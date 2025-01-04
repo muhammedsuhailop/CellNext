@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>CellNext | Signup</title>
+  <link rel="stylesheet" href="css/user-signup-styles.css" type="text/css">
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/295/295128.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="container-wrapper">
+
+      <h3 class="login-text"><i class="bi bi-person-circle ac-logo"></i>Signup with OTP</h3>
+
+      <form id="signupForm">
+        <!-- Email or Phone -->
+        <div class="item">
+          <label for="emailPhone">Email or Phone</label>
+          <input class="input" type="text" id="emailPhone" placeholder="Enter your email or phone" required>
+        </div>
+
+        <!-- Get OTP Button -->
+        <div class="item submit">
+          <button type="button" id="getOTPButton">Get OTP</button>
+        </div>
+
+        <!-- OTP -->
+        <div class="item">
+          <label for="otp">OTP</label>
+          <input class="input" type="text" id="otp" placeholder="Enter OTP" required disabled>
+          <div id="otpTimer" class="timer">You can request a new OTP in <span id="timer">30</span> seconds</div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="item submit"><button type="submit">Submit</button></div>
+      </form>
+
+      <div id="resendOTP" class="ac" style="display: none;">
+        <a href="#" id="resendLink">Resend OTP</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let timerValue = 30;
+    let otpRequested = false;
+
+    const timerElement = document.getElementById('timer');
+    const otpField = document.getElementById('otp');
+    const resendLink = document.getElementById('resendLink');
+    const resendOTP = document.getElementById('resendOTP');
+    const getOTPButton = document.getElementById('getOTPButton');
+
+    function startTimer() {
+      const interval = setInterval(() => {
+        timerValue--;
+        timerElement.textContent = timerValue;
+
+        if (timerValue <= 0) {
+          clearInterval(interval);
+          otpField.disabled = false; // Enable OTP input after timer ends
+          resendOTP.style.display = 'block'; // Show resend OTP link
+        }
+      }, 1000);
+    }
+
+    // Trigger OTP request (simulate OTP sending)
+    function requestOTP() {
+      otpRequested = true;
+      otpField.disabled = false; // Enable OTP field after clicking Get OTP
+      timerValue = 30; // Reset timer
+      startTimer();
+      resendOTP.style.display = 'none'; // Hide resend link initially
+    }
+
+    // Handle Get OTP click
+    getOTPButton.addEventListener('click', () => {
+      const emailPhone = document.getElementById('emailPhone').value;
+      if (emailPhone) {
+        requestOTP(); // Request OTP after email/phone input
+      } else {
+        alert('Please enter your email or phone.');
+      }
+    });
+
+    // Handle resend OTP click
+    resendLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      requestOTP(); // Request OTP again
+    });
+
+    // Handle form submission
+    document.getElementById('signupForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Here you would typically handle the OTP validation and user sign-up
+      alert('Signup successful!');
+    });
+  </script>
+</body>
+
+
+
+</html>
