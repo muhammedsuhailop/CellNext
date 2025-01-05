@@ -1,3 +1,5 @@
+const User = require('../../models/userSchema')
+
 const loadHomePage = async (req, res) => {
     try {
         return res.render('home');
@@ -33,11 +35,26 @@ const loadLoginPage = async (req, res) => {
     }
 }
 
-const loadSignupOtpPage = async (req, res) => {
+// const loadSignupOtpPage = async (req, res) => {
+//     try {
+//         res.render('signup-with-otp');
+//     } catch (error) {
+//         console.log('Error loading Signup with OTP page');
+//         res.status(500).send('Server Error');
+//     }
+// }
+// Removed Seperate OTP page 
+
+const signup = async (req, res) => {
+    const { name, email, phone, password, otp } = req.body;
+    console.log({ name, email, phone, password, otp });
     try {
-        res.render('signup-with-otp');
+        const newUser = new User({ name, email, phone, password });
+        await newUser.save();
+        return res.send('Signup success');
+
     } catch (error) {
-        console.log('Error loading Signup with OTP page');
+        console.log('Error new user Signup');
         res.status(500).send('Server Error');
     }
 }
@@ -48,6 +65,6 @@ module.exports = {
     pageNotFound,
     loadSignupPage,
     loadLoginPage,
-    loadSignupOtpPage,
+    signup,
 
 }
