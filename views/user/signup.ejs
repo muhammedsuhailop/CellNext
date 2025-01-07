@@ -19,40 +19,40 @@
 
       <form method="post" id="signupForm" action="/signup">
         <% if (message) { %>
-            <div class="error-message general-error"><%= message %></div>
+        <div class="error-message general-error"><%= message %></div>
         <% } %>
 
         <div id="nameError" class="error-message"></div>
         <div class="item">
-            <label for="fullName">Full Name</label>
-            <input class="input" type="text" id="name" placeholder="Enter your full name" name="name">
+          <label for="fullName">Full Name</label>
+          <input class="input" type="text" id="name" placeholder="Enter your full name" name="name">
         </div>
-        
+
         <div id="emailError" class="error-message"></div>
         <div class="item">
-            <label for="email">Email</label>
-            <input class="input" type="email" id="email" placeholder="Enter your email address" name="email">
+          <label for="email">Email</label>
+          <input class="input" type="email" id="email" placeholder="Enter your email address" name="email">
         </div>
-        
+
         <div id="phoneError" class="error-message"></div>
         <div class="item">
-            <label for="phone">Phone</label>
-            <input class="input" type="tel" id="phone" placeholder="Enter your phone number" name="phone">
+          <label for="phone">Phone</label>
+          <input class="input" type="tel" id="phone" placeholder="Enter your phone number" name="phone">
         </div>
-        
+
         <div id="passwordError" class="error-message"></div>
         <div class="item">
-            <label for="password">Password</label>
-            <input class="input" type="password" id="password" placeholder="Enter your password" name="password">
+          <label for="password">Password</label>
+          <input class="input" type="password" id="password" placeholder="Enter your password" name="password">
         </div>
 
         <div id="confirmPasswordError" class="error-message"></div>
         <div class="item">
-            <label for="confirmPassword">Confirm Password</label>
-            <input class="input" type="password" id="confirmPassword" placeholder="Re-enter your password" name="confirmPassword">
+          <label for="confirmPassword">Confirm Password</label>
+          <input class="input" type="password" id="confirmPassword" placeholder="Re-enter your password" name="confirmPassword">
         </div>
-        
-    
+
+
         <div class="item submit">
           <button type="submit" id="sendOtp">Send OTP</button>
         </div>
@@ -62,12 +62,15 @@
       <h2><span>OR</span></h2>
 
       <!-- Google Signup -->
-      <div class="item submit">
-        <button type="button" class="google-btn">
-          <div class="icons8-google social-mediaImg"></div>
-          Signup with Google
-        </button>
-      </div>
+      <div class="item submit google-btn">
+            <a href="/auth/google" class="button-like-anchor">
+                <div class="icons8-google social-mediaImg"></div>
+                Signup with Google
+            </a>
+    </div>
+    
+    
+    
 
       <!-- Link to Login Page -->
       <div class="item submit">
