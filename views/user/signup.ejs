@@ -17,58 +17,46 @@
     <div class="container-wrapper">
       <h3 class="login-text"><i class="bi bi-person-circle ac-logo"></i>Signup</h3>
 
-      <form method="post" action="/signup">
-        <!-- Full Name -->
+      <form method="post" id="signupForm" action="/signup">
+        <% if (message) { %>
+            <div class="error-message general-error"><%= message %></div>
+        <% } %>
+
+        <div id="nameError" class="error-message"></div>
         <div class="item">
-          <label for="fullName">Full Name</label>
-          <input class="input" type="text" id="name" placeholder="Enter your full name" name="name">
+            <label for="fullName">Full Name</label>
+            <input class="input" type="text" id="name" placeholder="Enter your full name" name="name">
+        </div>
+        
+        <div id="emailError" class="error-message"></div>
+        <div class="item">
+            <label for="email">Email</label>
+            <input class="input" type="email" id="email" placeholder="Enter your email address" name="email">
+        </div>
+        
+        <div id="phoneError" class="error-message"></div>
+        <div class="item">
+            <label for="phone">Phone</label>
+            <input class="input" type="tel" id="phone" placeholder="Enter your phone number" name="phone">
+        </div>
+        
+        <div id="passwordError" class="error-message"></div>
+        <div class="item">
+            <label for="password">Password</label>
+            <input class="input" type="password" id="password" placeholder="Enter your password" name="password">
         </div>
 
-        <!-- Email -->
+        <div id="confirmPasswordError" class="error-message"></div>
         <div class="item">
-          <label for="email">Email</label>
-          <input class="input" type="email" id="email" placeholder="Enter your email address" name="email">
+            <label for="confirmPassword">Confirm Password</label>
+            <input class="input" type="password" id="confirmPassword" placeholder="Re-enter your password" name="confirmPassword">
         </div>
-
-        <!-- Phone -->
-        <div class="item">
-          <label for="phone">Phone</label>
-          <input class="input" type="tel" id="phone" placeholder="Enter your phone number" name="phone">
-        </div>
-
-        <!-- Password -->
-        <div class="item">
-          <label for="password">Password</label>
-          <input class="input" type="password" id="password" placeholder="Enter your password" name="password">
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="item">
-          <label for="confirmPassword">Confirm Password</label>
-          <input class="input" type="password" id="confirmPassword" placeholder="Re-enter your password" name="confirm-password">
-        </div>
-        <div class="item">
-          <span id="confirmPasswordError" style="color: red; display: none;">Passwords do not match</span>
-        </div>
-
-        <!-- Send OTP Button -->
+        
+    
         <div class="item submit">
-          <button type="button" id="sendOtp">Send OTP</button>
+          <button type="submit" id="sendOtp">Send OTP</button>
         </div>
 
-        <!-- OTP Section -->
-        <div class="item-otp" id="otpSection" style="display: none;">
-          <label for="otp">OTP</label>
-          <input class="input-otp" type="text" id="otp" placeholder="Enter OTP" maxlength="4" name="otp" required>
-          <div id="otpTimer" class="timer" style="display: none;">
-            You can request a new OTP in <span id="timer">30</span> seconds
-          </div>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="item submit" id="submitSection" style="display: none;">
-          <button type="submit" id="submitBtn">Submit</button>
-        </div>
       </form>
 
       <h2><span>OR</span></h2>
