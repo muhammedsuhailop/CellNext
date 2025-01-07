@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css">
   <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
   <link rel="stylesheet" href="css/style.css" type="text/css">
+  <link rel="stylesheet" href="css/user-header.css">
 </head>
 
 <body>
@@ -38,14 +39,25 @@
         <a href="/signup">Signup</a>
         <a href="#">FAQs</a>
       </div>
-      <div class="offcanvas__top__hover">
-        <span>inr <i class="arrow_carrot-down"></i></span>
-        <ul>
-          <li>INR</li>
-          <li>EUR</li>
-          <li>USD</li>
-        </ul>
-      </div>
+      <div class="offcanvas-top-tile">
+        <% if (locals.user) { %>
+        <div class="dropdown">
+          <span><%= user.name %> <i class="arrow_carrot-down"></i></span>
+          <ul>
+            <li><a href="/user-profile">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+          </ul>
+        </div>
+        <% } else { %>
+        <div class="dropdown">
+          <span>Login <i class="arrow_carrot-down"></i></span>
+          <ul>
+            <li><a href="/login">Login</a></li>
+            <li><a href="/signup">Signup</a></li>
+          </ul>
+        </div>
+        <% } %>
+      </div>      
     </div>
     <div class="offcanvas__nav__option">
       <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
@@ -77,14 +89,27 @@
                 <a href="/signup">Signup</a>
                 <a href="#">FAQs</a>
               </div>
-              <div class="header__top__hover">
-                <span>Inr <i class="arrow_carrot-down"></i></span>
-                <ul>
-                  <li>INR</li>
-                  <li>EUR</li>
-                  <li>USD</li>
-                </ul>
+              <div class="header__dropdown">
+                <% if (locals.user) { %>
+                <div class="dropdown">
+                  <span><%= user.name %> <i class="arrow_carrot-down"></i></span>
+                  <ul>
+                    <li><a href="/user-profile">My Profile</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                  </ul>
+                </div>
+                <% } else { %>
+                <div class="dropdown">
+                  <span>Login <i class="arrow_carrot-down"></i></span>
+                  <ul>
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/signup">Signup</a></li>
+                  </ul>
+                </div>
+                <% } %>
               </div>
+              
+
             </div>
           </div>
         </div>

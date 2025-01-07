@@ -6,6 +6,7 @@ const passport = require('./config/passport')
 const env = require('dotenv').config();
 const db = require('./config/db')
 const userRouter = require('./routes/userRoute');
+const adminRouter = require('./routes/adminRoute');
 const { Session } = require('inspector/promises');
 db()
 
@@ -29,7 +30,8 @@ app.set('view engine', 'ejs');
 app.set('views', [path.join(__dirname, 'views/user'), path.join(__dirname, 'views/admin')]);
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', userRouter)
+app.use('/', userRouter);
+app.use('/admin', adminRouter);
 
 
 app.listen(process.env.PORT, () => {

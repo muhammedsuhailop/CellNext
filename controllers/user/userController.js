@@ -5,7 +5,16 @@ const bcrypt = require('bcrypt');
 
 const loadHomePage = async (req, res) => {
     try {
-        return res.render('home');
+        const user = req.session.user;
+        if (user) {
+            const userData = await User.findOne({ _id: user });
+            console.log('User data', userData.name)
+            res.render('home', { user: userData })
+        } else {
+            console.log('No loggedin user');
+            return res.render('home');
+        }
+
     } catch (error) {
         console.log('Error loading Home page');
         res.status(500).send('Server Error');
@@ -25,15 +34,6 @@ const loadSignupPage = async (req, res) => {
         res.render('signup', { message: '' });
     } catch (error) {
         console.log('Error loading Signup page');
-        res.status(500).send('Server Error');
-    }
-}
-
-const loadLoginPage = async (req, res) => {
-    try {
-        res.render('login');
-    } catch (error) {
-        console.log('Error loading Login page');
         res.status(500).send('Server Error');
     }
 }
@@ -178,16 +178,75 @@ const verifyOtp = async (req, res) => {
     }
 };
 
+const loadLoginPage = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.render('login');
+        } else {
+            res.redirect('/');
+        }
+
+    } catch (error) {
+        console.log('Error loading Login page');
+        res.redirect('/pageNotFound');
+    }
+}
+
+const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const findUser = await User.findOne({ isAdmin: 0, email: email });
+
+        if (!findUser) {
+            return res.render('login', { message: 'User not found' });
+        }
+        if (findUser.isBlocked) {
+            return res.render('login', { message: 'User is blocked by admin' });
+        }
+
+        const passwordMatch = await bcrypt.compare(password, findUser.password);
+
+        if (!passwordMatch) {
+            return res.render('login', { message: 'Incorrect Password' });
+        }
+
+        req.session.user = findUser._id;
+        console.log('req.session.user', req.session.user)
+        res.redirect('/');
+    } catch (error) {
+        console.error('login error', error);
+        return res.render('login', { message: 'login failed. Please try again later' });
+    }
+}
+
+const logout = async (req, res) => {
+    try {
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Error destroying session:', err);
+                return res.redirect('pageNotFound');
+            }
+            return res.redirect('/login');
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.redirect('pageNotFound');
+    }
+};
+
 
 
 module.exports = {
     loadHomePage,
     pageNotFound,
     loadSignupPage,
-    loadLoginPage,
     signup,
     verifyOtp,
     loadVerifOtpPage,
     resendOtp,
+    loadLoginPage,
+    login,
+    logout,
 
 }
