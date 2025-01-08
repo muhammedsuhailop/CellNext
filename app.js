@@ -8,7 +8,7 @@ const db = require('./config/db')
 const userRouter = require('./routes/userRoute');
 const adminRouter = require('./routes/adminRoute');
 const { Session } = require('inspector/promises');
-db()
+db();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
