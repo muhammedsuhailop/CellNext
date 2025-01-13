@@ -17,7 +17,7 @@
         <div class="content-wrapper">
           <!-- Content -->
           <div class="container-xxl flex-grow-1 container-p-y">
-            <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4>
+            <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Customers /</span> View Customers</h4>
             <!-- Basic Bootstrap Table -->
             <div class="card">
               <h5 class="card-header">Table Basic</h5>
@@ -58,9 +58,9 @@
                           </button>
                           <div class="dropdown-menu">
                             <% if (data[i].isBlocked===false) { %>
-                            <a class="dropdown-item" href="/admin/blockCustomer?id=<%= data[i]._id %>"><i class='bx bxs-lock me-1'></i> Block</a>
+                            <a class="dropdown-item" href="/admin/users/block-user?id=<%= data[i]._id %>"><i class='bx bxs-lock me-1'></i> Block</a>
                             <% } else { %>
-                            <a class="dropdown-item" href="/admin/unblockCustomer?id=<%= data[i]._id %>"><i class='bx bxs-lock-open me-1'></i> Unblock</a>
+                            <a class="dropdown-item" href="/admin/users/unblock-user?id=<%= data[i]._id %>"><i class='bx bxs-lock-open me-1'></i> Unblock</a>
                             <% } %>
                             <!-- <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-edit-alt me-1"></i> Block</a> -->
                             <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-trash me-1"></i> Delete</a>
@@ -75,20 +75,21 @@
               <div class="container-xxl flex-grow-1 container-p-y d-flex justify-content-center align-items-center">
                 <nav aria-label="User Pagination">
                   <ul class="pagination justify-content-center">
+                    <!-- Previous Button -->
                     <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-                      <a class="page-link" href="?search=<%= searchQuery %>&page=<%= Number(currentPage) - 1 %>" tabindex="-1">
+                      <a class="page-link" href="<%= currentPage > 1 ? '?search=' + searchQuery + '&page=' + (Number(currentPage)  - 1) : '#' %>" tabindex="-1">
                         Previous
                       </a>
                     </li>
                     <% for (let i = 1; i <= totalPages; i++) { %>
                     <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                      <a class="page-link" href="?search=<%= searchQuery %>&page=<%= i %>">
+                      <a class="page-link" href="<%= i === currentPage ? '#' : '?search=' + searchQuery + '&page=' + i %>">
                         <%= i %>
                       </a>
                     </li>
                     <% } %>
                     <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-                      <a class="page-link" href="?search=<%= searchQuery %>&page=<%= Number(currentPage) + 1 %>">
+                      <a class="page-link" href="<%= currentPage < totalPages ? '?search=' + searchQuery + '&page=' + (Number(currentPage)  + 1) : '#' %>">
                         Next
                       </a>
                     </li>
@@ -115,15 +116,6 @@
     <div class="layout-overlay layout-menu-toggle"></div>
   </div>
   <!-- / Layout wrapper -->
-
-  <!-- <div class="buy-now">
-      <a
-        href="https://themeselection.com/products/sneat-bootstrap-html-admin-template/"
-        target="_blank"
-        class="btn btn-danger btn-buy-now"
-        >Upgrade to Pro</a
-      >
-    </div> -->
 
   <!-- Core JS -->
   <!-- build:js assets/vendor/js/core.js -->

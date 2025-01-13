@@ -1,0 +1,162 @@
+<%- include('../../views/partials/admin/header') %>
+
+<body>
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        <!-- Navbar - Sidebar-->
+        <%- include('../../views/partials/admin/sidebar') %>
+        <%- include('../../views/partials/admin/navbar') %>
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Forms/</span> Vertical Layouts</h4>
+
+            <!-- Basic Layout -->
+            <div class="col-xxl">
+              <div class="card mb-4">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                  <h5 class="mb-0">Edit Category</h5>
+                </div>
+                <div class="card-body">
+                  <form id="edit-category-form" data-category-id="<%= category._id %>">
+                    <div class="row mb-3">
+                      <!-- General Error -->
+                      <div class="text-danger error-message" id="general-error" style="display: none;"></div>
+
+                      <!-- Name Field -->
+                      <label class="col-sm-2 col-form-label" for="basic-default-name">Name</label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" id="basic-default-name" placeholder="Enter category name" name="name" value="<%= category.name %>" />
+                        <!-- Name Error -->
+                        <div class="text-danger error-message" id="name-error" style="display: none;"></div>
+                      </div>
+                    </div>
+
+                    <!-- Description Field -->
+                    <div class="row mb-3 align-items-center">
+                      <label class="col-md-2 col-form-label" for="basic-default-message">Description</label>
+                      <div class="col-md-8">
+                        <textarea id="basic-default-message" class="form-control" placeholder="Enter category description" name="description"><%= category.description %></textarea>
+                      </div>
+                      <div class="col-md-2 text-end mt-1">
+                        <button type="button" id="edit-category-btn" class="btn btn-primary w-100">Edit Category</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!-- Content wrapper -->
+      </div>
+      <!-- / Layout page -->
+
+    </div>
+  </div>
+  <!-- Overlay -->
+  <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- / Layout wrapper -->
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="/assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/assets/vendor/libs/popper/popper.js"></script>
+  <script src="/assets/vendor/js/bootstrap.js"></script>
+  <script src="/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+
+  <script src="/assets/vendor/js/menu.js"></script>
+  <!-- endbuild -->
+
+  <!-- Vendors JS -->
+  <script src="/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+
+  <!-- Main JS -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- Page JS -->
+  <script src="/assets/js/dashboards-analytics.js"></script>
+
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    document.getElementById('edit-category-btn').addEventListener('click', function() {
+      const form = document.getElementById('edit-category-form');
+      const categoryId = form.dataset.categoryId;
+      const name = document.getElementById('basic-default-name').value.trim();
+      const description = document.getElementById('basic-default-message').value.trim();
+
+      console.log(`Category ID: ${categoryId}, Name: ${name}, Description: ${description}`);
+
+      document.getElementById('name-error').style.display = 'none';
+      document.getElementById('name-error').textContent = '';
+
+      // AJAX request to edit the category
+      fetch(`/admin/editCategory?id=${categoryId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name,
+            description
+          }),
+        })
+        .then(response => {
+          console.log(response.status);
+          if (!response.ok) {
+            return response.json().then(data => {
+              throw data;
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data);
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: data.message,
+          }).then(() => {
+            window.location.href = '/admin/category';
+          });
+        })
+        .catch(error => {
+          console.log(error);
+          if (error.errors) {
+            if (error.errors.name) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: error.errors.name,
+              });
+            } else if (error.errors.general) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.errors.general,
+              });
+            }
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Unexpected Error',
+              text: 'Something went wrong. Please try again later.',
+            });
+          }
+        });
+    });
+  </script>
+</body>
+
+</html>
