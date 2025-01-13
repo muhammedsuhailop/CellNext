@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const multer = require('multer');
 const session = require('express-session');
 const passport = require('./config/passport')
 const env = require('dotenv').config();

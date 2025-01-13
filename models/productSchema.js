@@ -39,6 +39,9 @@ const productSchema = new Schema({
         type: String,
         required: true,
     },
+    storage: {
+        type: String,
+    },
     productImage: {
         type: String,
         required: true
