@@ -12,7 +12,7 @@ const productSchema = new Schema({
     },
     brand: {
         type: String,
-        required: true
+        // required: true
     },
     category: {
         type: Schema.Types.ObjectId,
@@ -43,7 +43,7 @@ const productSchema = new Schema({
         type: String,
     },
     productImage: {
-        type: String,
+        type: [String],
         required: true
     },
     isBlocked: {

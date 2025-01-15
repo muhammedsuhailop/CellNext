@@ -25,45 +25,38 @@ const addProduct = async (req, res) => {
         const product = req.body;
         const productExists = await Product.findOne({
             productName: product.productName
-        })
-
-        console.log(productExists);
+        });
 
         if (!productExists) {
             const images = [];
             console.log('req.files:', req.files);
+            // Handle the uploaded images from multer
+            req.files.forEach(file => {
+                images.push('/uploads/product-images/' + file.filename); // Add the file path to the images array
+            });
 
-            if (req.files && req.files.length > 0) {
-                for (let i = 0; i < req.files.length; i++) {
-                    const originalImagePath = req.files[i].path;
-                    const resizedImagePath = path.join('public', 'uploads', 'product-images', req.files[i].filename);
-                    await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
-                    images.push(req.files[i].filename);
-                }
-
-                const categoryId = await Category.findOne({ name: product.category });
-                if (!categoryId) {
-                    return res.status(400).json('Invalid category name');
-                }
-
-                const newProduct = new Product({
-                    productName: product.productName,
-                    description: product.description,
-                    brand: product.brand,
-                    regularPrice: product.regularPrice,
-                    salePrice: product.salePrice,
-                    createdAt: new Date(),
-                    quantity: product.quantity,
-                    color: product.color,
-                    storage: product.storage,
-                    productImage: images,
-                    status: 'Available',
-                })
-
-                await newProduct.save();
-                return res.redirect('/admin/addProduct');
-
+            const categoryId = await Category.findOne({ _id: product.category });
+            if (!categoryId) {
+                return res.status(400).json('Invalid category name');
             }
+
+            const newProduct = new Product({
+                productName: product.productName,
+                description: product.descriptionid,
+                category: product.category,
+                brand: product.brand,
+                regularPrice: product.regularPrice,
+                salePrice: product.salePrice,
+                createdAt: new Date(),
+                quantity: product.quantity,
+                color: product.color,
+                storage: product.storage,
+                productImage: images,
+                status: 'Available',
+            });
+
+            await newProduct.save();
+            return res.redirect('/admin/addProduct');
         } else {
             return res.status(400).json('Product already exists');
         }
@@ -71,7 +64,7 @@ const addProduct = async (req, res) => {
         console.log('Error on adding product ', error);
         res.redirect('/admin/error-page');
     }
-}
+};
 
 
 module.exports = {

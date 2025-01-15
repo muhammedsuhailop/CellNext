@@ -34,7 +34,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
                   <% } %>
-                  <form method="post" action="/admin/addProduct">
+                  <form action="/admin/addProduct" method="POST" enctype="multipart/form-data">
                     <div class="row">
                       <div class="col-md-6 mb-3">
                         <div id="category-error" class="error-message text-danger"></div>
@@ -74,7 +74,7 @@
                       <div id="image<%= i %>-error" class="error-message text-danger"></div>
                       <label class="col-sm-2 col-form-label" for="image<%= i %>">Image <%= i %></label>
                       <div class="col-sm-4">
-                        <input type="file" class="form-control" id="image<%= i %>" name="image<%= i %>" accept="image/*" />
+                        <input type="file" class="form-control" id="image<%= i %>" name="images" accept="image/*" />
                       </div>
                       <div class="col-sm-6" style="display: flex; align-items: center; justify-content: center;">
                         <div class="image-preview" id="preview-image<%= i %>" style="width: 150px; height: 150px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border: 2px solid #979b9f">
@@ -105,7 +105,6 @@
                         </div>
                       </div>
                     </div>
-
                     <div class="row">
                       <div class="col-md-4 mb-3">
                         <div id="size-error" class="error-message text-danger"></div>
@@ -158,8 +157,6 @@
                       </div>
                     </div>
                   </form>
-
-
                 </div>
               </div>
             </div>
@@ -245,44 +242,110 @@
           previewImg.style.display = 'block';
           previewContainer.style.backgroundColor = 'transparent';
           cropperModal.hide();
+
+          // Create FormData and send AJAX request
+          const formData = new FormData();
+          formData.append('images', blob, `image-${currentImageIndex}.jpg`); // Ensure the field name matches multer configuration
+          formData.append('imageIndex', currentImageIndex);
+
+          fetch('/admin/addProduct', {
+              method: 'POST',
+              body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Image uploaded successfully:', data);
+            })
+            .catch(error => {
+              console.error('Error uploading image:', error);
+            });
         }, 'image/jpeg');
       });
     });
+  </script>
+  <script>
+    // document.addEventListener('DOMContentLoaded', function() {
+    //   const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
+    //   let cropper;
+    //   let currentImageIndex;
 
-    document.addEventListener('DOMContentLoaded', function() {
-      for (let i = 1; i <= 4; i++) {
-        document.getElementById('image' + i).addEventListener('change', function(event) {
-          const file = event.target.files[0];
-          const previewImg = document.getElementById('preview-img' + i);
-          const previewContainer = document.getElementById('preview-image' + i);
+    //   for (let i = 1; i <= 4; i++) {
+    //     document.getElementById('image' + i).addEventListener('change', function(event) {
+    //       const file = event.target.files[0];
+    //       const previewContainer = document.getElementById('preview-image' + i);
+    //       const previewImg = document.getElementById('preview-img' + i);
 
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              previewImg.src = e.target.result;
-              previewImg.style.display = 'block';
-              previewContainer.style.backgroundColor = 'transparent';
-            };
-            reader.readAsDataURL(file);
-          } else {
-            previewImg.src = '';
-            previewImg.style.display = 'none';
-            previewContainer.style.backgroundColor = '#f5f5f5';
-          }
-        });
-      }
+    //       if (file) {
+    //         const reader = new FileReader();
+    //         reader.onload = function(e) {
+    //           document.getElementById('cropperImage').src = e.target.result;
+    //           cropperModal.show();
+    //           currentImageIndex = i;
+    //           if (cropper) {
+    //             cropper.destroy();
+    //           }
+    //           cropper = new Cropper(document.getElementById('cropperImage'), {
+    //             aspectRatio: 1, // 1:1 aspect ratio
+    //             viewMode: 1,
+    //           });
+    //         };
+    //         reader.readAsDataURL(file);
+    //       }
+    //     });
+    //   }
 
-      document.getElementById('color').addEventListener('change', function() {
-        const customColorContainer = document.getElementById('custom-color-container');
-        customColorContainer.style.display = this.value === 'custom' ? 'block' : 'none';
-      });
+    //   document.getElementById('cropImage').addEventListener('click', function() {
+    //     const canvas = cropper.getCroppedCanvas({
+    //       width: 150,
+    //       height: 150,
+    //     });
+    //     const previewImg = document.getElementById('preview-img' + currentImageIndex);
+    //     const previewContainer = document.getElementById('preview-image' + currentImageIndex);
 
-      // Bind validateForm to form submission
-      const formElement = document.querySelector('form');
-      if (formElement) {
-        formElement.onsubmit = validateForm;
-      }
+    //     canvas.toBlob(function(blob) {
+    //       const url = URL.createObjectURL(blob);
+    //       previewImg.src = url;
+    //       previewImg.style.display = 'block';
+    //       previewContainer.style.backgroundColor = 'transparent';
+    //       cropperModal.hide();
+    //     }, 'image/jpeg');
+    //   });
+    // });
+
+    // document.addEventListener('DOMContentLoaded', function() {
+    //   for (let i = 1; i <= 4; i++) {
+    //     document.getElementById('image' + i).addEventListener('change', function(event) {
+    //       const file = event.target.files[0];
+    //       const previewImg = document.getElementById('preview-img' + i);
+    //       const previewContainer = document.getElementById('preview-image' + i);
+
+    //       if (file) {
+    //         const reader = new FileReader();
+    //         reader.onload = function(e) {
+    //           previewImg.src = e.target.result;
+    //           previewImg.style.display = 'block';
+    //           previewContainer.style.backgroundColor = 'transparent';
+    //         };
+    //         reader.readAsDataURL(file);
+    //       } else {
+    //         previewImg.src = '';
+    //         previewImg.style.display = 'none';
+    //         previewContainer.style.backgroundColor = '#f5f5f5';
+    //       }
+    //     });
+    //   }
+
+    document.getElementById('color').addEventListener('change', function() {
+      const customColorContainer = document.getElementById('custom-color-container');
+      customColorContainer.style.display = this.value === 'custom' ? 'block' : 'none';
     });
+
+    // Bind validateForm to form submission
+    const formElement = document.querySelector('form');
+    if (formElement) {
+      formElement.onsubmit = validateForm;
+    }
+    // });
 
     function validateForm(event) {
       clearErrorMessages();

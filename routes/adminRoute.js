@@ -4,6 +4,7 @@ const adminController = require('../controllers/admin/adminController');
 const customerController = require('../controllers/admin/customerController');
 const categoryController = require('../controllers/admin/categoryController');
 const productsController = require('../controllers/admin/productsController');
+const upload = require('../middlewares/multer');  // Use proper path to your multer configuration
 const { userAuth, adminAuth } = require('../middlewares/auth')
 
 
@@ -25,7 +26,7 @@ router.get('/editCategory', adminAuth, categoryController.getEditCategory);
 router.post('/editCategory', adminAuth, categoryController.editCategory);
 //Product Management
 router.get('/addProduct', adminAuth, productsController.getAddProduct);
-router.post('/addProduct', adminAuth, productsController.addProduct);
+router.post('/addProduct', adminAuth,upload, productsController.addProduct);
 
 
 //Error-Page
