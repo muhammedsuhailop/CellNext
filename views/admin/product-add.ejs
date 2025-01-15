@@ -198,70 +198,69 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
-      let cropper;
-      let currentImageIndex;
+    document.addEventListener('DOMContentLoaded', function () {
+  const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
+  let cropper;
+  let currentImageIndex;
 
-      for (let i = 1; i <= 4; i++) {
-        document.getElementById('image' + i).addEventListener('change', function(event) {
-          const file = event.target.files[0];
-          const previewContainer = document.getElementById('preview-image' + i);
-          const previewImg = document.getElementById('preview-img' + i);
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('image' + i).addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          document.getElementById('cropperImage').src = e.target.result;
+          cropperModal.show();
+          currentImageIndex = i;
 
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              document.getElementById('cropperImage').src = e.target.result;
-              cropperModal.show();
-              currentImageIndex = i;
-              if (cropper) {
-                cropper.destroy();
-              }
-              cropper = new Cropper(document.getElementById('cropperImage'), {
-                aspectRatio: 1, // 1:1 aspect ratio
-                viewMode: 1,
-              });
-            };
-            reader.readAsDataURL(file);
+          if (cropper) {
+            cropper.destroy();
           }
-        });
+
+          cropper = new Cropper(document.getElementById('cropperImage'), {
+            aspectRatio: 1,
+            viewMode: 1,
+          });
+        };
+        reader.readAsDataURL(file);
       }
-
-      document.getElementById('cropImage').addEventListener('click', function() {
-        const canvas = cropper.getCroppedCanvas({
-          width: 150,
-          height: 150,
-        });
-        const previewImg = document.getElementById('preview-img' + currentImageIndex);
-        const previewContainer = document.getElementById('preview-image' + currentImageIndex);
-
-        canvas.toBlob(function(blob) {
-          const url = URL.createObjectURL(blob);
-          previewImg.src = url;
-          previewImg.style.display = 'block';
-          previewContainer.style.backgroundColor = 'transparent';
-          cropperModal.hide();
-
-          // Create FormData and send AJAX request
-          const formData = new FormData();
-          formData.append('images', blob, `image-${currentImageIndex}.jpg`); // Ensure the field name matches multer configuration
-          formData.append('imageIndex', currentImageIndex);
-
-          fetch('/admin/addProduct', {
-              method: 'POST',
-              body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-              console.log('Image uploaded successfully:', data);
-            })
-            .catch(error => {
-              console.error('Error uploading image:', error);
-            });
-        }, 'image/jpeg');
-      });
     });
+  }
+
+  document.getElementById('cropImage').addEventListener('click', function () {
+    const canvas = cropper.getCroppedCanvas({
+      width: 150,
+      height: 150,
+    });
+    const previewImg = document.getElementById('preview-img' + currentImageIndex);
+    const previewContainer = document.getElementById('preview-image' + currentImageIndex);
+
+    canvas.toBlob(function (blob) {
+      const url = URL.createObjectURL(blob);
+      previewImg.src = url;
+      previewImg.style.display = 'block';
+      previewContainer.style.backgroundColor = 'transparent';
+      cropperModal.hide();
+
+      // Create FormData and send cropped image to the server
+      const formData = new FormData();
+      formData.append('images', blob, `cropped-image-${currentImageIndex}.jpg`);
+
+      fetch('/admin/addProduct', {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('Cropped image uploaded successfully:', data);
+        })
+        .catch((error) => {
+          console.error('Error uploading cropped image:', error);
+        });
+    }, 'image/jpeg');
+  });
+});
+
   </script>
   <script>
     // document.addEventListener('DOMContentLoaded', function() {

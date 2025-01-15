@@ -23,45 +23,71 @@ const getAddProduct = async (req, res) => {
 const addProduct = async (req, res) => {
     try {
         const product = req.body;
+
+        // Check if product already exists
         const productExists = await Product.findOne({
-            productName: product.productName
+            productName: product.productName,
         });
 
-        if (!productExists) {
-            const images = [];
-            console.log('req.files:', req.files);
-            // Handle the uploaded images from multer
-            req.files.forEach(file => {
-                images.push('/uploads/product-images/' + file.filename); // Add the file path to the images array
-            });
-
-            const categoryId = await Category.findOne({ _id: product.category });
-            if (!categoryId) {
-                return res.status(400).json('Invalid category name');
-            }
-
-            const newProduct = new Product({
-                productName: product.productName,
-                description: product.descriptionid,
-                category: product.category,
-                brand: product.brand,
-                regularPrice: product.regularPrice,
-                salePrice: product.salePrice,
-                createdAt: new Date(),
-                quantity: product.quantity,
-                color: product.color,
-                storage: product.storage,
-                productImage: images,
-                status: 'Available',
-            });
-
-            await newProduct.save();
-            return res.redirect('/admin/addProduct');
-        } else {
+        if (productExists) {
             return res.status(400).json('Product already exists');
         }
+
+        const images = [];
+        const croppedImageDir = path.join(__dirname, '../../public/uploads/product-images');
+
+        if (!fs.existsSync(croppedImageDir)) {
+            fs.mkdirSync(croppedImageDir, { recursive: true });
+        }
+
+        for (const file of req.files) {
+            const originalPath = file.path;
+            const croppedImagePath = path.join(
+                croppedImageDir,
+                `cropped-${Date.now()}-${file.originalname}`
+            );
+
+            await sharp(originalPath)
+                .resize(150, 150)
+                .toFile(croppedImagePath);
+
+            fs.unlink(originalPath, (err) => {
+                if (err) {
+                    console.error('Error deleting original file:', err);
+                } else {
+                    console.log('Original file deleted:', originalPath);
+                }
+            });
+
+            // Save the cropped image path to the array
+            images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
+        }
+
+        const categoryId = await Category.findOne({ _id: product.category });
+        if (!categoryId) {
+            return res.status(400).json('Invalid category name');
+        }
+
+        const newProduct = new Product({
+            productName: product.productName,
+            description: product.descriptionid,
+            category: product.category,
+            brand: product.brand,
+            regularPrice: product.regularPrice,
+            salePrice: product.salePrice,
+            createdAt: new Date(),
+            quantity: product.quantity,
+            color: product.color,
+            storage: product.storage,
+            productImage: images,
+            status: 'Available',
+        });
+
+        await newProduct.save();
+
+        return res.redirect('/admin/addProduct');
     } catch (error) {
-        console.log('Error on adding product ', error);
+        console.error('Error adding product:', error);
         res.redirect('/admin/error-page');
     }
 };
