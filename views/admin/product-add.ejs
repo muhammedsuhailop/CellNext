@@ -28,12 +28,21 @@
                   <small class="text-muted float-end">Add New Product</small>
                 </div>
                 <div class="card-body">
-                  <% if (locals.message && message.length > 0) { %>
-                  <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
-                    <strong>Error:</strong> <%= message %>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  <div class="card-body">
+                    <% if (messages && messages.error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+                      <strong>Error:</strong> <%= messages.error %>
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <% } %>
+                    <% if (messages && messages.success) { %>
+                    <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+                      <strong>Success:</strong> <%= messages.success %>
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <% } %>
                   </div>
-                  <% } %>
+
                   <form action="/admin/addProduct" method="POST" enctype="multipart/form-data">
                     <div class="row">
                       <div class="col-md-6 mb-3">
@@ -199,84 +208,83 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-  const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
-  let cropper;
-  let currentImageIndex;
-  let croppedImages = {}; // Store cropped images for later submission
+      const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
+      let cropper;
+      let currentImageIndex;
+      let croppedImages = {}; // Store cropped images for later submission
 
-  for (let i = 1; i <= 4; i++) {
-    document.getElementById('image' + i).addEventListener('change', function(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('cropperImage').src = e.target.result;
-          cropperModal.show();
-          currentImageIndex = i;
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById('image' + i).addEventListener('change', function(event) {
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              document.getElementById('cropperImage').src = e.target.result;
+              cropperModal.show();
+              currentImageIndex = i;
 
-          if (cropper) {
-            cropper.destroy();
+              if (cropper) {
+                cropper.destroy();
+              }
+
+              cropper = new Cropper(document.getElementById('cropperImage'), {
+                aspectRatio: 1,
+                viewMode: 1,
+              });
+            };
+            reader.readAsDataURL(file);
           }
+        });
+      }
 
-          cropper = new Cropper(document.getElementById('cropperImage'), {
-            aspectRatio: 1,
-            viewMode: 1,
+      // Cropping and storing the image
+      document.getElementById('cropImage').addEventListener('click', function() {
+        const canvas = cropper.getCroppedCanvas({
+          width: 150,
+          height: 150,
+        });
+        const previewImg = document.getElementById('preview-img' + currentImageIndex);
+        const previewContainer = document.getElementById('preview-image' + currentImageIndex);
+
+        canvas.toBlob(function(blob) {
+          const url = URL.createObjectURL(blob);
+          previewImg.src = url;
+          previewImg.style.display = 'block';
+          previewContainer.style.backgroundColor = 'transparent';
+          cropperModal.hide();
+
+          // Store the cropped image for later use
+          croppedImages[currentImageIndex] = blob;
+        }, 'image/jpeg');
+      });
+
+      // Submit cropped images when the submit button is clicked
+      document.getElementById('submitButton').addEventListener('click', function() {
+        const formData = new FormData();
+
+        // Append cropped images to the FormData
+        for (let index in croppedImages) {
+          const blob = croppedImages[index];
+          if (blob) {
+            formData.append('croppedImages[]', blob, `cropped-image-${index}.jpg`);
+          }
+        }
+
+        // Send the cropped images to the server
+        fetch('/admin/addProduct', {
+            method: 'POST',
+            body: formData,
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log('Cropped images uploaded successfully:', data);
+            // Optionally reset the form or handle further actions after upload
+          })
+          .catch((error) => {
+            console.error('Error uploading cropped images:', error);
           });
-        };
-        reader.readAsDataURL(file);
-      }
+      });
     });
-  }
-
-  // Cropping and storing the image
-  document.getElementById('cropImage').addEventListener('click', function() {
-    const canvas = cropper.getCroppedCanvas({
-      width: 150,
-      height: 150,
-    });
-    const previewImg = document.getElementById('preview-img' + currentImageIndex);
-    const previewContainer = document.getElementById('preview-image' + currentImageIndex);
-
-    canvas.toBlob(function(blob) {
-      const url = URL.createObjectURL(blob);
-      previewImg.src = url;
-      previewImg.style.display = 'block';
-      previewContainer.style.backgroundColor = 'transparent';
-      cropperModal.hide();
-
-      // Store the cropped image for later use
-      croppedImages[currentImageIndex] = blob;
-    }, 'image/jpeg');
-  });
-
-  // Submit cropped images when the submit button is clicked
-  document.getElementById('submitButton').addEventListener('click', function() {
-    const formData = new FormData();
-
-    // Append cropped images to the FormData
-    for (let index in croppedImages) {
-      const blob = croppedImages[index];
-      if (blob) {
-        formData.append('croppedImages[]', blob, `cropped-image-${index}.jpg`);
-      }
-    }
-
-    // Send the cropped images to the server
-    fetch('/admin/addProduct', {
-      method: 'POST',
-      body: formData,
-    })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log('Cropped images uploaded successfully:', data);
-      // Optionally reset the form or handle further actions after upload
-    })
-    .catch((error) => {
-      console.error('Error uploading cropped images:', error);
-    });
-  });
-});
-
   </script>
   <script>
     // document.addEventListener('DOMContentLoaded', function() {

@@ -11,10 +11,18 @@ const getAddProduct = async (req, res) => {
     try {
         const category = await Category.find({ isListed: true });
         const brand = await Brand.find({ isBlocked: false });
+
+        const successMessage = req.flash('success');
+        const errorMessage = req.flash('error');
+
         res.render('product-add', {
             category: category,
-            brand: brand
-        })
+            brand: brand,
+            messages: {
+                success: successMessage.length > 0 ? successMessage[0] : null,
+                error: errorMessage.length > 0 ? errorMessage[0] : null,
+            },
+        });
     } catch (error) {
         console.log('Error on add product page loading', error);
         res.redirect('/admin/error-page');
@@ -27,7 +35,8 @@ const addProduct = async (req, res) => {
 
         const productExists = await Product.findOne({ productName: product.productName });
         if (productExists) {
-            return res.status(400).json('Product already exists');
+            req.flash('error', 'Product already exists');
+            return res.redirect('/admin/addProduct');
         }
 
         console.log('Directory name:', __dirname);
@@ -45,7 +54,7 @@ const addProduct = async (req, res) => {
             const uniqueId = uuidv4();
             const croppedImagePath = path.join(
                 croppedImageDir,
-                `cropped-${uniqueId}-${file.originalname}`
+                `crd-${uniqueId}-${file.originalname}`
             );
 
             console.log(`Processing file: ${file.originalname}`);
@@ -59,7 +68,7 @@ const addProduct = async (req, res) => {
 
             try {
                 await sharp(originalPath)
-                    .resize(150, 150)
+                    .resize(500, 500)
                     .toFile(croppedImagePath);
                 console.log('Cropping completed.');
                 images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
@@ -74,6 +83,7 @@ const addProduct = async (req, res) => {
             return res.status(400).json('Invalid category name');
         }
 
+        const color = product.color === 'custom' ? product.custom_color : product.color;
         const newProduct = new Product({
             productName: product.productName,
             description: product.descriptionid,
@@ -83,7 +93,7 @@ const addProduct = async (req, res) => {
             salePrice: product.salePrice,
             createdAt: new Date(),
             quantity: product.quantity,
-            color: product.color,
+            color: color,
             storage: product.storage,
             productImage: images,
             status: 'Available',
@@ -91,6 +101,7 @@ const addProduct = async (req, res) => {
 
         await newProduct.save();
 
+        req.flash('success', 'Product added successfully!');
         return res.redirect('/admin/addProduct');
 
     } catch (error) {
