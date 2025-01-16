@@ -24,21 +24,20 @@ const addProduct = async (req, res) => {
     try {
         const product = req.body;
 
-        // Check if product already exists
-        const productExists = await Product.findOne({
-            productName: product.productName,
-        });
-
+        const productExists = await Product.findOne({ productName: product.productName });
         if (productExists) {
             return res.status(400).json('Product already exists');
         }
 
+        console.log('Directory name:', __dirname);
         const images = [];
         const croppedImageDir = path.join(__dirname, '../../public/uploads/product-images');
 
         if (!fs.existsSync(croppedImageDir)) {
             fs.mkdirSync(croppedImageDir, { recursive: true });
         }
+
+        console.log('Uploaded files:', req.files);
 
         for (const file of req.files) {
             const originalPath = file.path;
@@ -47,20 +46,25 @@ const addProduct = async (req, res) => {
                 `cropped-${Date.now()}-${file.originalname}`
             );
 
-            await sharp(originalPath)
-                .resize(150, 150)
-                .toFile(croppedImagePath);
+            console.log(`Processing file: ${file.originalname}`);
+            console.log(`Original file path: ${originalPath}`);
+            console.log(`Cropped file path: ${croppedImagePath}`);
 
-            fs.unlink(originalPath, (err) => {
-                if (err) {
-                    console.error('Error deleting original file:', err);
-                } else {
-                    console.log('Original file deleted:', originalPath);
-                }
-            });
+            if (!fs.existsSync(originalPath)) {
+                console.error(`File does not exist: ${originalPath}`);
+                continue;
+            }
 
-            // Save the cropped image path to the array
-            images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
+            try {
+                await sharp(originalPath)
+                    .resize(150, 150)
+                    .toFile(croppedImagePath);
+                console.log('Cropping completed.');
+                images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
+            } catch (err) {
+                console.error('Error processing file with sharp:', err);
+                continue;
+            }
         }
 
         const categoryId = await Category.findOne({ _id: product.category });
@@ -86,11 +90,13 @@ const addProduct = async (req, res) => {
         await newProduct.save();
 
         return res.redirect('/admin/addProduct');
+        
     } catch (error) {
         console.error('Error adding product:', error);
         res.redirect('/admin/error-page');
     }
 };
+
 
 
 module.exports = {
