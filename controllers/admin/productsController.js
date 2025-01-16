@@ -4,7 +4,8 @@ const Brand = require('../../models/brandSchema');
 const Product = require('../../models/productSchema');
 const fs = require('fs');
 const path = require('path');
-const sharp = require('sharp')
+const sharp = require('sharp');
+const { v4: uuidv4 } = require('uuid');
 
 const getAddProduct = async (req, res) => {
     try {
@@ -41,9 +42,10 @@ const addProduct = async (req, res) => {
 
         for (const file of req.files) {
             const originalPath = file.path;
+            const uniqueId = uuidv4();
             const croppedImagePath = path.join(
                 croppedImageDir,
-                `cropped-${Date.now()}-${file.originalname}`
+                `cropped-${uniqueId}-${file.originalname}`
             );
 
             console.log(`Processing file: ${file.originalname}`);
@@ -90,7 +92,7 @@ const addProduct = async (req, res) => {
         await newProduct.save();
 
         return res.redirect('/admin/addProduct');
-        
+
     } catch (error) {
         console.error('Error adding product:', error);
         res.redirect('/admin/error-page');
