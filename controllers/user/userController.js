@@ -1,4 +1,6 @@
 const User = require('../../models/userSchema');
+const Category = require('../../models/categorySchema');
+const Product = require('../../models/productSchema');
 const nodemailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
@@ -6,13 +8,38 @@ const bcrypt = require('bcrypt');
 const loadHomePage = async (req, res) => {
     try {
         const user = req.session.user;
+        const categories = await Category.find({ isListed: true });
+        const productData = await Product.find({
+            isBlocked: false,
+            category: { $in: categories.map(category => category._id) }, quantity: { $gt: 0 }
+        });
+
+        productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        const heroData = [
+            {
+                backgroundImage: "img/hero/oppo banner1.PNG",
+                collection: "New Year Collection",
+                title: "Exclusive New Year Collections ",
+                description: "Crafting the future of mobile phones, where luxury meets innovation. Designed with precision and ethically produced to deliver unmatched quality, each device is a testament to excellence in craftsmanship.",
+                link: "#"
+            },
+            {
+                backgroundImage: "img/hero/banner--5.PNG",
+                collection: "Summer Collection",
+                title: "iPhone: Where cutting-edge technology meets timeless elegance.",
+                description: "Designed to elevate your experience with unmatched performance and seamless style.",
+                link: "#"
+            }
+        ];
+
         if (user) {
             const userData = await User.findOne({ _id: user });
             console.log('User data', userData.name)
-            res.render('home', { user: userData })
+            res.render('home', { user: userData, products: productData, heroData: heroData })
         } else {
             console.log('No loggedin user');
-            return res.render('home');
+            return res.render('home', { products: productData, heroData: heroData });
         }
 
     } catch (error) {
@@ -235,6 +262,15 @@ const logout = async (req, res) => {
     }
 };
 
+const loadShopePage = async (req, res) => {
+    try {
+        res.render('shop');
+    } catch (error) {
+        console.error('Shope page error:', error);
+        res.redirect('pageNotFound');
+    }
+}
+
 
 
 module.exports = {
@@ -248,5 +284,6 @@ module.exports = {
     loadLoginPage,
     login,
     logout,
+    loadShopePage,
 
 }
