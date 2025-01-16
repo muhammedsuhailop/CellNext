@@ -26,7 +26,13 @@ router.get('/editCategory', adminAuth, categoryController.getEditCategory);
 router.post('/editCategory', adminAuth, categoryController.editCategory);
 //Product Management
 router.get('/addProduct', adminAuth, productsController.getAddProduct);
-router.post('/addProduct', adminAuth,upload, productsController.addProduct);
+router.post('/addProduct', adminAuth, upload, productsController.addProduct);
+router.get('/products', adminAuth, productsController.getAllProducts);
+router.post('/addProductOffer', adminAuth, productsController.addProductOffer);
+router.post('/removeProductOffer', adminAuth, productsController.removeProductOffer);
+router.get('/bockProduct', adminAuth, productsController.bockProduct);
+router.get('/unbockProduct', adminAuth, productsController.unbockProduct);
+
 
 
 //Error-Page

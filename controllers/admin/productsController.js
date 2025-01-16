@@ -110,9 +110,123 @@ const addProduct = async (req, res) => {
     }
 };
 
+const getAllProducts = async (req, res) => {
+    try {
+        const search = req.query.search || "";
+        const page = req.query.page || 1;
+        const limit = 5;
+
+        const ProductData = await Product.find({
+            $or: [
+                { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+                { brand: { $regex: new RegExp(".*" + search + ".*", "i") } }
+            ]
+        })
+            .limit(limit)
+            .skip((page - 1) * limit)
+            .populate('category')
+            .sort({ createdAt: -1 })
+            .exec();
+
+        const count = await Product.find({
+            $or: [
+                { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+                { brand: { $regex: new RegExp(".*" + search + ".*", "i") } }
+            ]
+        }).countDocuments();
+        const totalPages = Math.ceil(count / limit);
+
+        const categoryData = await Category.find({ isListed: true });
+        const brand = await Brand.find({ isBlocked: false });
+
+        const categoriesnames = categoryData.reduce((acc, cat) => {
+            acc[cat._id] = cat.name;
+            return acc;
+        }, {});
+
+        // Render the products page with the necessary data
+        res.render('products', {
+            decodeURIata: ProductData,
+            totalPages: totalPages,
+            currentPage: page,
+            categoriesnames: categoriesnames,
+            brand: brand,
+            searchQuery: search
+        });
+
+    } catch (error) {
+        console.error('Error listing product:', error);
+        res.redirect('/admin/error-page');
+    }
+};
+
+const addProductOffer = async (req, res) => {
+    try {
+        const { productId, percentage } = req.body;
+        const findProduct = await Product.findOne({ _id: productId });
+        const findCategory = await Category.findOne({ _id: findProduct.category });
+
+        if (findCategory.categoryOffer > percentage) {
+            return res.json({ status: false, message: 'This product category already have an offer' });
+        }
+
+        findProduct.salePrice = findProduct.regularPrice - Math.floor(findProduct.regularPrice * (percentage / 100));
+        findProduct.productOffer = parseInt(percentage);
+        await findProduct.save();
+        findCategory.categoryOffer = 0;
+        await findCategory.save();
+        res.json({ status: true })
+    } catch (error) {
+        console.error('Error adding offer product:', error);
+        res.redirect('/admin/error-page');
+    }
+};
+
+const removeProductOffer = async (req, res) => {
+    try {
+        const { productId } = req.body;
+        const findProduct = await Product.findOne({ _id: productId });
+        const percentage = findProduct.productOffer;
+        findProduct.salePrice = findProduct.regularPrice + Math.floor(findProduct.regularPrice * (percentage / 100));
+        findProduct.productOffer = 0;
+        await findProduct.save();
+        res.json({ status: true });
+    } catch (error) {
+        console.error('Error removing offer product:', error);
+        res.redirect('/admin/error-page');
+    }
+
+};
+
+const bockProduct = async (req, res) => {
+    try {
+        let id = req.query.id;
+        await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
+        res.redirect('/admin/products')
+    } catch (error) {
+        console.error('Error blocking product:', error);
+        res.redirect('/admin/error-page');
+    }
+}
+
+const unbockProduct = async (req, res) => {
+    try {
+        let id = req.query.id;
+        await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
+        res.redirect('/admin/products')
+    } catch (error) {
+        console.error('Error blocking product:', error);
+        res.redirect('/admin/error-page');
+    }
+}
 
 
 module.exports = {
     getAddProduct,
     addProduct,
+    getAllProducts,
+    addProductOffer,
+    removeProductOffer,
+    bockProduct,
+    unbockProduct,
 }
