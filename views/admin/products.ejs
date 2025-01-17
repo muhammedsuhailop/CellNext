@@ -23,8 +23,20 @@
             <!-- Basic Layout -->
             <div class="col-xxl">
               <div class="card mb-4">
-
-
+                <div class="card-body">
+                  <% if (messages && messages.error) { %>
+                  <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+                    <strong>Error:</strong> <%= messages.error %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                  <% } %>
+                  <% if (messages && messages.success) { %>
+                  <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+                    <strong>Success:</strong> <%= messages.success %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                  <% } %>
+                </div>
                 <!-- Basic Bootstrap Table -->
                 <div class="card" id="view-category-section">
                   <h5 class="card-header">View Products</h5>
@@ -70,7 +82,7 @@
                             <a href="/admin/unbockProduct/?id=<%= product._id %>" class="btn btn-secondary">Unblock</a>
                             <% } %>
                           </td>
-                          <td><a href="/edit/<%= product._id %>" class="btn btn-primary">Edit</a></td>
+                          <td><a href="/admin/editProduct?id=<%= product._id %>" class="btn btn-primary">Edit</a></td>
                         </tr>
                         <% }); %>
                       </tbody>

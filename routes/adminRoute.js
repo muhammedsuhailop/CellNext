@@ -32,6 +32,9 @@ router.post('/addProductOffer', adminAuth, productsController.addProductOffer);
 router.post('/removeProductOffer', adminAuth, productsController.removeProductOffer);
 router.get('/bockProduct', adminAuth, productsController.bockProduct);
 router.get('/unbockProduct', adminAuth, productsController.unbockProduct);
+router.get('/editProduct', adminAuth, productsController.getEditProduct);
+router.post('/editProduct/:id', adminAuth, upload, productsController.editProduct);
+
 
 
 

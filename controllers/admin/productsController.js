@@ -144,6 +144,9 @@ const getAllProducts = async (req, res) => {
             return acc;
         }, {});
 
+        const successMessage = req.flash('success');
+        const errorMessage = req.flash('error');
+
         // Render the products page with the necessary data
         res.render('products', {
             decodeURIata: ProductData,
@@ -151,7 +154,11 @@ const getAllProducts = async (req, res) => {
             currentPage: page,
             categoriesnames: categoriesnames,
             brand: brand,
-            searchQuery: search
+            searchQuery: search,
+            messages: {
+                success: successMessage.length > 0 ? successMessage[0] : null,
+                error: errorMessage.length > 0 ? errorMessage[0] : null,
+            },
         });
 
     } catch (error) {
@@ -220,6 +227,116 @@ const unbockProduct = async (req, res) => {
     }
 }
 
+const getEditProduct = async (req, res) => {
+    try {
+        const id = req.query.id;
+        const product = await Product.findOne({ _id: id });
+        const category = await Category.find({});
+        const brand = await Brand.find({});
+        const categoryMap = category.reduce((acc, cat) => {
+            acc[cat._id] = cat.name; // Map category ID to its name
+            return acc;
+        }, {});
+        const successMessage = req.flash('success');
+        const errorMessage = req.flash('error');
+        res.render('product-edit', {
+            product: product,
+            category: category,
+            categoryMap: categoryMap,
+            brand: brand,
+            messages: {
+                success: successMessage.length > 0 ? successMessage[0] : null,
+                error: errorMessage.length > 0 ? errorMessage[0] : null,
+            },
+        })
+    } catch (error) {
+        console.error('Error edit product:', error);
+        res.redirect('/admin/error-page');
+    }
+}
+
+
+const editProduct = async (req, res) => {
+    try {
+        const productId = req.params.id; // Get the product ID from the URL 
+        const product = req.body;
+
+        // Find the existing product by ID
+        const existingProduct = await Product.findById(productId);
+        if (!existingProduct) {
+            req.flash('error', 'Product not found');
+            return res.redirect(`/admin/editProduct/${productId}`);
+        }
+
+        const images = existingProduct.productImage;
+        const croppedImageDir = path.join(__dirname, '../../public/uploads/product-images');
+
+        if (!fs.existsSync(croppedImageDir)) {
+            fs.mkdirSync(croppedImageDir, { recursive: true });
+        }
+
+        console.log('Uploaded files:', req.files);
+
+        for (const file of req.files) {
+            const originalPath = file.path;
+            const uniqueId = uuidv4();
+            const croppedImagePath = path.join(
+                croppedImageDir,
+                `crd-${uniqueId}-${file.originalname}`
+            );
+
+            console.log(`Processing file: ${file.originalname}`);
+            console.log(`Original file path: ${originalPath}`);
+            console.log(`Cropped file path: ${croppedImagePath}`);
+
+            if (!fs.existsSync(originalPath)) {
+                console.error(`File does not exist: ${originalPath}`);
+                continue;
+            }
+
+            try {
+                await sharp(originalPath)
+                    .resize(500, 500)
+                    .toFile(croppedImagePath);
+                console.log('Cropping completed.');
+                images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
+            } catch (err) {
+                console.error('Error processing file with sharp:', err);
+                continue;
+            }
+        }
+
+        const categoryId = await Category.findOne({ _id: product.category });
+        if (!categoryId) {
+            return res.status(400).json('Invalid category name');
+        }
+
+        const color = product.color === 'custom' ? product.custom_color : product.color;
+
+        // Update the existing product with new data
+        existingProduct.productName = product.productName;
+        existingProduct.description = product.descriptionid;
+        existingProduct.category = product.category;
+        existingProduct.brand = product.brand;
+        existingProduct.regularPrice = product.regularPrice;
+        existingProduct.salePrice = product.salePrice;
+        existingProduct.quantity = product.quantity;
+        existingProduct.color = color;
+        existingProduct.storage = product.storage;
+        existingProduct.productImage = images;
+        existingProduct.status = 'Available';
+        existingProduct.updatedAt = new Date();
+
+        await existingProduct.save();
+
+        req.flash('success', 'Product updated successfully!');
+        return res.redirect(`/admin/products`);
+
+    } catch (error) {
+        console.error('Error updating product:', error);
+        res.redirect('/admin/error-page');
+    }
+};
 
 module.exports = {
     getAddProduct,
@@ -229,4 +346,6 @@ module.exports = {
     removeProductOffer,
     bockProduct,
     unbockProduct,
+    getEditProduct,
+    editProduct,
 }

@@ -43,13 +43,13 @@
                     <% } %>
                   </div>
 
-                  <form action="/admin/addProduct" method="POST" enctype="multipart/form-data">
+                  <form action="/admin/editProduct/<%= product._id %>" method="POST" enctype="multipart/form-data">
                     <div class="row">
                       <div class="col-md-6 mb-3">
                         <div id="category-error" class="error-message text-danger"></div>
                         <label for="category-select">Select Category</label>
                         <select class="form-control" id="category-select" name="category">
-                          <option value="">Select Category</option>
+                          <option value="<%= product.category %>"><%= categoryMap[product.category] %></option>
                           <% category.forEach((category) => { %>
                           <option value="<%= category._id %>"><%= category.name %></option>
                           <% }); %>
@@ -69,29 +69,33 @@
                     <div class="mb-3">
                       <div id="productName-error" class="error-message text-danger"></div>
                       <label class="form-label" for="basic-default-fullname">Product Name</label>
-                      <input type="text" class="form-control" id="basic-default-fullname" placeholder="Product Name" name="productName" />
+                      <input type="text" class="form-control" id="basic-default-fullname" placeholder="Product Name" name="productName" value="<%= product.productName %>" />
                     </div>
                     <div class="mb-3">
                       <div id="description-error" class="error-message text-danger"></div>
                       <label class="form-label" for="basic-default-message">Product Description</label>
-                      <textarea id="descriptionid" class="form-control" placeholder="Enter Product Description" name="descriptionid"></textarea>
+                      <textarea id="descriptionid" class="form-control" placeholder="Enter Product Description" name="descriptionid"> <%= product.description %></textarea>
                     </div>
                     <label class="form-label" for="basic-default-message">Upload Product Images</label>
 
-                    <% for (let i = 1; i <= 4; i++) { %>
+                    <% for (let i = 0; i < 4; i++) { %>
                     <div class="row mb-3">
                       <div id="image<%= i %>-error" class="error-message text-danger"></div>
-                      <label class="col-sm-2 col-form-label" for="image<%= i %>">Image <%= i %></label>
+                      <label class="col-sm-2 col-form-label" for="image<%= i %>">Image <%= i + 1 %></label>
                       <div class="col-sm-4">
                         <input type="file" class="form-control" id="image<%= i %>" name="images" accept="image/*" />
                       </div>
-                      <div class="col-sm-6" style="display: flex; align-items: center; justify-content: center;">
-                        <div class="image-preview" id="preview-image<%= i %>" style="width: 150px; height: 150px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border: 2px solid #979b9f">
-                          <img id="preview-img<%= i %>" src="" alt="No image" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
+                      <div class="col-sm-6 d-flex align-items-center justify-content-center">
+                        <div class="image-preview position-relative" id="preview-image<%= i %>" style="width: 150px; height: 150px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border: 2px solid #979b9f">
+                          <img id="preview-img<%= i %>" src="<%= product.productImage[i] ? product.productImage[i] : '' %>" alt="No image" style="width: 100%; height: 100%; object-fit: cover; display: <%= product.productImage[i] ? 'block' : 'none' %>;" />
+                          <% if (product.productImage[i]) { %>
+                          <button class="btn btn-danger remove-image position-absolute" style="top: 5px; right: 5px;" data-index="<%= i %>">Remove</button>
+                          <% } %>
                         </div>
                       </div>
                     </div>
                     <% } %>
+
                     <!-- Modal for Image Cropping -->
                     <div id="cropperModal" class="modal" tabindex="-1" role="dialog">
                       <div class="modal-dialog" role="document">
@@ -118,8 +122,8 @@
                       <div class="col-md-4 mb-3">
                         <div id="size-error" class="error-message text-danger"></div>
                         <label for="storage-size" class="form-label">Storage Size</label>
-                        <select class="form-control" id="storage-size" name="storage">
-                          <option value="">Select Storage Size</option>
+                        <select class="form-control" id="storage-size" name="storage_size">
+                          <option value='<%= product.storage %>'><%= product.storage %></option>
                           <option value="64GB">64GB</option>
                           <option value="128GB">128GB</option>
                           <option value="256GB">256GB</option>
@@ -130,7 +134,7 @@
                         <div id="color-error" class="error-message text-danger"></div>
                         <label for="color" class="form-label">Color</label>
                         <select class="form-control" id="color" name="color">
-                          <option value="">Select Color</option>
+                          <option value="<%= product.color %>"><%= product.color %></option>
                           <option value="black">Black</option>
                           <option value="white">White</option>
                           <option value="blue">Blue</option>
@@ -145,24 +149,24 @@
                       <div class="col-md-4 mb-3">
                         <div id="quantity-error" class="error-message text-danger"></div>
                         <label for="quantity" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" />
+                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="<%= product.quantity %>" />
                       </div>
                     </div>
                     <div class="row mb-3">
                       <div class="col-md-6">
                         <div id="regularPrice-error" class="error-message text-danger"></div>
                         <label for="regular-price" class="form-label">Regular Price</label>
-                        <input type="number" class="form-control" id="regular-price" name="regularPrice" placeholder="₹ Enter regular price" />
+                        <input type="number" class="form-control" id="regular-price" name="regularPrice" placeholder="₹ Enter regular price" value="<%= product.regularPrice %>" />
                       </div>
                       <div class="col-md-6">
                         <div id="salePrice-error" class="error-message text-danger"></div>
                         <label for="offer-price" class="form-label">Offer Price</label>
-                        <input type="number" class="form-control" id="offer-price" name="salePrice" placeholder="₹ Enter offer price" />
+                        <input type="number" class="form-control" id="offer-price" name="salePrice" placeholder="₹ Enter offer price" value="<%= product.salePrice %>" />
                       </div>
                     </div>
                     <div class="row mb-3">
                       <div class="col-sm-10 offset-sm-2">
-                        <button type="submit" class="btn btn-primary">Add Product</button>
+                        <button type="submit" class="btn btn-primary">Update Product</button>
                       </div>
                     </div>
                   </form>
@@ -213,8 +217,20 @@
       let currentImageIndex;
       let croppedImages = {}; // Store cropped images for later submission
 
-      for (let i = 1; i <= 4; i++) {
-        document.getElementById('image' + i).addEventListener('change', function(event) {
+      function updateImagePreview(index, src, displayStyle) {
+        const previewImg = document.getElementById('preview-img' + index);
+        const previewContainer = document.getElementById('preview-image' + index);
+
+        previewImg.src = src;
+        previewImg.style.display = displayStyle;
+        previewContainer.style.backgroundColor = src ? 'transparent' : '#f5f5f5';
+      }
+
+      for (let i = 0; i < 4; i++) {
+        const imageInput = document.getElementById('image' + i);
+        const removeButton = document.querySelector('.remove-image[data-index="' + i + '"]');
+
+        imageInput.addEventListener('change', function(event) {
           const file = event.target.files[0];
           if (file) {
             const reader = new FileReader();
@@ -235,6 +251,15 @@
             reader.readAsDataURL(file);
           }
         });
+
+        if (removeButton) {
+          removeButton.addEventListener('click', function() {
+            const index = this.getAttribute('data-index');
+            updateImagePreview(index, '', 'none');
+            document.getElementById('image' + index).value = '';
+            delete croppedImages[index];
+          });
+        }
       }
 
       // Cropping and storing the image
@@ -243,14 +268,10 @@
           width: 150,
           height: 150,
         });
-        const previewImg = document.getElementById('preview-img' + currentImageIndex);
-        const previewContainer = document.getElementById('preview-image' + currentImageIndex);
 
         canvas.toBlob(function(blob) {
           const url = URL.createObjectURL(blob);
-          previewImg.src = url;
-          previewImg.style.display = 'block';
-          previewContainer.style.backgroundColor = 'transparent';
+          updateImagePreview(currentImageIndex, url, 'block');
           cropperModal.hide();
 
           // Store the cropped image for later use
@@ -271,7 +292,7 @@
         }
 
         // Send the cropped images to the server
-        fetch('/admin/addProduct', {
+        fetch('/admin/editProduct', {
             method: 'POST',
             body: formData,
           })
@@ -286,78 +307,8 @@
       });
     });
   </script>
+
   <script>
-    // document.addEventListener('DOMContentLoaded', function() {
-    //   const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
-    //   let cropper;
-    //   let currentImageIndex;
-
-    //   for (let i = 1; i <= 4; i++) {
-    //     document.getElementById('image' + i).addEventListener('change', function(event) {
-    //       const file = event.target.files[0];
-    //       const previewContainer = document.getElementById('preview-image' + i);
-    //       const previewImg = document.getElementById('preview-img' + i);
-
-    //       if (file) {
-    //         const reader = new FileReader();
-    //         reader.onload = function(e) {
-    //           document.getElementById('cropperImage').src = e.target.result;
-    //           cropperModal.show();
-    //           currentImageIndex = i;
-    //           if (cropper) {
-    //             cropper.destroy();
-    //           }
-    //           cropper = new Cropper(document.getElementById('cropperImage'), {
-    //             aspectRatio: 1, // 1:1 aspect ratio
-    //             viewMode: 1,
-    //           });
-    //         };
-    //         reader.readAsDataURL(file);
-    //       }
-    //     });
-    //   }
-
-    //   document.getElementById('cropImage').addEventListener('click', function() {
-    //     const canvas = cropper.getCroppedCanvas({
-    //       width: 150,
-    //       height: 150,
-    //     });
-    //     const previewImg = document.getElementById('preview-img' + currentImageIndex);
-    //     const previewContainer = document.getElementById('preview-image' + currentImageIndex);
-
-    //     canvas.toBlob(function(blob) {
-    //       const url = URL.createObjectURL(blob);
-    //       previewImg.src = url;
-    //       previewImg.style.display = 'block';
-    //       previewContainer.style.backgroundColor = 'transparent';
-    //       cropperModal.hide();
-    //     }, 'image/jpeg');
-    //   });
-    // });
-
-    // document.addEventListener('DOMContentLoaded', function() {
-    //   for (let i = 1; i <= 4; i++) {
-    //     document.getElementById('image' + i).addEventListener('change', function(event) {
-    //       const file = event.target.files[0];
-    //       const previewImg = document.getElementById('preview-img' + i);
-    //       const previewContainer = document.getElementById('preview-image' + i);
-
-    //       if (file) {
-    //         const reader = new FileReader();
-    //         reader.onload = function(e) {
-    //           previewImg.src = e.target.result;
-    //           previewImg.style.display = 'block';
-    //           previewContainer.style.backgroundColor = 'transparent';
-    //         };
-    //         reader.readAsDataURL(file);
-    //       } else {
-    //         previewImg.src = '';
-    //         previewImg.style.display = 'none';
-    //         previewContainer.style.backgroundColor = '#f5f5f5';
-    //       }
-    //     });
-    //   }
-
     document.getElementById('color').addEventListener('change', function() {
       const customColorContainer = document.getElementById('custom-color-container');
       customColorContainer.style.display = this.value === 'custom' ? 'block' : 'none';
@@ -437,10 +388,10 @@
         totalImagesSelected += imageInput.files.length; // Count selected files
       });
 
-      if (totalImagesSelected < 3) {
-        displayErrorMessage('image1-error', 'Please select at least three images.');
-        isValid = false;
-      }
+      // if (totalImagesSelected < 3) {
+      //   displayErrorMessage('image1-error', 'Please select at least three images.');
+      //   isValid = false;
+      // }
 
       if (!isValid) {
         event.preventDefault();
