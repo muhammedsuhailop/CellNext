@@ -34,9 +34,7 @@ router.get('/bockProduct', adminAuth, productsController.bockProduct);
 router.get('/unbockProduct', adminAuth, productsController.unbockProduct);
 router.get('/editProduct', adminAuth, productsController.getEditProduct);
 router.post('/editProduct/:id', adminAuth, upload, productsController.editProduct);
-
-
-
+router.post('/removeProductImage/:productId/:index', adminAuth, productsController.removeProductImage);
 
 //Error-Page
 router.get('/error-page', adminController.loadError);

@@ -78,6 +78,7 @@
                     </div>
                     <label class="form-label" for="basic-default-message">Upload Product Images</label>
 
+                    <input type="hidden" id="productId" value="<%= product._id %>" />
                     <% for (let i = 0; i < 4; i++) { %>
                     <div class="row mb-3">
                       <div id="image<%= i %>-error" class="error-message text-danger"></div>
@@ -89,12 +90,15 @@
                         <div class="image-preview position-relative" id="preview-image<%= i %>" style="width: 150px; height: 150px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border: 2px solid #979b9f">
                           <img id="preview-img<%= i %>" src="<%= product.productImage[i] ? product.productImage[i] : '' %>" alt="No image" style="width: 100%; height: 100%; object-fit: cover; display: <%= product.productImage[i] ? 'block' : 'none' %>;" />
                           <% if (product.productImage[i]) { %>
-                          <button class="btn btn-danger remove-image position-absolute" style="top: 5px; right: 5px;" data-index="<%= i %>">Remove</button>
+                          <button type="button" class="btn btn-danger remove-image position-absolute" style="top: 5px; right: 5px;" data-index="<%= i %>">Remove</button>
                           <% } %>
                         </div>
                       </div>
                     </div>
                     <% } %>
+
+
+
 
                     <!-- Modal for Image Cropping -->
                     <div id="cropperModal" class="modal" tabindex="-1" role="dialog">
@@ -122,7 +126,7 @@
                       <div class="col-md-4 mb-3">
                         <div id="size-error" class="error-message text-danger"></div>
                         <label for="storage-size" class="form-label">Storage Size</label>
-                        <select class="form-control" id="storage-size" name="storage_size">
+                        <select class="form-control" id="storage-size" name="storage">
                           <option value='<%= product.storage %>'><%= product.storage %></option>
                           <option value="64GB">64GB</option>
                           <option value="128GB">128GB</option>
@@ -217,6 +221,8 @@
       let currentImageIndex;
       let croppedImages = {}; // Store cropped images for later submission
 
+      const productId = document.getElementById('productId').value;
+
       function updateImagePreview(index, src, displayStyle) {
         const previewImg = document.getElementById('preview-img' + index);
         const previewContainer = document.getElementById('preview-image' + index);
@@ -224,6 +230,7 @@
         previewImg.src = src;
         previewImg.style.display = displayStyle;
         previewContainer.style.backgroundColor = src ? 'transparent' : '#f5f5f5';
+        console.log(`Updated preview for image ${index}: src=${src}, display=${displayStyle}`);
       }
 
       for (let i = 0; i < 4; i++) {
@@ -253,11 +260,29 @@
         });
 
         if (removeButton) {
-          removeButton.addEventListener('click', function() {
+          removeButton.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent form submission
             const index = this.getAttribute('data-index');
+            console.log(`Remove button clicked for image ${index}`);
+
             updateImagePreview(index, '', 'none');
             document.getElementById('image' + index).value = '';
             delete croppedImages[index];
+
+            // If there was an existing image, remove it from the backend
+            fetch(`/admin/removeProductImage/${productId}/${index}`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              })
+              .then(response => response.json())
+              .then(data => {
+                console.log('Image removed successfully from backend:', data);
+              })
+              .catch(error => {
+                console.error('Error removing image from backend:', error);
+              });
           });
         }
       }
@@ -292,7 +317,7 @@
         }
 
         // Send the cropped images to the server
-        fetch('/admin/editProduct', {
+        fetch(`/admin/editProduct/${productId}`, {
             method: 'POST',
             body: formData,
           })
@@ -331,7 +356,7 @@
       const category = document.getElementsByName('category')[0].value.trim();
       const price = document.getElementsByName('regularPrice')[0].value.trim();
       const salePrice = document.getElementsByName('salePrice')[0].value.trim();
-      const storageSize = document.getElementsByName('storage_size')[0].value.trim();
+      const storageSize = document.getElementsByName('storage')[0].value.trim();
       const color = document.getElementsByName('color')[0].value.trim();
       const customColor = document.getElementById('custom-color').value.trim();
       const quantity = document.getElementsByName('quantity')[0].value.trim();

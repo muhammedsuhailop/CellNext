@@ -258,10 +258,9 @@ const getEditProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
     try {
-        const productId = req.params.id; // Get the product ID from the URL 
+        const productId = req.params.id; 
         const product = req.body;
 
-        // Find the existing product by ID
         const existingProduct = await Product.findById(productId);
         if (!existingProduct) {
             req.flash('error', 'Product not found');
@@ -313,7 +312,6 @@ const editProduct = async (req, res) => {
 
         const color = product.color === 'custom' ? product.custom_color : product.color;
 
-        // Update the existing product with new data
         existingProduct.productName = product.productName;
         existingProduct.description = product.descriptionid;
         existingProduct.category = product.category;
@@ -338,6 +336,40 @@ const editProduct = async (req, res) => {
     }
 };
 
+const removeProductImage = async (req, res) => {
+    try {
+      const { productId, index } = req.params;
+  
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ error: 'Product not found' });
+      }
+  
+      if (product.productImage[index]) {
+        const imagePath = path.join(__dirname, '../../public', product.productImage[index]);
+        fs.unlink(imagePath, (err) => {
+          if (err) {
+            console.error('Error removing image file:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+          }
+          product.productImage.splice(index, 1);
+          product.save()
+            .then(() => res.status(200).json({ success: 'Image removed successfully' }))
+            .catch((error) => {
+              console.error('Error saving product:', error);
+              res.status(500).json({ error: 'Internal server error' });
+            });
+        });
+      } else {
+        return res.status(400).json({ error: 'Image not found in product' });
+      }
+    } catch (error) {
+      console.error('Error removing image:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+  
+
 module.exports = {
     getAddProduct,
     addProduct,
@@ -348,4 +380,5 @@ module.exports = {
     unbockProduct,
     getEditProduct,
     editProduct,
+    removeProductImage,
 }
