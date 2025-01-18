@@ -12,7 +12,7 @@ const brandSchema = new Schema({
     },
     isBlocked: {
         type: Boolean,
-        default: true
+        default: false
     },
     createdAt: {
         type: Date,
