@@ -8,75 +8,78 @@ const categoryInfo = async (req, res) => {
         let page = parseInt(req.query.page) || 1;
         const limit = 4;
         if (page < 1) page = 1;
-        const categoryData = await Category.find({})
+
+        const searchCondition = search ? { name: { $regex: search, $options: 'i' } } : {};
+
+        const categoryData = await Category.find(searchCondition)
             .sort({ createdAt: -1 })
-            .limit(limit * 1)
+            .limit(limit)
             .skip((page - 1) * limit)
             .exec();
-        console.log('Page :', page)
 
-        const count = await Category.countDocuments({});
+        const count = await Category.countDocuments(searchCondition);
 
         const totalPages = Math.ceil(count / limit);
         if (page > totalPages) page = totalPages;
-
 
         res.render('category', {
             data: categoryData,
             totalPages: totalPages,
             currentPage: page,
-            searchQuery: search
+            searchQuery: search,
+            searchAction: '/admin/category',
         });
     } catch (error) {
         console.error('Error on category page', error);
         res.redirect('/admin/error-page');
     }
-}
+};
+
 
 const addCategory = async (req, res) => {
     const { name, description } = req.body;
     try {
-      const existingCategory = await Category.findOne({ name });
-      if (existingCategory) {
-        return res.status(400).json({ error: 'Category already exists' });
-      }
-  
-      const newCategory = new Category({
-        name,
-        description,
-      });
-      await newCategory.save();
-  
-      return res.json({ message: 'Category added successfully' });
-    } catch (error) {
-      console.log('Unexpected error adding new category', error);
-      return res.status(500).json({ error: 'Internal server error' });
-    }
-  };
-  
+        const existingCategory = await Category.findOne({ name });
+        if (existingCategory) {
+            return res.status(400).json({ error: 'Category already exists' });
+        }
 
-const getListCategory = async (req, res) => {
-    try {
-        let id = req.query.id;
-        await Category.updateOne({ _id: id }, { $set: { isListed: false } });
-        res.redirect('/admin/category')
-    } catch (error) {
-        console.log('Error while listing category');
-        res.redirect('/admin/error-page');
-    }
-}
+        const newCategory = new Category({
+            name,
+            description,
+        });
+        await newCategory.save();
 
-const getUnlistCategory = async (req, res) => {
+        return res.json({ message: 'Category added successfully' });
+    } catch (error) {
+        console.log('Unexpected error adding new category', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+const listCategory = async (req, res) => {
     try {
-        let id = req.query.id;
+        const { id, isListed } = req.body;
         await Category.updateOne({ _id: id }, { $set: { isListed: true } });
-        res.redirect('/admin/category')
+        res.json({ message: 'Category listed successfully!' });
     } catch (error) {
-        console.log('Error while unlisting category');
-        res.redirect('/admin/error-page');
-
+        console.log('Error while listing category:', error);
+        res.status(500).json({ error: 'An error occurred while listing the category.' });
     }
 }
+
+const unlistCategory = async (req, res) => {
+    try {
+        const { id, isListed } = req.body;
+        await Category.updateOne({ _id: id }, { $set: { isListed: false } });
+        res.json({ message: 'Category unlisted successfully!' });
+    } catch (error) {
+        console.log('Error while unlisting category:', error);
+        res.status(500).json({ error: 'An error occurred while unlisting the category.' });
+    }
+}
+
 
 const getEditCategory = async (req, res) => {
     try {
@@ -125,17 +128,12 @@ const editCategory = async (req, res) => {
 };
 
 
-
-
-
-
-
 module.exports = {
     categoryInfo,
     addCategory,
-    getListCategory,
-    getUnlistCategory,
     getEditCategory,
-    editCategory
+    editCategory,
+    listCategory,
+    unlistCategory,
 
 }

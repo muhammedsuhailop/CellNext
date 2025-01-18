@@ -36,7 +36,8 @@ const customerInfo = async (req, res) => {
             data: userData,
             totalPages: totalPages,
             currentPage: page,
-            searchQuery: search
+            searchQuery: search,
+            searchAction: '/admin/users',
         });
     } catch (error) {
         console.error('Error on customers page', error);

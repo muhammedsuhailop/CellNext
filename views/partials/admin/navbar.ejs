@@ -10,12 +10,21 @@
   <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
     <!-- Search -->
     <div class="navbar-nav align-items-center">
-      <div class="nav-item d-flex align-items-center">
-        <i class="bx bx-search fs-4 lh-0"></i>
-        <input type="text" class="form-control border-0 shadow-none" placeholder="Search..." aria-label="Search..." />
+      <div class="nav-item d-flex align-items-center w-100">
+        <form action="<%= typeof searchAction !== 'undefined' ? searchAction : '#' %>" method="GET" class="d-flex flex-grow-1 align-items-center">
+          <!-- Search Input -->
+          <input type="text" name="search" class="form-control border-0" placeholder="Search..." aria-label="Search..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" style="min-width: 200px;" />
+
+          <!-- Search Icon Trigger -->
+          <button type="submit" class="btn btn-link p-0 ms-1" style="font-size: 1.5rem;">
+            <i class="bx bx-search"></i>
+          </button>
+        </form>
       </div>
     </div>
     <!-- /Search -->
+
+
 
     <ul class="navbar-nav flex-row align-items-center ms-auto">
       <!-- Place this tag where you want the button to render. -->

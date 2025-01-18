@@ -155,6 +155,7 @@ const getAllProducts = async (req, res) => {
             categoriesnames: categoriesnames,
             brand: brand,
             searchQuery: search,
+            searchAction: '/admin/products',
             messages: {
                 success: successMessage.length > 0 ? successMessage[0] : null,
                 error: errorMessage.length > 0 ? errorMessage[0] : null,
@@ -205,27 +206,28 @@ const removeProductOffer = async (req, res) => {
 
 };
 
-const bockProduct = async (req, res) => {
+const blockProduct = async (req, res) => {
     try {
-        let id = req.query.id;
+        const { id, isBlocked } = req.body;
         await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
-        res.redirect('/admin/products')
+        res.json({ message: 'Product blocked successfully!' });
     } catch (error) {
         console.error('Error blocking product:', error);
-        res.redirect('/admin/error-page');
+        res.status(500).json({ error: 'An error occurred while blocking the product.' });
     }
 }
 
-const unbockProduct = async (req, res) => {
+const unblockProduct = async (req, res) => {
     try {
-        let id = req.query.id;
+        const { id, isBlocked } = req.body;
         await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
-        res.redirect('/admin/products')
+        res.json({ message: 'Product unblocked successfully!' });
     } catch (error) {
-        console.error('Error blocking product:', error);
-        res.redirect('/admin/error-page');
+        console.error('Error unblocking product:', error);
+        res.status(500).json({ error: 'An error occurred while unblocking the product.' });
     }
 }
+
 
 const getEditProduct = async (req, res) => {
     try {
@@ -258,7 +260,7 @@ const getEditProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
     try {
-        const productId = req.params.id; 
+        const productId = req.params.id;
         const product = req.body;
 
         const existingProduct = await Product.findById(productId);
@@ -338,37 +340,37 @@ const editProduct = async (req, res) => {
 
 const removeProductImage = async (req, res) => {
     try {
-      const { productId, index } = req.params;
-  
-      const product = await Product.findById(productId);
-      if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
-      }
-  
-      if (product.productImage[index]) {
-        const imagePath = path.join(__dirname, '../../public', product.productImage[index]);
-        fs.unlink(imagePath, (err) => {
-          if (err) {
-            console.error('Error removing image file:', err);
-            return res.status(500).json({ error: 'Internal server error' });
-          }
-          product.productImage.splice(index, 1);
-          product.save()
-            .then(() => res.status(200).json({ success: 'Image removed successfully' }))
-            .catch((error) => {
-              console.error('Error saving product:', error);
-              res.status(500).json({ error: 'Internal server error' });
+        const { productId, index } = req.params;
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        if (product.productImage[index]) {
+            const imagePath = path.join(__dirname, '../../public', product.productImage[index]);
+            fs.unlink(imagePath, (err) => {
+                if (err) {
+                    console.error('Error removing image file:', err);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                product.productImage.splice(index, 1);
+                product.save()
+                    .then(() => res.status(200).json({ success: 'Image removed successfully' }))
+                    .catch((error) => {
+                        console.error('Error saving product:', error);
+                        res.status(500).json({ error: 'Internal server error' });
+                    });
             });
-        });
-      } else {
-        return res.status(400).json({ error: 'Image not found in product' });
-      }
+        } else {
+            return res.status(400).json({ error: 'Image not found in product' });
+        }
     } catch (error) {
-      console.error('Error removing image:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+        console.error('Error removing image:', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
-  };
-  
+};
+
 
 module.exports = {
     getAddProduct,
@@ -376,8 +378,8 @@ module.exports = {
     getAllProducts,
     addProductOffer,
     removeProductOffer,
-    bockProduct,
-    unbockProduct,
+    blockProduct,
+    unblockProduct,
     getEditProduct,
     editProduct,
     removeProductImage,

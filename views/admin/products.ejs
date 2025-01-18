@@ -1,5 +1,7 @@
-<%- include('../../views/partials/admin/header') %>
+<link rel="stylesheet" href="/css/admin-table-style.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+
+<%- include('../../views/partials/admin/header') %>
 
 <body>
   <!-- Layout wrapper -->
@@ -37,22 +39,14 @@
                   <% } %>
                 </div>
                 <!-- Basic Bootstrap Table -->
-                <style>
-                  th:nth-child(1),
-                  td:nth-child(1) {
-                    position: sticky;
-                    left: 0;
-                    background-color: #fff;
-                  }
-                </style>
                 <div class="card" id="view-category-section">
                   <h5 class="card-header">View Products</h5>
                   <div class="table-responsive text-nowrap">
                     <table class="table">
                       <thead>
                         <tr>
-                          <th>Product Name</th>
-                          <th>Brand</th>
+                          <th class="product-name">Product Name</th>
+                          <th class="brand-name">Brand</th>
                           <th>Category</th>
                           <th>Sale Price</th>
                           <th>Offer</th>
@@ -65,8 +59,8 @@
                       <tbody>
                         <% decodeURIata.forEach(function(product) { %>
                         <tr>
-                          <td><%= product.productName %></td>
-                          <td><%= product.brand %></td>
+                          <td class="product-name"><%= product.productName %></td>
+                          <td class="brand-name"><%= product.brand %></td>
                           <td><%= categoriesnames[product.category._id] || 'Unknown' %></td>
                           <td><%= product.salePrice %></td>
                           <td><%= product.productOffer %></td>
@@ -81,12 +75,16 @@
                           </td>
                           <td><%= product.quantity %></td>
                           <td>
-                            <% if (product.isBlocked  === false) { %>
-                            <!-- If product has an offer, show the "Edit Offer" button -->
-                            <a href="/admin/bockProduct/?id=<%= product._id %>" class="btn btn-warning">Block</a>
+                            <% if (product.isBlocked === false) { %>
+                            <form id="blockForm<%= product._id %>" style="display:inline;">
+                              <input type="hidden" name="id" value="<%= product._id %>" />
+                              <button type="button" class="btn btn-warning" style="width: auto;" onclick="updateProductStatus('<%= product._id %>', true)">Block</button>
+                            </form>
                             <% } else { %>
-                            <!-- If there is no offer, show the "Offer" button -->
-                            <a href="/admin/unbockProduct/?id=<%= product._id %>" class="btn btn-secondary">Unblock</a>
+                            <form id="unblockForm<%= product._id %>" style="display:inline;">
+                              <input type="hidden" name="id" value="<%= product._id %>" />
+                              <button type="button" class="btn btn-secondary" style="width: auto;" onclick="updateProductStatus('<%= product._id %>', false)">Unblock</button>
+                            </form>
                             <% } %>
                           </td>
                           <td><a href="/admin/editProduct?id=<%= product._id %>" class="btn btn-primary">Edit</a></td>
@@ -221,6 +219,38 @@
         .catch((error) => {
           console.error(error);
         })
+    }
+  </script>
+
+  <script>
+    function updateProductStatus(productId, isBlocked) {
+      fetch('/admin/product/' + (isBlocked ? 'block' : 'unblock'), {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: productId,
+            isBlocked: isBlocked
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          Swal.fire({
+            icon: 'success',
+            title: data.message,
+          }).then(() => {
+            window.location.reload();
+          });
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'An error occurred!',
+            text: error.message,
+          });
+        });
     }
   </script>
 </body>

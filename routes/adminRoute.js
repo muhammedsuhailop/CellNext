@@ -21,8 +21,8 @@ router.get('/users/unblock-user', adminAuth, customerController.unblockCustomer)
 //Category Management
 router.get('/category', adminAuth, categoryController.categoryInfo);
 router.post('/addCategory', adminAuth, categoryController.addCategory);
-router.get('/listCategory', adminAuth, categoryController.getListCategory);
-router.get('/unlistCategory', adminAuth, categoryController.getUnlistCategory);
+router.patch('/category/list', adminAuth, categoryController.listCategory);
+router.patch('/category/unlist', adminAuth, categoryController.unlistCategory);
 router.get('/editCategory', adminAuth, categoryController.getEditCategory);
 router.post('/editCategory', adminAuth, categoryController.editCategory);
 //Product Management
@@ -31,8 +31,8 @@ router.post('/addProduct', adminAuth, upload, productsController.addProduct);
 router.get('/products', adminAuth, productsController.getAllProducts);
 router.post('/addProductOffer', adminAuth, productsController.addProductOffer);
 router.post('/removeProductOffer', adminAuth, productsController.removeProductOffer);
-router.get('/bockProduct', adminAuth, productsController.bockProduct);
-router.get('/unbockProduct', adminAuth, productsController.unbockProduct);
+router.patch('/product/block', adminAuth, productsController.blockProduct);
+router.patch('/product/unblock', adminAuth, productsController.unblockProduct);
 router.get('/editProduct', adminAuth, productsController.getEditProduct);
 router.post('/editProduct/:id', adminAuth, upload, productsController.editProduct);
 router.post('/removeProductImage/:productId/:index', adminAuth, productsController.removeProductImage);
@@ -40,8 +40,8 @@ router.post('/removeProductImage/:productId/:index', adminAuth, productsControll
 router.get('/brands',adminAuth,brandController.loadBrandPage);
 router.get('/addBrand',adminAuth,brandController.loadAddBrandPage);
 router.post('/addBrand',adminAuth,upload,brandController.addBrand);
-router.get('/blockBrand', adminAuth, brandController.blockBrand);
-router.get('/unblockBrand', adminAuth, brandController.unblockBrand);
+router.patch('/brand/block', adminAuth, brandController.blockBrand);
+router.patch('/brand/unblock', adminAuth, brandController.unblockBrand);
 
 //Error-Page
 router.get('/error-page', adminController.loadError);

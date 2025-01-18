@@ -11,14 +11,16 @@ const loadBrandPage = async (req, res) => {
         let page = parseInt(req.query.page) || 1;
         const limit = 4;
         if (page < 1) page = 1;
-        const brandData = await Brand.find({})
+
+        const searchCondition = search ? { brandName: { $regex: search, $options: 'i' } } : {};
+
+        const brandData = await Brand.find(searchCondition)
             .sort({ createdAt: -1 })
             .limit(limit * 1)
             .skip((page - 1) * limit)
             .exec();
-        console.log('Page :', page)
 
-        const count = await Brand.countDocuments({});
+        const count = await Brand.countDocuments(searchCondition);
 
         const totalPages = Math.ceil(count / limit);
         if (page > totalPages) page = totalPages;
@@ -31,6 +33,7 @@ const loadBrandPage = async (req, res) => {
             totalPages: totalPages,
             currentPage: page,
             searchQuery: search,
+            searchAction: '/admin/brands',
             messages: {
                 success: successMessage.length > 0 ? successMessage[0] : null,
                 error: errorMessage.length > 0 ? errorMessage[0] : null,
@@ -116,26 +119,29 @@ const addBrand = async (req, res) => {
 
 const blockBrand = async (req, res) => {
     try {
-        let id = req.query.id;
-        console.log('Block brand invoked');
+        const { id, isBlocked } = req.body;
+
         await Brand.updateOne({ _id: id }, { $set: { isBlocked: true } });
+
         req.flash('success', 'Brand blocked successfully!');
-        res.redirect('/admin/brands');
+        res.json({ message: 'Brand blocked successfully!' });
     } catch (error) {
         console.error('Error blocking brand:', error);
-        res.redirect('/admin/error-page');
+        res.status(500).json({ error: 'An error occurred while blocking the brand.' });
     }
 }
 
 const unblockBrand = async (req, res) => {
     try {
-        let id = req.query.id;
+        const { id, isBlocked } = req.body;
+
         await Brand.updateOne({ _id: id }, { $set: { isBlocked: false } });
+
         req.flash('success', 'Brand unblocked successfully!');
-        res.redirect('/admin/brands');
+        res.json({ message: 'Brand unblocked successfully!' });
     } catch (error) {
-        console.error('Error blocking brand:', error);
-        res.redirect('/admin/error-page');
+        console.error('Error unblocking brand:', error);
+        res.status(500).json({ error: 'An error occurred while unblocking the brand.' });
     }
 }
 

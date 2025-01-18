@@ -83,14 +83,16 @@
                         <% } %>
                       </td>
                       <td>
-                        <% if(category.isListed){ %>
-                        <button class="btn btn-sm btn-danger" style="width: 65px;">
-                          <a href="/admin/listCategory?id=<%= category._id %>" class="text-white">Unlist</a>
-                        </button>
+                        <% if(category.isListed) { %>
+                        <form id="unlistForm<%= category._id %>" style="display:inline;">
+                          <input type="hidden" name="id" value="<%= category._id %>" />
+                          <button type="button" class="btn btn-sm btn-danger" style="width: 65px;" onclick="updateCategoryStatus('<%= category._id %>', false)">Unlist</button>
+                        </form>
                         <% } else { %>
-                        <button class="btn btn-sm btn-success" style="width: 65px;">
-                          <a href="/admin/unlistCategory?id=<%= category._id %>" class="text-white">List</a>
-                        </button>
+                        <form id="listForm<%= category._id %>" style="display:inline;">
+                          <input type="hidden" name="id" value="<%= category._id %>" />
+                          <button type="button" class="btn btn-sm btn-success" style="width: 65px;" onclick="updateCategoryStatus('<%= category._id %>', true)">List</button>
+                        </form>
                         <% } %>
                       </td>
                       <td>
@@ -256,6 +258,38 @@
         element.innerText = '';
         element.style.display = 'none';
       });
+    }
+  </script>
+
+  <script>
+    function updateCategoryStatus(categoryId, isListed) {
+      fetch('/admin/category/' + (isListed ? 'list' : 'unlist'), {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: categoryId,
+            isListed: isListed
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          Swal.fire({
+            icon: 'success',
+            title: data.message,
+          }).then(() => {
+            window.location.reload();
+          });
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'An error occurred!',
+            text: error.message,
+          });
+        });
     }
   </script>
 </body>

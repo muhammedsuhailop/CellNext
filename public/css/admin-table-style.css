@@ -1,0 +1,33 @@
+th:nth-child(1),
+td:nth-child(1) {
+    position: sticky;
+    left: 0;
+    background-color: #ffffff;
+    z-index: 10;
+}
+
+td.product-name,
+th.product-name {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+td.brand-name,
+th.brand-name {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+td.customer-name {
+    width: 450px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+td.customer-email {
+    width: 450px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
