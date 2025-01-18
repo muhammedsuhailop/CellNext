@@ -264,7 +264,9 @@ const logout = async (req, res) => {
 
 const loadShopePage = async (req, res) => {
     try {
-        res.render('shop');
+        const user = req.session.user;
+        const userData = await User.findOne({ _id: user });
+        res.render('shop', { user: userData });
     } catch (error) {
         console.error('Shope page error:', error);
         res.redirect('pageNotFound');

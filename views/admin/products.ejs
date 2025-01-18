@@ -6,7 +6,6 @@
   <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
 
-
       <!-- Layout container -->
       <div class="layout-page">
         <!-- Navbar - Sidebar-->
@@ -38,6 +37,14 @@
                   <% } %>
                 </div>
                 <!-- Basic Bootstrap Table -->
+                <style>
+                  th:nth-child(1),
+                  td:nth-child(1) {
+                    position: sticky;
+                    left: 0;
+                    background-color: #fff;
+                  }
+                </style>
                 <div class="card" id="view-category-section">
                   <h5 class="card-header">View Products</h5>
                   <div class="table-responsive text-nowrap">
@@ -120,7 +127,6 @@
           <!-- Content wrapper -->
         </div>
         <!-- / Layout page -->
-
       </div>
     </div>
     <!-- Overlay -->

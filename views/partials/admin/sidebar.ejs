@@ -20,8 +20,9 @@
    <div class="menu-inner-shadow"></div>
 
    <ul class="menu-inner py-1">
+
      <!-- Dashboard -->
-     <li class="menu-item">
+     <li class="menu-item <%= currentPath === '/admin/' ? 'active' : '' %>">
        <a href="/admin/" class="menu-link">
          <i class="menu-icon tf-icons bx bx-home-circle"></i>
          <div data-i18n="Analytics">Dashboard</div>
@@ -29,13 +30,13 @@
      </li>
 
      <!-- Customers -->
-     <li class="menu-item">
+     <li class="menu-item <%= currentPath.startsWith('/admin/users') ? 'active open' : '' %>">
        <a href="/admin/users" class="menu-link menu-toggle">
          <i class="menu-icon tf-icons bx bxs-contact"></i>
          <div data-i18n="Layouts">Customers</div>
        </a>
        <ul class="menu-sub">
-         <li class="menu-item">
+         <li class="menu-item <%= currentPath === '/admin/users' ? 'active' : '' %>">
            <a href="/admin/users" class="menu-link">
              <div data-i18n="Without menu">View Customers</div>
            </a>
@@ -44,39 +45,37 @@
      </li>
 
      <!-- Categories -->
-     <li class="menu-item">
+     <li class="menu-item <%= currentPath.startsWith('/admin/category') ? 'active open' : '' %>">
        <a href="/admin/category" class="menu-link menu-toggle">
          <i class="menu-icon tf-icons bx bx-category"></i>
          <div data-i18n="Layouts">Categories</div>
        </a>
        <ul class="menu-sub">
-         <li class="menu-item">
+         <li class="menu-item <%= currentPath === '/admin/category#view-category-section' ? 'active' : '' %>">
            <a href="/admin/category#view-category-section" class="menu-link">
              <div data-i18n="Without menu">View Categories</div>
            </a>
          </li>
-         <li class="menu-item">
+         <li class="menu-item <%= currentPath === '/admin/category' ? 'active' : '' %>">
            <a href="/admin/category" class="menu-link">
-             <div data-i18n="Without navbar">Create new Category</div>
+             <div data-i18n="Without navbar">Create New Category</div>
            </a>
          </li>
        </ul>
      </li>
 
      <!-- Products -->
-     <li class="menu-item">
-       <a href="/admin/products" class="menu-link menu-toggle">
+     <li class="menu-item <%= currentPath.startsWith('/admin/products') || currentPath.startsWith('/admin/addProduct') ? 'active open' : '' %>"> <a href="/admin/products" class="menu-link menu-toggle">
          <i class="menu-icon tf-icons bx bx-cart"></i>
          <div data-i18n="Layouts">Products</div>
        </a>
-
        <ul class="menu-sub">
-         <li class="menu-item">
+         <li class="menu-item <%= currentPath === '/admin/products' ? 'active' : '' %>">
            <a href="/admin/products" class="menu-link">
              <div data-i18n="Without menu">View Products</div>
            </a>
          </li>
-         <li class="menu-item">
+         <li class="menu-item <%= currentPath === '/admin/addProduct' ? 'active' : '' %>">
            <a href="/admin/addProduct" class="menu-link">
              <div data-i18n="Without navbar">Add New Product</div>
            </a>
@@ -391,29 +390,3 @@
    </ul>
  </aside>
  <!-- / Menu -->
-
- <script>
-   document.addEventListener('DOMContentLoaded', () => {
-     const menuItems = document.querySelectorAll('.menu-item > a');
-     const currentPath = window.location.pathname;
-
-     menuItems.forEach(link => {
-       const parentLi = link.parentElement;
-       const childMenu = parentLi.querySelector('.menu-sub');
-
-       if (link.getAttribute('href') === currentPath) {
-         parentLi.classList.add('active');
-       }
-
-       if (childMenu) {
-         const childLinks = childMenu.querySelectorAll('a');
-         childLinks.forEach(childLink => {
-           if (childLink.getAttribute('href') === currentPath) {
-             childLink.parentElement.classList.add('active');
-             parentLi.classList.add('active');
-           }
-         });
-       }
-     });
-   });
- </script>

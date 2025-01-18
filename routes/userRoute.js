@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user/userController');
 const passport = require('passport');
+const { userAuth, adminAuth } = require('../middlewares/auth')
+
 
 router.get('/pageNotFound', userController.pageNotFound);
 
@@ -23,8 +25,8 @@ router.post('/login', userController.login);
 router.get('/logout', userController.logout);
 
 //Home & Shop
-router.get('/', userController.loadHomePage);
-router.get('/shop', userController.loadShopePage);
+router.get('/',userAuth, userController.loadHomePage);
+router.get('/shop',userAuth, userController.loadShopePage);
 
 
 
