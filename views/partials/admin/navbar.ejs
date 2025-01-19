@@ -11,7 +11,7 @@
     <!-- Search -->
     <div class="navbar-nav align-items-center">
       <div class="nav-item d-flex align-items-center w-100">
-        <form action="<%= typeof searchAction !== 'undefined' ? searchAction : '#' %>" method="GET" class="d-flex flex-grow-1 align-items-center">
+        <form action="<%= typeof searchAction !== 'undefined' ? searchAction : '#' %>" method="GET" class="d-flex flex-grow-1 align-items-center m-0">
           <!-- Search Input -->
           <input type="text" name="search" class="form-control border-0" placeholder="Search..." aria-label="Search..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" style="min-width: 200px;" />
 
@@ -27,10 +27,6 @@
 
 
     <ul class="navbar-nav flex-row align-items-center ms-auto">
-      <!-- Place this tag where you want the button to render. -->
-      <li class="nav-item lh-1 me-3">
-        <a class="github-button" href="https://github.com/themeselection/sneat-html-admin-template-free" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star themeselection/sneat-html-admin-template-free on GitHub">Star</a>
-      </li>
 
       <!-- User -->
       <li class="nav-item navbar-dropdown dropdown-user dropdown">

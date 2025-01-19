@@ -24,7 +24,7 @@ router.post('/addCategory', adminAuth, categoryController.addCategory);
 router.patch('/category/list', adminAuth, categoryController.listCategory);
 router.patch('/category/unlist', adminAuth, categoryController.unlistCategory);
 router.get('/editCategory', adminAuth, categoryController.getEditCategory);
-router.post('/editCategory', adminAuth, categoryController.editCategory);
+router.put('/editCategory', adminAuth, categoryController.editCategory);
 //Product Management
 router.get('/addProduct', adminAuth, productsController.getAddProduct);
 router.post('/addProduct', adminAuth, upload, productsController.addProduct);

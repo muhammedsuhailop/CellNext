@@ -4,7 +4,8 @@ const path = require('path');
 const multer = require('multer');
 const session = require('express-session');
 const flash = require('connect-flash');
-const passport = require('./config/passport')
+const passport = require('./config/passport');
+const methodOverride = require('method-override');
 const env = require('dotenv').config();
 const db = require('./config/db')
 const userRouter = require('./routes/userRoute');
@@ -25,6 +26,7 @@ app.use(session({
     }
 }))
 app.use(flash());
+app.use(methodOverride('_method'));
 
 app.use(passport.initialize());
 app.use(passport.session());
