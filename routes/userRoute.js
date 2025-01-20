@@ -25,11 +25,9 @@ router.post('/login', userController.login);
 router.get('/logout', userController.logout);
 
 //Home & Shop
-router.get('/',userAuth, userController.loadHomePage);
-router.get('/shop',userAuth, userController.loadShopePage);
-
-
-
+router.get('/', userAuth, userController.loadHomePage);
+router.get('/shop', userAuth, userController.loadShopePage);
+router.get('/filter', userAuth, userController.filterProduct)
 
 
 
