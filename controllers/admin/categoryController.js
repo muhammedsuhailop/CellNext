@@ -1,4 +1,5 @@
 const Category = require('../../models/categorySchema');
+const Product = require('../../models/productSchema');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
 
@@ -127,6 +128,80 @@ const editCategory = async (req, res) => {
     }
 };
 
+const addCategoryOffer = async (req, res) => {
+    try {
+        const percentage = parseInt(req.body.percentage);
+        const categoryId = req.body.categoryId;
+
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(400).json({ status: false, message: 'Category not found' });
+        }
+
+        const products = await Product.find({ category: categoryId });
+
+        await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
+
+        for (const product of products) {
+            let salePrice = product.regularPrice;
+
+            if (percentage > 0) {
+                salePrice -= Math.floor((product.regularPrice * percentage) / 100);
+            }
+
+            if (product.productOffer > 0) {
+                salePrice -= Math.floor((product.regularPrice * product.productOffer) / 100);
+            }
+
+            product.salePrice = salePrice;
+            await product.save();
+        }
+
+        res.json({ status: true, message: 'Category offer applied successfully' });
+
+    } catch (error) {
+        res.status(500).json({ status: false, message: 'Internal error' });
+        console.error('Error in addCategoryOffer:', error);
+    }
+};
+
+
+
+const removeCategoryOffer = async (req, res) => {
+    try {
+        const categoryId = req.body.categoryId;
+
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(400).json({ status: false, message: 'Category not found' });
+        }
+
+        const percentage = category.categoryOffer;
+
+        const products = await Product.find({ category: categoryId });
+        if (products.length > 0) {
+            for (const product of products) {
+                if (product.productOffer === 0) {
+                    product.salePrice = product.regularPrice;
+                } else {
+                    product.salePrice = product.regularPrice - Math.floor((product.regularPrice * product.productOffer) / 100);
+                }
+                await product.save();
+            }
+        }
+
+        category.categoryOffer = 0;
+        await category.save();
+
+        res.json({ status: true, message: 'Category offer removed successfully' });
+    } catch (error) {
+        res.status(500).json({ status: false, message: 'Internal server error' });
+        console.error('Error in removeCategoryOffer:', error);
+    }
+};
+
+
+
 
 module.exports = {
     categoryInfo,
@@ -135,5 +210,7 @@ module.exports = {
     editCategory,
     listCategory,
     unlistCategory,
+    addCategoryOffer,
+    removeCategoryOffer,
 
 }

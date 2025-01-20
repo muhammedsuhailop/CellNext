@@ -12,7 +12,7 @@ const productSchema = new Schema({
     },
     brand: {
         type: String,
-        // required: true
+        required: true
     },
     category: {
         type: Schema.Types.ObjectId,

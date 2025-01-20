@@ -59,9 +59,9 @@
                         <div id="brand-error" class="error-message text-danger"></div>
                         <label for="brand-select">Select Brand</label>
                         <select class="form-control" id="brand-select" name="brand">
-                          <option value="">Select Brand</option>
+                          <option value="<%= product.brand %>"><%= product.brand %></option>
                           <% brand.forEach((brand) => { %>
-                          <option value="<%= brand._id %>"><%= brand.name %></option>
+                          <option value="<%= brand.brandName %>"><%= brand.brandName %></option>
                           <% }); %>
                         </select>
                       </div>

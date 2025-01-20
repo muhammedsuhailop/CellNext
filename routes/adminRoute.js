@@ -5,7 +5,7 @@ const customerController = require('../controllers/admin/customerController');
 const categoryController = require('../controllers/admin/categoryController');
 const productsController = require('../controllers/admin/productsController');
 const brandController = require('../controllers/admin/brandController');
-const upload = require('../helpers/multer');  
+const upload = require('../helpers/multer');
 const { userAuth, adminAuth } = require('../middlewares/auth')
 
 
@@ -25,6 +25,8 @@ router.patch('/category/list', adminAuth, categoryController.listCategory);
 router.patch('/category/unlist', adminAuth, categoryController.unlistCategory);
 router.get('/editCategory', adminAuth, categoryController.getEditCategory);
 router.put('/editCategory', adminAuth, categoryController.editCategory);
+router.post('/addCategoryOffer', adminAuth, categoryController.addCategoryOffer);
+router.post('/removeCategoryOffer', adminAuth, categoryController.removeCategoryOffer);
 //Product Management
 router.get('/addProduct', adminAuth, productsController.getAddProduct);
 router.post('/addProduct', adminAuth, upload, productsController.addProduct);
@@ -37,9 +39,9 @@ router.get('/editProduct', adminAuth, productsController.getEditProduct);
 router.post('/editProduct/:id', adminAuth, upload, productsController.editProduct);
 router.post('/removeProductImage/:productId/:index', adminAuth, productsController.removeProductImage);
 //Brand Management 
-router.get('/brands',adminAuth,brandController.loadBrandPage);
-router.get('/addBrand',adminAuth,brandController.loadAddBrandPage);
-router.post('/addBrand',adminAuth,upload,brandController.addBrand);
+router.get('/brands', adminAuth, brandController.loadBrandPage);
+router.get('/addBrand', adminAuth, brandController.loadAddBrandPage);
+router.post('/addBrand', adminAuth, upload, brandController.addBrand);
 router.patch('/brand/block', adminAuth, brandController.blockBrand);
 router.patch('/brand/unblock', adminAuth, brandController.unblockBrand);
 

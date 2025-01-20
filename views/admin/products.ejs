@@ -67,10 +67,10 @@
                           <td>
                             <% if (product.productOffer > 0) { %>
                             <!-- If product has an offer, show the "Edit Offer" button -->
-                            <button class="btn btn-warning" onclick="removeOffer('<%= product._id %>')">Remove Offer</button>
+                            <button class="btn btn-sm btn-warning" onclick="removeOffer('<%= product._id %>')">Remove Offer</button>
                             <% } else { %>
                             <!-- If there is no offer, show the "Offer" button -->
-                            <button class="btn btn-secondary" onclick="addOffer('<%= product._id %>')">Add Offer</button>
+                            <button class="btn btn-sm btn-secondary" onclick="addOffer('<%= product._id %>')">Add Offer</button>
                             <% } %>
                           </td>
                           <td><%= product.quantity %></td>
@@ -78,16 +78,16 @@
                             <% if (product.isBlocked === false) { %>
                             <form id="blockForm<%= product._id %>" style="display:inline;">
                               <input type="hidden" name="id" value="<%= product._id %>" />
-                              <button type="button" class="btn btn-warning" style="width: auto;" onclick="updateProductStatus('<%= product._id %>', true)">Block</button>
+                              <button type="button" class="btn btn-sm btn-warning" style="width: auto;" onclick="updateProductStatus('<%= product._id %>', true)">Block</button>
                             </form>
                             <% } else { %>
                             <form id="unblockForm<%= product._id %>" style="display:inline;">
                               <input type="hidden" name="id" value="<%= product._id %>" />
-                              <button type="button" class="btn btn-secondary" style="width: auto;" onclick="updateProductStatus('<%= product._id %>', false)">Unblock</button>
+                              <button type="button" class="btn btn-sm btn-secondary" style="width: auto;" onclick="updateProductStatus('<%= product._id %>', false)">Unblock</button>
                             </form>
                             <% } %>
                           </td>
-                          <td><a href="/admin/editProduct?id=<%= product._id %>" class="btn btn-primary">Edit</a></td>
+                          <td><a href="/admin/editProduct?id=<%= product._id %>" class="btn btn-sm btn-primary">Edit</a></td>
                         </tr>
                         <% }); %>
                       </tbody>

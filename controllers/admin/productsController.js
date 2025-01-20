@@ -171,40 +171,73 @@ const getAllProducts = async (req, res) => {
 const addProductOffer = async (req, res) => {
     try {
         const { productId, percentage } = req.body;
-        const findProduct = await Product.findOne({ _id: productId });
-        const findCategory = await Category.findOne({ _id: findProduct.category });
 
-        if (findCategory.categoryOffer > percentage) {
-            return res.json({ status: false, message: 'This product category already have an offer' });
+        const findProduct = await Product.findOne({ _id: productId });
+        if (!findProduct) {
+            return res.json({ status: false, message: 'Product not found' });
         }
 
-        findProduct.salePrice = findProduct.regularPrice - Math.floor(findProduct.regularPrice * (percentage / 100));
+        const findCategory = await Category.findOne({ _id: findProduct.category });
+        if (!findCategory) {
+            return res.json({ status: false, message: 'Category not found' });
+        }
+
+        let salePrice = findProduct.regularPrice;
+
+        if (findCategory.categoryOffer > 0) {
+            salePrice -= Math.floor(salePrice * (findCategory.categoryOffer / 100));
+        }
+
+        if (percentage > 0 && percentage <= 100) {
+            salePrice -= Math.floor(salePrice * (percentage / 100));
+        } else {
+            return res.json({ status: false, message: 'Invalid product offer percentage' });
+        }
+
+        findProduct.salePrice = salePrice;
         findProduct.productOffer = parseInt(percentage);
         await findProduct.save();
-        findCategory.categoryOffer = 0;
-        await findCategory.save();
-        res.json({ status: true })
+
+        res.json({ status: true, message: 'Product offer applied successfully' });
     } catch (error) {
-        console.error('Error adding offer product:', error);
+        console.error('Error adding product offer:', error);
         res.redirect('/admin/error-page');
     }
 };
+
 
 const removeProductOffer = async (req, res) => {
     try {
         const { productId } = req.body;
+
         const findProduct = await Product.findOne({ _id: productId });
-        const percentage = findProduct.productOffer;
-        findProduct.salePrice = findProduct.regularPrice + Math.floor(findProduct.regularPrice * (percentage / 100));
+        if (!findProduct) {
+            return res.json({ status: false, message: 'Product not found' });
+        }
+
+        const findCategory = await Category.findById(findProduct.category);
+        if (!findCategory) {
+            return res.json({ status: false, message: 'Category not found' });
+        }
+
+        let salePrice = findProduct.regularPrice;
+
+        if (findCategory.categoryOffer > 0) {
+            salePrice -= Math.floor(salePrice * (findCategory.categoryOffer / 100));
+        }
+
+        findProduct.salePrice = salePrice;
         findProduct.productOffer = 0;
+
         await findProduct.save();
-        res.json({ status: true });
+
+        res.json({ status: true, message: 'Product offer removed successfully' });
     } catch (error) {
         console.error('Error removing offer product:', error);
         res.redirect('/admin/error-page');
     }
-
 };
+
 
 const blockProduct = async (req, res) => {
     try {
@@ -236,7 +269,7 @@ const getEditProduct = async (req, res) => {
         const category = await Category.find({});
         const brand = await Brand.find({});
         const categoryMap = category.reduce((acc, cat) => {
-            acc[cat._id] = cat.name; // Map category ID to its name
+            acc[cat._id] = cat.name;
             return acc;
         }, {});
         const successMessage = req.flash('success');
