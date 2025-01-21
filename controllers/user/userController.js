@@ -314,7 +314,7 @@ const filterProduct = async (req, res) => {
         console.log('Query Parameters:', { category, brand });
 
         const findCategory = category ? await Category.findOne({ _id: category }) : null;
-        const findBrand = brand ? await Brand.findOne({ brandName: brand }) : null;
+        const findBrand = brand ? await Brand.findOne({ _id: brand }) : null;
 
         console.log('Found Category:', findCategory);
         console.log('Found Brand:', findBrand);
@@ -322,6 +322,7 @@ const filterProduct = async (req, res) => {
         const brands = await Brand.find({}).lean();
 
         const query = { isBlocked: false };
+
         if (findCategory) {
             query.category = findCategory._id;
         }
@@ -385,6 +386,8 @@ const filterProduct = async (req, res) => {
         res.redirect('pageNotFound');
     }
 };
+
+
 
 
 
