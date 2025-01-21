@@ -50,8 +50,8 @@
           <% for(let i = 0; i < products.length; i++) { %>
           <div class="col-lg-4 col-md-6 col-sm-6">
             <div class="product__item <%= products[i].onSale ? 'sale' : '' %>">
-              <div class="product__item__pic" style="background-image: url('<%= products[i].productImage[0] %>');">
-                <span class="label"><%= products[i].productOffer>5 ? 'Sale' : '' %></span>
+              <div onclick="redirectToProduct('<%= products[i]._id %>')" class="product__item__pic" style="background-image: url('<%= products[i].productImage[0] %>');">
+                <span class="label"><%= products[i].productOffer > 5 ? 'Sale' : '' %></span>
                 <ul class="product__hover">
                   <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
                   <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
@@ -60,7 +60,11 @@
               </div>
               <div class="product__item__text">
                 <h6><%= products[i].productName %></h6>
+                <% if (products[i].quantity <= 0) { %>
+                <a class="text-danger font-weight-bold">Out of Stock</a>
+                <% } else { %>
                 <a href="#" class="add-cart">+ Add To Cart</a>
+                <% } %>
                 <div class="rating">
                   <% for(let j = 0; j < products[i].rating; j++) { %>
                   <i class="fa fa-star"></i>
@@ -70,7 +74,8 @@
                   <% } %>
                 </div>
                 <h5>
-                  ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(products[i].salePrice).replace('₹', '').trim() %></h5>
+                  ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(products[i].salePrice).replace('₹', '').trim() %>
+                </h5>
                 <h6><span class="text-muted" style="text-decoration: line-through; font-size: 0.9em;">
                     ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(products[i].regularPrice).replace('₹', '').trim() %>
                   </span></h6>
@@ -79,7 +84,6 @@
           </div>
           <% } %>
         </div>
-
         <div class="row">
           <div class="col-lg-12">
             <div class="product__pagination">
@@ -93,7 +97,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -137,6 +140,12 @@
 <script src="js/mixitup.min.js"></script>
 <script src="js/owl.carousel.min.js"></script>
 <script src="js/main.js"></script>
+<script>
+  function redirectToProduct(productId) {
+    window.location.href = `/productDetails?id=${productId}`;
+  }
+</script>
+
 </body>
 
 </html>

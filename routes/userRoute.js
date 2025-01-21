@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user/userController');
+const productcontroller = require('../controllers/user/productController');
 const passport = require('passport');
 const { userAuth, adminAuth } = require('../middlewares/auth')
 
@@ -31,6 +32,7 @@ router.get('/filter', userAuth, userController.filterProduct);
 router.get('/filterPrice', userAuth, userController.filterByPrice);
 router.post('/search', userAuth, userController.searchProduts);
 
-
+//Product Management
+router.get('/productDetails', userAuth, productcontroller.productDetails);
 
 module.exports = router
