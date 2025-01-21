@@ -29,6 +29,7 @@ router.get('/', userAuth, userController.loadHomePage);
 router.get('/shop', userAuth, userController.loadShopePage);
 router.get('/filter', userAuth, userController.filterProduct);
 router.get('/filterPrice', userAuth, userController.filterByPrice);
+router.post('/search', userAuth, userController.searchProduts);
 
 
 

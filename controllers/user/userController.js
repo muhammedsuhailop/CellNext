@@ -366,7 +366,7 @@ const filterProduct = async (req, res) => {
             }
         }
 
-        req.session.filterProduct = currentProduct;
+        req.session.filteredProducts = findProducts;
 
         res.render('shop', {
             user: userData,
@@ -429,7 +429,58 @@ const filterByPrice = async (req, res) => {
     }
 }
 
+const searchProduts = async (req, res) => {
+    try {
+        const user = req.session.user;
+        const userData = await User.findOne({ _id: user });
+        let search = req.body.query;
 
+        const brands = await Brand.find({}).lean();
+        const categories = await Category.find({ isListed: true }).lean();
+        const categoryIds = categories.map(category => category._id.toString());
+        const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+
+        let searchResult = [];
+        if (req.session.filteredProducts && req.session.filteredProducts.length > 0) {
+            searchResult = req.session.filteredProducts.filter(product =>
+                product.productName.toLowerCase().includes(search.toLowerCase()));
+            console.log(searchResult)
+        } else {
+            searchResult = await Product.find({
+                productName: { $regex: ".*" + search + ".*", $options: "i" },
+                isBlocked: false,
+                category: { $in: categoryIds }
+            });
+            console.log(searchResult)
+        }
+
+        searchResult.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        console.log('After if', searchResult)
+
+        let totalProducts = searchResult.length;
+
+        let itemsPerPage = 6;
+        let currentPage = parseInt(req.query.page) || 1;
+        let startIndex = (currentPage - 1) * itemsPerPage;
+        let endIndex = startIndex + itemsPerPage;
+        let totalPages = Math.ceil(totalProducts / itemsPerPage);
+        const currentProduct = searchResult.slice(startIndex, endIndex);
+
+        res.render('shop', {
+            user: userData,
+            products: currentProduct,
+            category: categories,
+            brand: brands,
+            totalPages,
+            currentPage,
+            categoriesWithIds: categoriesWithIds,
+            totalProducts: totalProducts
+        });
+    } catch (error) {
+        console.error('search error:', error);
+        res.redirect('pageNotFound');
+    }
+}
 
 module.exports = {
     loadHomePage,
@@ -444,6 +495,7 @@ module.exports = {
     logout,
     loadShopePage,
     filterProduct,
-    filterByPrice
+    filterByPrice,
+    searchProduts,
 
 }

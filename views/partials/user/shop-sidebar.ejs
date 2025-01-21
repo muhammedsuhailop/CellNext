@@ -1,8 +1,8 @@
 <div class="col-lg-3">
   <div class="shop__sidebar">
     <div class="shop__sidebar__search">
-      <form action="#">
-        <input type="text" placeholder="Search...">
+      <form action="/search" method="POST">
+        <input type="text" placeholder="Search..." name="query">
         <button type="submit"><span class="icon_search"></span></button>
       </form>
     </div>
@@ -65,7 +65,6 @@
                       { label: '₹40000.00 - ₹60000.00', gt: 40000, lt: 60000 },
                       { label: '₹60000.00+', gt: 60000, lt: 500000 } 
                     ]; 
-                  
                     priceRanges.forEach(priceRange => { 
                       const queryString = `gt=${priceRange.gt}&lt=${priceRange.lt}`; 
                     %>
