@@ -42,8 +42,7 @@
                     </div>
                     <% } %>
                   </div>
-
-                  <form action="/admin/addProduct" method="POST" enctype="multipart/form-data">
+                  <form action="/admin/addProduct" method="POST" enctype="multipart/form-data" id="addProductForm">
                     <div class="row">
                       <div class="col-md-6 mb-3">
                         <div id="category-error" class="error-message text-danger"></div>
@@ -164,7 +163,7 @@
                     </div>
                     <div class="row mb-3">
                       <div class="col-sm-10 offset-sm-2">
-                        <button type="submit" class="btn btn-primary">Add Product</button>
+                        <button type="submit" id="submitButton" class="btn btn-primary">Add Product</button>
                       </div>
                     </div>
                   </form>
@@ -216,250 +215,160 @@
       let croppedImages = {};
 
       for (let i = 1; i <= 4; i++) {
-        document.getElementById('image' + i).addEventListener('change', function(event) {
-          const file = event.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              document.getElementById('cropperImage').src = e.target.result;
-              cropperModal.show();
-              currentImageIndex = i;
+        const imageInput = document.querySelector('#addProductForm #image' + i);
+        if (imageInput) {
+          imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                document.getElementById('cropperImage').src = e.target.result;
+                cropperModal.show();
+                currentImageIndex = i;
 
-              if (cropper) {
-                cropper.destroy();
-              }
+                if (cropper) {
+                  cropper.destroy();
+                }
 
-              cropper = new Cropper(document.getElementById('cropperImage'), {
-                aspectRatio: 1,
-                viewMode: 1,
-              });
-            };
-            reader.readAsDataURL(file);
-          }
-        });
+                cropper = new Cropper(document.getElementById('cropperImage'), {
+                  aspectRatio: 1,
+                  viewMode: 1,
+                });
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        }
       }
 
       // Cropping and storing the image
-      document.getElementById('cropImage').addEventListener('click', function() {
-        const canvas = cropper.getCroppedCanvas({
-          width: 150,
-          height: 150,
-        });
-        const previewImg = document.getElementById('preview-img' + currentImageIndex);
-        const previewContainer = document.getElementById('preview-image' + currentImageIndex);
+      const cropImageButton = document.querySelector('#addProductForm #cropImage');
+      if (cropImageButton) {
+        cropImageButton.addEventListener('click', function() {
+          if (cropper) {
+            const canvas = cropper.getCroppedCanvas({
+              width: 150,
+              height: 150,
+            });
+            const previewImg = document.querySelector(`#addProductForm #preview-img${currentImageIndex}`);
+            const previewContainer = document.querySelector(`#addProductForm #preview-image${currentImageIndex}`);
 
-        canvas.toBlob(function(blob) {
-          const url = URL.createObjectURL(blob);
-          previewImg.src = url;
-          previewImg.style.display = 'block';
-          previewContainer.style.backgroundColor = 'transparent';
-          cropperModal.hide();
+            canvas.toBlob(function(blob) {
+              const url = URL.createObjectURL(blob);
+              previewImg.src = url;
+              previewImg.style.display = 'block';
+              previewContainer.style.backgroundColor = 'transparent';
+              cropperModal.hide();
 
-          croppedImages[currentImageIndex] = blob;
-        }, 'image/jpeg');
-      });
-
-      document.getElementById('submitButton').addEventListener('click', function() {
-        const formData = new FormData();
-
-        for (let index in croppedImages) {
-          const blob = croppedImages[index];
-          if (blob) {
-            formData.append('croppedImages[]', blob, `cropped-image-${index}.jpg`);
+              croppedImages[currentImageIndex] = blob;
+            }, 'image/jpeg');
           }
+        });
+      }
+
+      // Form validation and submission
+      const formElement = document.getElementById('addProductForm');
+      if (formElement) {
+        formElement.addEventListener('submit', function(event) {
+          const isValid = validateForm(formElement);
+          if (!isValid) {
+            event.preventDefault();
+          }
+        });
+      }
+
+      function validateForm(form) {
+        clearErrorMessages(form);
+        let isValid = true;
+
+        const name = form.querySelector('[name="productName"]').value.trim();
+        const description = form.querySelector('#descriptionid').value.trim();
+        const brand = form.querySelector('[name="brand"]').value.trim();
+        const category = form.querySelector('[name="category"]').value.trim();
+        const price = form.querySelector('[name="regularPrice"]').value.trim();
+        const salePrice = form.querySelector('[name="salePrice"]').value.trim();
+        const color = form.querySelector('[name="color"]').value.trim();
+        const customColor = form.querySelector('#custom-color').value.trim();
+        const quantity = form.querySelector('[name="quantity"]').value.trim();
+        const imageInputs = form.querySelectorAll('input[type="file"][name^="image"]');
+
+        if (!name) {
+          displayErrorMessage(form, 'productName-error', 'Please enter a product name.');
+          isValid = false;
+        } else if (name.length >= 59) {
+          displayErrorMessage(form, 'productName-error', 'Product name must be less than 59 characters.');
+          isValid = false;
         }
 
-        // Send the cropped images to the server
-        fetch('/admin/addProduct', {
-            method: 'POST',
-            body: formData,
-          })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log('Cropped images uploaded successfully:', data);
-          })
-          .catch((error) => {
-            console.error('Error uploading cropped images:', error);
-          });
-      });
+        if (!description) {
+          displayErrorMessage(form, 'description-error', 'Please enter a product description.');
+          isValid = false;
+        } else if (description.length >= 500) {
+          displayErrorMessage(form, 'description-error', 'Description must be less than 500 characters.');
+          isValid = false;
+        }
+
+
+        if (!category) {
+          displayErrorMessage(form, 'category-error', 'Please select a category.');
+          isValid = false;
+        }
+
+        if (!brand) {
+          displayErrorMessage(form, 'brand-error', 'Please select a brand.');
+          isValid = false;
+        }
+
+        if (!quantity || quantity <= 0) {
+          displayErrorMessage(form, 'quantity-error', 'Please enter a valid non-negative quantity.');
+          isValid = false;
+        }
+
+        if (!price || !/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) <= 0) {
+          displayErrorMessage(form, 'regularPrice-error', 'Please enter a valid non-negative price.');
+          isValid = false;
+        }
+
+        if (salePrice && parseFloat(price) < parseFloat(salePrice)) {
+          displayErrorMessage(form, 'salePrice-error', 'Regular price must be greater than sale price.');
+          isValid = false;
+        }
+
+        if (!color && !customColor) {
+          displayErrorMessage(form, 'color-error', 'Please select or enter a color.');
+          isValid = false;
+        }
+
+        let totalImagesSelected = 0;
+        imageInputs.forEach((imageInput) => {
+          totalImagesSelected += imageInput.files.length;
+        });
+
+        if (totalImagesSelected < 3) {
+          displayErrorMessage(form, 'image1-error', 'Please select at least three images.');
+          isValid = false;
+        }
+
+        return isValid;
+      }
+
+      function displayErrorMessage(form, elementId, message) {
+        const errorElement = form.querySelector(`#${elementId}`);
+        if (errorElement) {
+          errorElement.textContent = message;
+          errorElement.style.display = 'block';
+        }
+      }
+
+      function clearErrorMessages(form) {
+        const errorElements = form.querySelectorAll('.error-message');
+        errorElements.forEach((element) => {
+          element.textContent = '';
+          element.style.display = 'none';
+        });
+      }
     });
   </script>
-  <script>
-    // document.addEventListener('DOMContentLoaded', function() {
-    //   const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
-    //   let cropper;
-    //   let currentImageIndex;
-
-    //   for (let i = 1; i <= 4; i++) {
-    //     document.getElementById('image' + i).addEventListener('change', function(event) {
-    //       const file = event.target.files[0];
-    //       const previewContainer = document.getElementById('preview-image' + i);
-    //       const previewImg = document.getElementById('preview-img' + i);
-
-    //       if (file) {
-    //         const reader = new FileReader();
-    //         reader.onload = function(e) {
-    //           document.getElementById('cropperImage').src = e.target.result;
-    //           cropperModal.show();
-    //           currentImageIndex = i;
-    //           if (cropper) {
-    //             cropper.destroy();
-    //           }
-    //           cropper = new Cropper(document.getElementById('cropperImage'), {
-    //             aspectRatio: 1, // 1:1 aspect ratio
-    //             viewMode: 1,
-    //           });
-    //         };
-    //         reader.readAsDataURL(file);
-    //       }
-    //     });
-    //   }
-
-    //   document.getElementById('cropImage').addEventListener('click', function() {
-    //     const canvas = cropper.getCroppedCanvas({
-    //       width: 150,
-    //       height: 150,
-    //     });
-    //     const previewImg = document.getElementById('preview-img' + currentImageIndex);
-    //     const previewContainer = document.getElementById('preview-image' + currentImageIndex);
-
-    //     canvas.toBlob(function(blob) {
-    //       const url = URL.createObjectURL(blob);
-    //       previewImg.src = url;
-    //       previewImg.style.display = 'block';
-    //       previewContainer.style.backgroundColor = 'transparent';
-    //       cropperModal.hide();
-    //     }, 'image/jpeg');
-    //   });
-    // });
-
-    // document.addEventListener('DOMContentLoaded', function() {
-    //   for (let i = 1; i <= 4; i++) {
-    //     document.getElementById('image' + i).addEventListener('change', function(event) {
-    //       const file = event.target.files[0];
-    //       const previewImg = document.getElementById('preview-img' + i);
-    //       const previewContainer = document.getElementById('preview-image' + i);
-
-    //       if (file) {
-    //         const reader = new FileReader();
-    //         reader.onload = function(e) {
-    //           previewImg.src = e.target.result;
-    //           previewImg.style.display = 'block';
-    //           previewContainer.style.backgroundColor = 'transparent';
-    //         };
-    //         reader.readAsDataURL(file);
-    //       } else {
-    //         previewImg.src = '';
-    //         previewImg.style.display = 'none';
-    //         previewContainer.style.backgroundColor = '#f5f5f5';
-    //       }
-    //     });
-    //   }
-
-    document.getElementById('color').addEventListener('change', function() {
-      const customColorContainer = document.getElementById('custom-color-container');
-      customColorContainer.style.display = this.value === 'custom' ? 'block' : 'none';
-    });
-
-    // Bind validateForm to form submission
-    const formElement = document.querySelector('form');
-    if (formElement) {
-      formElement.onsubmit = validateForm;
-    }
-    // });
-
-    function validateForm(event) {
-      clearErrorMessages();
-
-      // Getting form values
-      const name = document.getElementsByName('productName')[0].value.trim();
-      const description = document.getElementById('descriptionid').value.trim();
-      const brand = document.getElementsByName('brand')[0].value.trim();
-      const category = document.getElementsByName('category')[0].value.trim();
-      const price = document.getElementsByName('regularPrice')[0].value.trim();
-      const salePrice = document.getElementsByName('salePrice')[0].value.trim();
-      const storageSize = document.getElementsByName('storage_size')[0].value.trim();
-      const color = document.getElementsByName('color')[0].value.trim();
-      const customColor = document.getElementById('custom-color').value.trim();
-      const quantity = document.getElementsByName('quantity')[0].value.trim();
-      const images = document.querySelectorAll('input[type="file"]');
-
-      let isValid = true;
-
-      // Individual field validation checks
-      if (name === "") {
-        displayErrorMessage('productName-error', 'Please enter a product name.');
-        isValid = false;
-      }
-
-      if (description === "") {
-        displayErrorMessage('description-error', 'Please enter a product description.');
-        isValid = false;
-      }
-
-      if (category === "") {
-        displayErrorMessage('category-error', 'Please select a category.');
-        isValid = false;
-      }
-      if (brand === "") {
-        displayErrorMessage('brand-error', 'Please select a brand.');
-        isValid = false;
-      }
-
-      if (quantity <= 0 || quantity === "") {
-        displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-        isValid = false;
-      }
-
-      if (price === "" || !/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) <= 0) {
-        displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-        isValid = false;
-      }
-
-      if (salePrice !== "" && parseFloat(price) < parseFloat(salePrice)) {
-        displayErrorMessage('salePrice-error', 'Regular price must be greater than sale price.');
-        isValid = false;
-      }
-
-      if (color === "" && customColor === "") {
-        displayErrorMessage('color-error', 'Please select or enter a color.');
-        isValid = false;
-      }
-
-      let totalImagesSelected = 0;
-      const imageInputs = document.querySelectorAll('input[type="file"][name^="image"]');
-
-      imageInputs.forEach(function(imageInput) {
-        totalImagesSelected += imageInput.files.length;
-      });
-
-      if (totalImagesSelected < 3) {
-        displayErrorMessage('image1-error', 'Please select at least three images.');
-        isValid = false;
-      }
-
-      if (!isValid) {
-        event.preventDefault();
-      }
-
-      return isValid;
-    }
-
-    function displayErrorMessage(elementId, message) {
-      const errorElement = document.getElementById(elementId);
-      errorElement.textContent = message;
-      errorElement.style.display = "block";
-    }
-
-    function clearErrorMessages() {
-      const errorElements = document.getElementsByClassName('error-message');
-      Array.from(errorElements).forEach(element => {
-        element.textContent = '';
-        element.style.display = 'none';
-      });
-    }
-  </script>
-
 
 </body>
 
