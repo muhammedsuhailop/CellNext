@@ -139,7 +139,7 @@ const signup = async (req, res) => {
 
         res.status(200).json({ message: 'OTP sent successfully' });
     } catch (error) {
-        console.error('Error during user signup', error.message); // Log error message
+        console.error('Error during user signup', error.message);
         res.status(500).json({ message: 'Server Error: ' + error.message });
     }
 };
@@ -162,7 +162,7 @@ const resendOtp = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Failed to resend OTP. Please try again.' });
         }
     } catch (error) {
-        console.error('Error during resend OTP', error.message); // Log error message
+        console.error('Error during resend OTP', error.message);
         res.status(500).json({ success: false, message: 'Server Error: ' + error.message });
     }
 };
@@ -246,6 +246,14 @@ const login = async (req, res) => {
         console.error('login error', error);
         return res.render('login', { message: 'login failed. Please try again later' });
     }
+}
+
+const googleLogin = async (req, res) => {
+    if (req.user) {
+        req.session.user = req.user._id;
+        console.log('req.session.user', req.session.user);
+    }
+    res.redirect('/')
 }
 
 const logout = async (req, res) => {
@@ -492,6 +500,7 @@ module.exports = {
     resendOtp,
     loadLoginPage,
     login,
+    googleLogin,
     logout,
     loadShopePage,
     filterProduct,

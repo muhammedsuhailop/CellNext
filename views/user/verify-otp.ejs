@@ -39,7 +39,7 @@
         </div>
         <div class="text-center">
           <div id="otpTimer" class="otp-timer">
-            <span id="timerValue">30</span>
+            <span id="timerValue">60</span>
           </div>
       </form>
       <form id="resendOtpForm" onsubmit="return resendOtp(event)">
@@ -47,6 +47,9 @@
           <button type="submit" id="resendOtpBtn" class="btn " style="display:none;">Resend OTP</button>
         </div>
       </form>
+      <div class="item submit">
+        <span class="ac">Already have an Account? <a href="/login">Login</a></span>
+      </div>
     </div>
   </div>
 
@@ -55,7 +58,7 @@
   <script>
     document.getElementById("otp").focus();
 
-    let timer = 30;
+    let timer = 60;
     let timerInterval;
 
     function startTimer() {
@@ -147,7 +150,7 @@
             document.getElementById('otp').value = ''
             document.getElementById('resendOtpBtn').style.display = 'none';
             document.getElementById('otpTimer').style.display = 'block';
-            timer = 30;
+            timer = 60;
             startTimer();
           } else {
             Swal.fire({
