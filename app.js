@@ -11,10 +11,12 @@ const db = require('./config/db')
 const userRouter = require('./routes/userRoute');
 const adminRouter = require('./routes/adminRoute');
 const { Session } = require('inspector/promises');
+const noCache = require('./middlewares/noCache');
 db();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(noCache);
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,

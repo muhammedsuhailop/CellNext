@@ -4,11 +4,16 @@ const bcrypt = require('bcrypt');
 
 
 const loadLogin = async (req, res) => {
-
-    if (req.session.admin) {
-        return res.redirect('/admin/');
+    try {
+        const message = req.flash('message')[0];
+        if (req.session.admin) {
+            return res.redirect('/admin/');
+        }
+        res.render('admin-login', { message: message })
+    } catch (error) {
+        console.error('Admin login error', error);
+        return res.redirect('/error-page')
     }
-    res.render('admin-login', { message: null })
 }
 
 const login = async (req, res) => {
@@ -18,16 +23,19 @@ const login = async (req, res) => {
         const admin = await User.findOne({ isAdmin: true, email: email });
 
         if (!admin) {
-            return res.render('admin-login', { message: 'Admin not found' });
+            req.flash('message', 'Admin not found');
+            return res.redirect('/admin/login');
         }
         if (admin.isBlocked) {
-            return res.render('admin-login', { message: 'Admin is blocked' });
+            req.flash('message', 'Admin is blocked');
+            return res.redirect('/admin/login');
         }
 
         const passwordMatch = await bcrypt.compare(password, admin.password);
 
         if (!passwordMatch) {
-            return res.render('admin-login', { message: 'Incorrect Password' });
+            req.flash('message', 'Incorrect Password');
+            return res.redirect('/admin/login');
         }
 
         req.session.admin = true

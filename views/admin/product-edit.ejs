@@ -216,7 +216,7 @@
       const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
       let cropper;
       let currentImageIndex;
-      let croppedImages = {}; // Store cropped images for later submission
+      let croppedImages = {}; 
 
       const productId = document.getElementById('productId').value;
 
@@ -258,7 +258,7 @@
 
         if (removeButton) {
           removeButton.addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault(); 
             const index = this.getAttribute('data-index');
             console.log(`Remove button clicked for image ${index}`);
 
@@ -284,7 +284,6 @@
         }
       }
 
-      // Cropping and storing the image
       document.getElementById('cropImage').addEventListener('click', function() {
         const canvas = cropper.getCroppedCanvas({
           width: 150,
@@ -296,16 +295,13 @@
           updateImagePreview(currentImageIndex, url, 'block');
           cropperModal.hide();
 
-          // Store the cropped image for later use
           croppedImages[currentImageIndex] = blob;
         }, 'image/jpeg');
       });
 
-      // Submit cropped images when the submit button is clicked
       document.getElementById('submitButton').addEventListener('click', function() {
         const formData = new FormData();
 
-        // Append cropped images to the FormData
         for (let index in croppedImages) {
           const blob = croppedImages[index];
           if (blob) {
@@ -313,7 +309,6 @@
           }
         }
 
-        // Send the cropped images to the server
         fetch(`/admin/editProduct/${productId}`, {
             method: 'POST',
             body: formData,
@@ -321,7 +316,6 @@
           .then((response) => response.json())
           .then((data) => {
             console.log('Cropped images uploaded successfully:', data);
-            // Optionally reset the form or handle further actions after upload
           })
           .catch((error) => {
             console.error('Error uploading cropped images:', error);
@@ -336,7 +330,6 @@
       customColorContainer.style.display = this.value === 'custom' ? 'block' : 'none';
     });
 
-    // Bind validateForm to form submission
     const formElement = document.querySelector('form');
     if (formElement) {
       formElement.onsubmit = validateForm;
@@ -361,7 +354,6 @@
 
       let isValid = true;
 
-      // Individual field validation checks
       if (name === "") {
         displayErrorMessage('productName-error', 'Please enter a product name.');
         isValid = false;
@@ -376,13 +368,12 @@
         displayErrorMessage('category-error', 'Please select a category.');
         isValid = false;
       }
-      // Comment as brand not implemented
-      //   if (brand === "") {
-      //     displayErrorMessage('brand-error', 'Please select a brand.');
-      //     isValid = false;
-      //   }
+      if (brand === "") {
+        displayErrorMessage('brand-error', 'Please select a brand.');
+        isValid = false;
+      }
 
-      if (quantity <= 0 || quantity === "") {
+      if (quantity < 0 || quantity === "") {
         displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
         isValid = false;
       }
@@ -402,18 +393,12 @@
         isValid = false;
       }
 
-      // Image validation: Check if at least 3 images are selected
       let totalImagesSelected = 0;
-      const imageInputs = document.querySelectorAll('input[type="file"][name^="image"]'); // Select all image file inputs
+      const imageInputs = document.querySelectorAll('input[type="file"][name^="image"]'); 
 
       imageInputs.forEach(function(imageInput) {
-        totalImagesSelected += imageInput.files.length; // Count selected files
+        totalImagesSelected += imageInput.files.length; 
       });
-
-      // if (totalImagesSelected < 3) {
-      //   displayErrorMessage('image1-error', 'Please select at least three images.');
-      //   isValid = false;
-      // }
 
       if (!isValid) {
         event.preventDefault();

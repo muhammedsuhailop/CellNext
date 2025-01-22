@@ -28,7 +28,6 @@
 
       <form id="verifyOtp" action="/verify-otp" onsubmit="return validateOTPForm(event)">
 
-
         <div class="item-otp" id="otpSection">
           <label for="otp">OTP</label>
           <input class="input-otp" type="text" id="otp" placeholder="Enter OTP" maxlength="4" name="otp" required>
@@ -94,13 +93,12 @@
         return false;
       }
 
-      // Perform the AJAX request
       $.ajax({
         type: 'POST',
         url: '/verify-otp',
         data: JSON.stringify({
           otp
-        }), // Send OTP as JSON
+        }),
         contentType: 'application/json',
         success: function(response) {
           if (response.success) {
@@ -135,7 +133,6 @@
     function resendOtp(event) {
       event.preventDefault();
 
-      // Perform the AJAX request to resend OTP
       $.ajax({
         type: 'POST',
         url: '/resend-otp',
@@ -170,6 +167,14 @@
       });
 
       return false;
+    }
+  </script>
+  <script>
+    window.onload = function() {
+      if (window.performance && window.performance.navigation.type == window.performance.navigation.TYPE_BACK_FORWARD) {
+        document.getElementById('verifyOtp').reset();
+        window.location.reload();
+      }
     }
   </script>
 

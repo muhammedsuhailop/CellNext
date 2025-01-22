@@ -45,6 +45,7 @@
                       <label class="col-md-2 col-form-label" for="basic-default-message">Description</label>
                       <div class="col-md-8">
                         <textarea id="basic-default-message" class="form-control" placeholder="Enter category description" name="description"><%= category.description %></textarea>
+                        <div class="text-danger error-message" id="description-error" style="display: none;"></div>
                       </div>
                       <div class="col-md-2 text-end mt-1">
                         <button type="button" id="edit-category-btn" class="btn btn-primary w-100">Edit Category</button>
@@ -96,12 +97,37 @@
       const name = document.getElementById('basic-default-name').value.trim();
       const description = document.getElementById('basic-default-message').value.trim();
 
-      console.log(`Category ID: ${categoryId}, Name: ${name}, Description: ${description}`);
-
       document.getElementById('name-error').style.display = 'none';
       document.getElementById('name-error').textContent = '';
+      document.getElementById('description-error').style.display = 'none';
+      document.getElementById('description-error').textContent = '';
 
-      // AJAX request to edit the category
+      let isValid = true;
+      const nameRegex = /^[A-Za-z\s\_\-\(\)]*$/;
+      if (!name) {
+        isValid = false;
+        document.getElementById('name-error').style.display = 'block';
+        document.getElementById('name-error').textContent = 'Name is required.';
+      } else if (!nameRegex.test(name)) {
+        isValid = false;
+        document.getElementById('name-error').style.display = 'block';
+        document.getElementById('name-error').textContent = 'Name can only contain alphabets, spaces, and characters (_,-,(),)';
+      } else if (name.length > 50) {
+        isValid = false;
+        document.getElementById('name-error').style.display = 'block';
+        document.getElementById('name-error').textContent = 'Name cannot exceed 50 characters.';
+      }
+
+      if (!description) {
+        isValid = false;
+        document.getElementById('description-error').style.display = 'block';
+        document.getElementById('description-error').textContent = 'Description is required.';
+      }
+
+      if (!isValid) {
+        return;
+      }
+
       fetch(`/admin/editCategory?id=${categoryId}`, {
           method: 'PUT',
           headers: {
@@ -159,8 +185,8 @@
 
     document.getElementById('edit-category-form').addEventListener('keypress', function(event) {
       if (event.key === 'Enter') {
-        event.preventDefault(); 
-        document.getElementById('edit-category-btn').click(); 
+        event.preventDefault();
+        document.getElementById('edit-category-btn').click();
       }
     });
   </script>

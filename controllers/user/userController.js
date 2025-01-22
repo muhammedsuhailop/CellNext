@@ -208,8 +208,9 @@ const verifyOtp = async (req, res) => {
 
 const loadLoginPage = async (req, res) => {
     try {
+        const message = req.flash('message')[0];
         if (!req.session.user) {
-            return res.render('login');
+            return res.render('login', { message: message });
         } else {
             res.redirect('/');
         }
@@ -227,16 +228,19 @@ const login = async (req, res) => {
         const findUser = await User.findOne({ isAdmin: 0, email: email });
 
         if (!findUser) {
-            return res.render('login', { message: 'User not found' });
+            req.flash('message', 'User not found');
+            return res.redirect('/login');
         }
         if (findUser.isBlocked) {
-            return res.render('login', { message: 'User is blocked by admin' });
+            req.flash('message', 'This account is blocked');
+            return res.redirect('/login');
         }
 
         const passwordMatch = await bcrypt.compare(password, findUser.password);
 
         if (!passwordMatch) {
-            return res.render('login', { message: 'Incorrect Password' });
+            req.flash('message', 'Incorrect Password');
+            return res.redirect('/login');
         }
 
         req.session.user = findUser._id;
