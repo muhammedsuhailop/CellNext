@@ -36,26 +36,30 @@
             <% } %>
           </ul>
         </div>
-        <div class="col-lg-6 col-md-9">
+        <div class="col-lg-6 col-md-9 position-relative">
           <div class="tab-content">
             <% if (product.productImage && product.productImage.length > 0) { %>
-              <% product.productImage.forEach((image, index) => { %>
-                <div class="tab-pane <%= index === 0 ? 'active' : '' %>" id="tabs-<%= index + 1 %>" role="tabpanel">
-                  <div class="product__details__pic__item">
-                    <img src="<%= image %>" alt="Product Image" class="zoom-image" data-zoom-image="<%= image %>">
-                  </div>
-                </div>
-              <% }); %>
-            <% } else { %>
-              <div class="tab-pane active" id="tabs-1" role="tabpanel">
-                <div class="product__details__pic__item">
-                  <img src="/img/default-product.png" alt="Default Product Image" class="zoom-image" data-zoom-image="/img/default-product.png">
-                </div>
+            <% product.productImage.forEach((image, index) => { %>
+            <div class="tab-pane <%= index === 0 ? 'active' : '' %>" id="tabs-<%= index + 1 %>" role="tabpanel" data-index="<%= index %>">
+              <div class="product__details__pic__item text-center">
+                <img src="<%= image %>" alt="Product Image" class="zoom-image" data-zoom-image="<%= image %>">
               </div>
+            </div>
+            <% }); %>
+            <% } else { %>
+            <div class="tab-pane active" id="tabs-1" role="tabpanel">
+              <div class="product__details__pic__item text-center">
+                <img src="/img/default-product.png" alt="Default Product Image" class="zoom-image" data-zoom-image="/img/default-product.png">
+              </div>
+            </div>
             <% } %>
           </div>
+
+          <button id="prev-image" class="btn btn-secondary image-nav prev-image">❮</button>
+          <button id="next-image" class="btn btn-secondary image-nav next-image">❯</button>
         </div>
       </div>
+
     </div>
   </div>
   <div class="product__details__content">
@@ -389,34 +393,69 @@
 
 <!-- Initialize ElevateZoom with lens effect -->
 <script>
-  $(document).ready(function () {
+  $(document).ready(function() {
     function applyZoom() {
-      var lensSize = 300;  
+      var lensSize = 300;
 
       if ($(window).width() < 768) {
-        lensSize = 200;  
+        lensSize = 200;
       }
 
       $('.zoom-image').elevateZoom({
-        zoomType: 'lens',       
-        lensShape: 'round',     
-        lensSize: lensSize,     
-        borderSize: 3,          
-        borderColor: '#ccc',    
-        zoomWindowWidth: 400,   
-        zoomWindowHeight: 400,  
-        zoomWindowPosition: 1,  
-        scrollZoom: true,       
-        zoomWindowFadeIn: 500,  
-        zoomWindowFadeOut: 500, 
+        zoomType: 'lens',
+        lensShape: 'round',
+        lensSize: lensSize,
+        borderSize: 3,
+        borderColor: '#ccc',
+        zoomWindowWidth: 400,
+        zoomWindowHeight: 400,
+        zoomWindowPosition: 1,
+        scrollZoom: true,
+        zoomWindowFadeIn: 500,
+        zoomWindowFadeOut: 500,
       });
     }
 
     applyZoom();
 
-    $(window).resize(function () {
+    $(window).resize(function() {
       applyZoom();
     });
   });
 </script>
 
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabContentContainer = document.querySelector('.tab-content');
+    const tabs = Array.from(tabContentContainer.querySelectorAll('.tab-pane'));
+    const prevButton = document.getElementById('prev-image');
+    const nextButton = document.getElementById('next-image');
+
+    if (!tabs.length) {
+      console.error('No image tabs found.');
+      return;
+    }
+
+    let currentIndex = 0;
+
+    const updateActiveTab = () => {
+      tabs.forEach((tab, i) => {
+        tab.classList.toggle('active', i === currentIndex);
+      });
+    };
+
+    prevButton.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      updateActiveTab();
+    });
+
+    nextButton.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % tabs.length;
+      updateActiveTab();
+    });
+
+    updateActiveTab();
+  });
+  
+</script>

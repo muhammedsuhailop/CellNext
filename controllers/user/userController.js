@@ -267,7 +267,7 @@ const logout = async (req, res) => {
                 console.error('Error destroying session:', err);
                 return res.redirect('pageNotFound');
             }
-            return res.redirect('/login');
+            return res.redirect('/');
         });
     } catch (error) {
         console.error('Logout error:', error);
