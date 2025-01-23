@@ -284,9 +284,13 @@ const loadShopePage = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 9;
         const skip = (page - 1) * limit;
+
+        const blockedBrandNames = await Brand.find({ isBlocked: true })
+        const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
         const products = await Product.find({
             isBlocked: false,
-            category: { $in: categoryIds }
+            category: { $in: categoryIds },
+            brand: { $nin: blockedBrandList }
         })
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -324,6 +328,8 @@ const filterProduct = async (req, res) => {
         const brand = req.query.brand;
 
         console.log('Query Parameters:', { category, brand });
+        const blockedBrandNames = await Brand.find({ isBlocked: true }).select('brandName');
+        const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
 
         const findCategory = category ? await Category.findOne({ _id: category }) : null;
         const findBrand = brand ? await Brand.findOne({ _id: brand }) : null;
@@ -333,7 +339,7 @@ const filterProduct = async (req, res) => {
 
         const brands = await Brand.find({}).lean();
 
-        const query = { isBlocked: false };
+        const query = { isBlocked: false, brand: { $nin: blockedBrandList } };
 
         if (findCategory) {
             query.category = findCategory._id;
@@ -406,11 +412,14 @@ const filterByPrice = async (req, res) => {
         const brands = await Brand.find({}).lean();
         const categories = await Category.find({ isListed: true }).lean();
         const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+        const blockedBrandNames = await Brand.find({ isBlocked: true }).select('brandName');
+        const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
 
 
         let findProducts = await Product.find({
             salePrice: { $gt: req.query.gt, $lt: req.query.lt },
             isBlocked: false,
+            brand: { $nin: blockedBrandList }
         }).lean();
 
         findProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -451,6 +460,8 @@ const searchProduts = async (req, res) => {
         const categories = await Category.find({ isListed: true }).lean();
         const categoryIds = categories.map(category => category._id.toString());
         const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+        const blockedBrandNames = await Brand.find({ isBlocked: true }).select('brandName');
+        const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
 
         let searchResult = [];
         if (req.session.filteredProducts && req.session.filteredProducts.length > 0) {
@@ -461,13 +472,13 @@ const searchProduts = async (req, res) => {
             searchResult = await Product.find({
                 productName: { $regex: ".*" + search + ".*", $options: "i" },
                 isBlocked: false,
-                category: { $in: categoryIds }
+                category: { $in: categoryIds },
+                brand: { $nin: blockedBrandList }
             });
             console.log(searchResult)
         }
 
         searchResult.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        console.log('After if', searchResult)
 
         let totalProducts = searchResult.length;
 

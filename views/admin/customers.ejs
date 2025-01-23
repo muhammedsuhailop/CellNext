@@ -60,16 +60,15 @@
                           </button>
                           <div class="dropdown-menu">
                             <% if (data[i].isBlocked===false) { %>
-                            <a href="#" class="dropdown-item" onclick="blockUser('<%= data[i]._id %>')">
+                            <a href="#" class="dropdown-item" onclick="updateUserStatus('<%= data[i]._id %>', 'block')">
                               <i class='bx bxs-lock me-1'></i> Block
                             </a>
                             <% } else { %>
-                            <a href="#" class="dropdown-item" onclick="unblockUser('<%= data[i]._id %>')">
+                            <a href="#" class="dropdown-item" onclick="updateUserStatus('<%= data[i]._id %>', 'unblock')">
                               <i class='bx bxs-lock-open me-1'></i> Unblock
                             </a>
                             <% } %>
-                            <!-- <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-edit-alt me-1"></i> Block</a> -->
-                            <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-trash me-1"></i> Delete</a>
+                            <a class="dropdown-item" href="#"><i class="bx bx-trash me-1"></i> Delete</a>
                           </div>
                         </div>
                       </td>
@@ -145,46 +144,47 @@
   <!-- Place this tag in your head or just before your close body tag. -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <script>
-    async function unblockUser(userId) {
-      const {
-        isConfirmed
-      } = await Swal.fire({
+    async function updateUserStatus(userId, action) {
+      const endpoint = action === 'block' ? '/admin/users/block-user' : '/admin/users/unblock-user';
+      const confirmationText = action === 'block' ? 'Do you want to block this user?' : 'Do you want to unblock this user?';
+      const successText = action === 'block' ? 'User has been successfully blocked.' : 'User has been successfully unblocked.';
+      const failureText = action === 'block' ? 'Failed to block the user. Please try again.' : 'Failed to unblock the user. Please try again.';
+  
+      const { isConfirmed } = await Swal.fire({
         title: 'Are you sure?',
-        text: 'Do you want to unblock this user?',
+        text: confirmationText,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Yes, unblock!',
+        confirmButtonText: action === 'block' ? 'Yes, block!' : 'Yes, unblock!',
         cancelButtonText: 'No, cancel!',
       });
-
-      if (!isConfirmed) return;
-
+  
+      if (!isConfirmed) return; 
+  
       try {
-        const response = await fetch('/admin/users/unblock-user', {
+        const response = await fetch(endpoint, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            id: userId
-          })
+          body: JSON.stringify({ id: userId }),
         });
-
+  
         if (response.ok) {
           Swal.fire({
             title: 'Success!',
-            text: 'User unblocked successfully!',
+            text: successText,
             icon: 'success',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
           }).then(() => {
-            location.reload();
+            location.reload(); 
           });
         } else {
           Swal.fire({
             title: 'Failed!',
-            text: 'Failed to unblock the user. Please try again.',
+            text: failureText,
             icon: 'error',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
           });
         }
       } catch (error) {
@@ -193,70 +193,12 @@
           title: 'Error!',
           text: 'An error occurred. Please try again.',
           icon: 'error',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
         });
       }
     }
   </script>
-  <script>
-    async function blockUser(userId) {
-      // SweetAlert2 confirmation before blocking the user
-      const {
-        isConfirmed
-      } = await Swal.fire({
-        title: 'Are you sure?',
-        text: 'Do you want to block this user?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, block!',
-        cancelButtonText: 'No, cancel!',
-      });
-
-      if (!isConfirmed) return; // Exit if the user cancels the action
-
-      try {
-        // Sending the PATCH request to block the user
-        const response = await fetch('/admin/users/block-user', {
-          method: 'PATCH', // Use PATCH for blocking the user
-          headers: {
-            'Content-Type': 'application/json', // Send data as JSON
-          },
-          body: JSON.stringify({
-            id: userId
-          }) // Send the user ID to the server
-        });
-
-        if (response.ok) {
-          // SweetAlert2 success message
-          Swal.fire({
-            title: 'Blocked!',
-            text: 'User has been successfully blocked.',
-            icon: 'success',
-            confirmButtonText: 'OK'
-          }).then(() => {
-            location.reload(); // Reload the page to reflect the changes
-          });
-        } else {
-          // Show error if the request fails
-          Swal.fire({
-            title: 'Failed!',
-            text: 'Failed to block the user. Please try again.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        // Show error if there's an exception
-        Swal.fire({
-          title: 'Error!',
-          text: 'An error occurred while blocking the user. Please try again.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-      }
-    }
-  </script>
+  
 </body>
 
 </html>

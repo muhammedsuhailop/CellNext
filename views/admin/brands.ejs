@@ -63,13 +63,13 @@
                         <!-- Unblock Form using PATCH -->
                         <form id="unblockForm<%= brand._id %>" style="display:inline;">
                           <input type="hidden" name="id" value="<%= brand._id %>" />
-                          <button type="button" class="btn btn-sm btn-warning" style="width: 65px;" onclick="updateStatus('<%= brand._id %>', false)">Unblock</button>
+                          <button type="button" class="btn btn-sm btn-success" style="width: 65px;" onclick="updateStatus('<%= brand._id %>', false)">Unblock</button>
                         </form>
                         <% } else { %>
                         <!-- Block Form using PATCH -->
                         <form id="blockForm<%= brand._id %>" style="display:inline;">
                           <input type="hidden" name="id" value="<%= brand._id %>" />
-                          <button type="button" class="btn btn-sm btn-success" style="width: 65px;" onclick="updateStatus('<%= brand._id %>', true)">Block</button>
+                          <button type="button" class="btn btn-sm btn-warning" style="width: 65px;" onclick="updateStatus('<%= brand._id %>', true)">Block</button>
                         </form>
                         <% } %>
                       </td>
