@@ -42,7 +42,12 @@
         <div id="passwordError" class="error-message"></div>
         <div class="item">
           <label for="password">Password</label>
-          <input class="input" type="password" id="password" placeholder="Enter your password" name="password">
+          <div class=" position-relative">
+            <input class="input" type="password" id="password" placeholder="Enter your password" name="password">
+            <button type="button" class="btn  position-absolute top-50 end-0 translate-middle-y mx-2" id="togglePassword">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
         </div>
         <div id="confirmPasswordError" class="error-message"></div>
         <div class="item">
@@ -73,6 +78,16 @@
         window.location.reload();
       }
     }
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('password');
+
+    togglePassword.addEventListener('click', function() {
+      const type = passwordField.type === 'password' ? 'text' : 'password';
+      passwordField.type = type;
+
+      this.querySelector('i').classList.toggle('bi-eye');
+      this.querySelector('i').classList.toggle('bi-eye-slash');
+    });
   </script>
 </body>
 
