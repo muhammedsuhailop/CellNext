@@ -41,9 +41,13 @@ function checkFields() {
     } else {
         showError("phone", "");
     }
-
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
     if (!password.value.trim()) {
         showError("password", "Password is required");
+        isValid = false;
+    } else if (!passwordRegex.test(password.value)) {
+        console.log(password.value)
+        showError("password", "Password must be at least 6 characters, include uppercase, lowercase, a number, and a special character");
         isValid = false;
     } else {
         showError("password", "");
@@ -70,7 +74,10 @@ sendOtpBtn.addEventListener("click", async (e) => {
     if (!checkFields()) return;
 
     sendOtpBtn.disabled = true;
-    sendOtpBtn.textContent = "Sending OTP...";
+    sendOtpBtn.innerHTML = `
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    <span class="ms-2">Sending OTP...</span>
+  `;
 
     const formData = {
         name: fullName.value.trim(),
@@ -90,7 +97,6 @@ sendOtpBtn.addEventListener("click", async (e) => {
         const data = await response.json();
         console.log('Response Data:', data);
 
-        // Handle server-side validation errors
         if (!response.ok) {
             if (data.errorCode === "E110") {
                 showError("email", data.message);
@@ -105,7 +111,6 @@ sendOtpBtn.addEventListener("click", async (e) => {
             return;
         }
 
-        // alert(data.message); 
         window.location.href = "/verify-otp";
     } catch (error) {
         console.error("Signup Error:", error);

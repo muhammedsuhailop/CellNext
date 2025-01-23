@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
 
-button, input {
+button,
+input {
     border: none;
     outline: none;
 }
@@ -129,7 +130,7 @@ input:focus::placeholder {
     color: #b9b7bd;
 }
 
-.error-message{
+.error-message {
     color: #ff0000;
     font-size: 0.85rem;
 }
@@ -182,7 +183,20 @@ input:focus::placeholder {
     margin: 10px 0 20px;
 }
 
+.container h6 {
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid #868b8e;
+    line-height: 0.1em;
+    margin: 10px 0 20px;
+}
+
 .container h2 span {
+    background-color: #eeede7;
+    padding: 0 10px;
+}
+
+.container h6 span {
     background-color: #eeede7;
     padding: 0 10px;
 }
@@ -301,22 +315,22 @@ input:focus::placeholder {
     background: #f2f2f2;
     border: 2px solid #ddd;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
+}
 
-  #timerValue {
+#timerValue {
     display: block;
     font-size: 24px;
     font-weight: bold;
     color: #333;
     line-height: 60px;
-  }
+}
 
-  #timerValue.expired {
+#timerValue.expired {
     font-size: 14px;
     color: red;
-  }
+}
 
-  .button-like-anchor {
+.button-like-anchor {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -326,9 +340,9 @@ input:focus::placeholder {
     width: 100%;
     background-color: #e7d2cc;
     font-size: 18px;
-    text-decoration: none; 
-    color: #000; 
-  }
+    text-decoration: none;
+    color: #000;
+}
 
 .button-like-anchor:hover {
     background-color: #b9b7bd;
@@ -336,6 +350,6 @@ input:focus::placeholder {
     box-shadow: #b5b6fb;
 }
 
-.google-btn{
+.google-btn {
     justify-content: center;
 }
