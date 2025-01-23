@@ -14,8 +14,9 @@ const { Session } = require('inspector/promises');
 const noCache = require('./middlewares/noCache');
 db();
 
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(methodOverride('_method'));
 app.use(noCache);
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -28,10 +29,14 @@ app.use(session({
     }
 }))
 app.use(flash());
-app.use(methodOverride('_method'));
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    next();
+  });
+  
 
 app.set('view engine', 'ejs');
 app.set('views', [path.join(__dirname, 'views/user'), path.join(__dirname, 'views/admin')]);

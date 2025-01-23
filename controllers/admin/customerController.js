@@ -6,7 +6,7 @@ const customerInfo = async (req, res) => {
     try {
         let search = req.query.search || '';
         let page = parseInt(req.query.page) || 1;
-        const limit = 4;
+        const limit = 6;
         if (page < 1) page = 1;
         const userData = await User.find({
             isAdmin: false,
@@ -47,25 +47,47 @@ const customerInfo = async (req, res) => {
 
 const blockCustomer = async (req, res) => {
     try {
-        let id = req.query.id;
-        await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
-        res.redirect('/admin/users');
+        const { id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+
+        const result = await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json({ message: 'User blocked successfully' });
     } catch (error) {
-        console.log('Error in blocking user');
-        res.render('/admin/error-page');
+        console.error('Error in blocking user:', error);
+        res.status(500).json({ error: 'Failed to block user' });
     }
-}
+};
+
 
 const unblockCustomer = async (req, res) => {
     try {
-        let id = req.query.id;
-        await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
-        res.redirect('/admin/users');
+        const { id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ error: 'User ID is missing' });
+        }
+
+        const result = await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json({ message: 'User unblocked successfully' });
     } catch (error) {
-        console.log('Error in unblocking user');
-        res.render('/admin/error-page');
+        console.log('Error in unblocking user:', error);
+        res.status(500).json({ error: 'Failed to unblock user' });
     }
-}
+};
+
 
 
 module.exports = {

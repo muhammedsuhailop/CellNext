@@ -16,8 +16,8 @@ router.get('/logout', adminController.logout);
 router.get('/', adminAuth, adminController.loadDashboard);
 //Customer Management
 router.get('/users', adminAuth, customerController.customerInfo);
-router.get('/users/block-user', adminAuth, customerController.blockCustomer);
-router.get('/users/unblock-user', adminAuth, customerController.unblockCustomer);
+router.patch('/users/block-user', adminAuth, customerController.blockCustomer);
+router.patch('/users/unblock-user', adminAuth, customerController.unblockCustomer);
 //Category Management
 router.get('/category', adminAuth, categoryController.categoryInfo);
 router.post('/addCategory', adminAuth, categoryController.addCategory);

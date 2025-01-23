@@ -15,7 +15,7 @@ const loadBrandPage = async (req, res) => {
         const searchCondition = search ? { brandName: { $regex: search, $options: 'i' } } : {};
 
         const brandData = await Brand.find(searchCondition)
-            .sort({ createdAt: -1 })
+            .sort({ brandName: 1 })
             .limit(limit * 1)
             .skip((page - 1) * limit)
             .exec();
