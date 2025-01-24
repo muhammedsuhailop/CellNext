@@ -43,134 +43,161 @@
                     <% } %>
                   </div>
 
-                  <form action="/admin/editProduct/<%= product._id %>" method="POST" enctype="multipart/form-data">
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <div id="category-error" class="error-message text-danger"></div>
-                        <label for="category-select">Select Category</label>
-                        <select class="form-control" id="category-select" name="category">
-                          <option value="<%= product.category %>"><%= categoryMap[product.category] %></option>
-                          <% category.forEach((category) => { %>
-                          <option value="<%= category._id %>"><%= category.name %></option>
-                          <% }); %>
-                        </select>
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <div id="brand-error" class="error-message text-danger"></div>
-                        <label for="brand-select">Select Brand</label>
-                        <select class="form-control" id="brand-select" name="brand">
-                          <option value="<%= product.brand %>"><%= product.brand %></option>
-                          <% brand.forEach((brand) => { %>
-                          <option value="<%= brand.brandName %>"><%= brand.brandName %></option>
-                          <% }); %>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="mb-3">
-                      <div id="productName-error" class="error-message text-danger"></div>
-                      <label class="form-label" for="basic-default-fullname">Product Name</label>
-                      <input type="text" class="form-control" id="basic-default-fullname" placeholder="Product Name" name="productName" value="<%= product.productName %>" />
-                    </div>
-                    <div class="mb-3">
-                      <div id="description-error" class="error-message text-danger"></div>
-                      <label class="form-label" for="basic-default-message">Product Description</label>
-                      <textarea id="descriptionid" class="form-control" placeholder="Enter Product Description" name="descriptionid"> <%= product.description %></textarea>
-                    </div>
-                    <label class="form-label" for="basic-default-message">Upload Product Images</label>
+                  <div class="container">
+                    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Products /</span> Edit Product</h4>
 
-                    <input type="hidden" id="productId" value="<%= product._id %>" />
-                    <% for (let i = 0; i < 4; i++) { %>
-                    <div class="row mb-3">
-                      <div id="image<%= i %>-error" class="error-message text-danger"></div>
-                      <label class="col-sm-2 col-form-label" for="image<%= i %>">Image <%= i + 1 %></label>
-                      <div class="col-sm-4">
-                        <input type="file" class="form-control" id="image<%= i %>" name="images" accept="image/*" />
-                      </div>
-                      <div class="col-sm-6 d-flex align-items-center justify-content-center">
-                        <div class="image-preview position-relative" id="preview-image<%= i %>" style="width: 150px; height: 150px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border: 2px solid #979b9f">
-                          <img id="preview-img<%= i %>" src="<%= product.productImage[i] ? product.productImage[i] : '' %>" alt="No image" style="width: 100%; height: 100%; object-fit: cover; display: <%= product.productImage[i] ? 'block' : 'none' %>;" />
-                          <% if (product.productImage[i]) { %>
-                          <button type="button" class="btn btn-danger remove-image position-absolute" style="top: 5px; right: 5px;" data-index="<%= i %>">Remove</button>
-                          <% } %>
+                    <!-- General Product Details -->
+                    <form action="/admin/editProduct/<%= product._id %>" method="POST" enctype="multipart/form-data">
+                      <h5>Product Details</h5>
+                      <hr />
+                      <div class="row">
+                        <!-- Product Name -->
+                        <div class="col-md-6 mb-3">
+                          <label for="product-name">Product Name</label>
+                          <input type="text" class="form-control" id="product-name" name="productName" value="<%= product.productName %>" placeholder="Enter Product Name" />
+                        </div>
+                        <!-- Product Description -->
+                        <div class="col-md-6 mb-3">
+                          <label for="product-description">Product Description</label>
+                          <textarea class="form-control" id="product-description" name="description" placeholder="Enter Product Description"><%= product.description %></textarea>
                         </div>
                       </div>
-                    </div>
-                    <% } %>
+                      <div class="row">
+                        <!-- Category -->
+                        <div class="col-md-6 mb-3">
+                          <label for="category-select">Select Category</label>
+                          <select class="form-control" name="category">
+                            <option value="<%= product.category %>"><%= categoryMap[product.category] %></option>
+                            <% category.forEach((cat) => { %>
+                            <option value="<%= cat._id %>"><%= cat.name %></option>
+                            <% }); %>
+                          </select>
+                        </div>
+                        <!-- Brand -->
+                        <div class="col-md-6 mb-3">
+                          <label for="brand-select">Select Brand</label>
+                          <select class="form-control" name="brand">
+                            <option value="<%= product.brand %>"><%= product.brand %></option>
+                            <% brand.forEach((b) => { %>
+                            <option value="<%= b.brandName %>"><%= b.brandName %></option>
+                            <% }); %>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <button type="submit" class="btn btn-primary">Update Product Details</button>
+                      </div>
+                    </form>
 
-                    <!-- Modal for Image Cropping -->
-                    <div id="cropperModal" class="modal" tabindex="-1" role="dialog">
-                      <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title">Crop Image</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                              <span aria-hidden="true">&times;</span>
-                            </button>
+                    <hr />
+
+                    <!-- Variant Editing Section -->
+                    <% product.variants.forEach((variant, index) => { %>
+                    <form action="/admin/editProductVariant/<%= product._id %>/variant/<%= index %>" method="POST" enctype="multipart/form-data" class="variant-section" id="variant-section-<%= index %>" style="<%= index === 0 ? '' : 'display: none;' %>">
+                      <h5>Variant <%= index + 1 %></h5>
+                      <hr />
+
+                      <!-- Variant Images -->
+                      <label>Upload Variant Images</label>
+                      <% for (let i = 0; i < 4; i++) { %>
+                      <div class="row mb-3">
+                        <div class="col-sm-6">
+                          <input type="file" class="form-control" id="image<%= i %>" name="variantImages" accept="image/*" />
+                        </div>
+                        <div class="col-sm-6">
+                          <div class="image-preview" id="preview-image<%= i %>" style="width: 150px; height: 150px; background-color: #f5f5f5; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center;">
+                            <img id="preview-img<%= i %>" src="<%= variant.images[i] || '' %>" alt="Image <%= i + 1 %>" style="width: 100%; height: 100%; object-fit: cover; display: <%= variant.images[i] ? 'block' : 'none' %>;" />
+                            <% if (variant.images[i]) { %>
+                            <button type="button" class="btn btn-danger remove-image position-absolute" data-index="<%= i %>">Remove</button>
+                            <% } %>
                           </div>
-                          <div class="modal-body">
-                            <div class="crop-container">
-                              <img id="cropperImage" src="" alt="Crop Image" style="max-width: 100%;" />
+                        </div>
+                      </div>
+                      <% } %>
+
+
+                      <!-- Modal for Image Cropping -->
+                      <div id="cropperModal" class="modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title">Crop Image</h5>
+                              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <div class="crop-container">
+                                <img id="cropperImage" src="" alt="Crop Image" style="max-width: 100%;" />
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" id="cropImage" class="btn btn-primary">Crop</button>
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             </div>
                           </div>
-                          <div class="modal-footer">
-                            <button type="button" id="cropImage" class="btn btn-primary">Crop</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                          </div>
                         </div>
                       </div>
-                    </div>
+
+
+                      <!-- Variant Details -->
+                      <div class="row mb-3">
+                        <div class="col-md-4">
+                          <label for="storage-size">Storage Size</label>
+                          <select class="form-control" name="storage">
+                            <option value="<%= variant.storage %>"><%= variant.storage %></option>
+                            <option value="64GB">64GB</option>
+                            <option value="128GB">128GB</option>
+                            <option value="256GB">256GB</option>
+                          </select>
+                        </div>
+                        <div class="col-md-4">
+                          <label for="color">Color</label>
+                          <select class="form-control" name="color">
+                            <option value="<%= variant.color %>"><%= variant.color %></option>
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                          </select>
+                        </div>
+                        <div class="col-md-4">
+                          <label for="quantity">Quantity</label>
+                          <input type="number" class="form-control" name="quantity" value="<%= variant.stock %>" />
+                        </div>
+                      </div>
+
+                      <!-- Pricing -->
+                      <div class="row mb-3">
+                        <div class="col-md-6">
+                          <label for="regular-price">Regular Price</label>
+                          <input type="number" class="form-control" name="regularPrice" value="<%= variant.regularPrice %>" />
+                        </div>
+                        <div class="col-md-6">
+                          <label for="sale-price">Sale Price</label>
+                          <input type="number" class="form-control" name="salePrice" value="<%= variant.salePrice %>" />
+                        </div>
+                      </div>
+
+                      <!-- Submit Button -->
+                      <div class="mb-3">
+                        <button type="submit" class="btn btn-success">Update Variant</button>
+                      </div>
+                    </form>
+                    <% }); %>
+
+                    <!-- Navigation Buttons for Variants -->
                     <div class="row">
-                      <div class="col-md-4 mb-3">
-                        <div id="size-error" class="error-message text-danger"></div>
-                        <label for="storage-size" class="form-label">Storage Size</label>
-                        <select class="form-control" id="storage-size" name="storage">
-                          <option value='<%= product.storage %>'><%= product.storage %></option>
-                          <option value="64GB">64GB</option>
-                          <option value="128GB">128GB</option>
-                          <option value="256GB">256GB</option>
-                          <option value="512GB">512GB</option>
-                        </select>
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <div id="color-error" class="error-message text-danger"></div>
-                        <label for="color" class="form-label">Color</label>
-                        <select class="form-control" id="color" name="color">
-                          <option value="<%= product.color %>"><%= product.color %></option>
-                          <option value="black">Black</option>
-                          <option value="white">White</option>
-                          <option value="blue">Blue</option>
-                          <option value="red">Red</option>
-                          <option value="custom">Custom Color</option>
-                        </select>
-                      </div>
-                      <div class="col-md-4 mb-3" id="custom-color-container" style="display: none;">
-                        <label for="custom-color" class="form-label">Enter Custom Color Name</label>
-                        <input type="text" class="form-control" id="custom-color" name="custom_color" placeholder="Enter color here" />
-                      </div>
-                      <div class="col-md-4 mb-3">
-                        <div id="quantity-error" class="error-message text-danger"></div>
-                        <label for="quantity" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="quantity" name="quantity" value="<%= product.quantity %>" />
+                      <div class="col-12 text-center">
+                        <% product.variants.forEach((variant, index) => { %>
+                        <button type="button" class="btn <%= index === 0 ? 'btn-primary' : 'btn-secondary' %> variant-btn" data-variant-index="<%= index %>">
+                          Variant <%= index + 1 %>
+                        </button>
+                        <% }); %>
                       </div>
                     </div>
-                    <div class="row mb-3">
-                      <div class="col-md-6">
-                        <div id="regularPrice-error" class="error-message text-danger"></div>
-                        <label for="regular-price" class="form-label">Regular Price</label>
-                        <input type="number" class="form-control" id="regular-price" name="regularPrice" placeholder="₹ Enter regular price" value="<%= product.regularPrice %>" />
-                      </div>
-                      <div class="col-md-6">
-                        <div id="salePrice-error" class="error-message text-danger"></div>
-                        <label for="offer-price" class="form-label">Offer Price</label>
-                        <input type="number" class="form-control" id="offer-price" name="salePrice" placeholder="₹ Enter offer price" value="<%= product.salePrice %>" />
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <div class="col-sm-10 offset-sm-2">
-                        <button type="submit" class="btn btn-primary">Update Product</button>
-                      </div>
-                    </div>
-                  </form>
+
+
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -212,41 +239,56 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Get all variant forms and navigation buttons
+      const variantForms = document.querySelectorAll('.variant-section');
+      const variantButtons = document.querySelectorAll('.variant-btn');
+
+      // Add click event listeners to each button
+      variantButtons.forEach((button, index) => {
+        button.addEventListener('click', () => {
+          // Hide all forms and reset button styles
+          variantForms.forEach((form) => {
+            form.style.display = 'none';
+          });
+          variantButtons.forEach((btn) => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-secondary');
+          });
+
+          // Show the selected variant form and highlight the button
+          const targetForm = document.getElementById(`variant-section-${index}`);
+          if (targetForm) {
+            targetForm.style.display = 'block';
+          }
+          button.classList.remove('btn-secondary');
+          button.classList.add('btn-primary');
+        });
+      });
+    });
+  </script>
+
+
+  <script>
     document.addEventListener('DOMContentLoaded', function() {
       const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
       let cropper;
       let currentImageIndex;
-      let croppedImages = {}; 
+      let croppedImages = {};
 
-      const productId = document.getElementById('productId').value;
-
-      function updateImagePreview(index, src, displayStyle) {
-        const previewImg = document.getElementById('preview-img' + index);
-        const previewContainer = document.getElementById('preview-image' + index);
-
-        previewImg.src = src;
-        previewImg.style.display = displayStyle;
-        previewContainer.style.backgroundColor = src ? 'transparent' : '#f5f5f5';
-        console.log(`Updated preview for image ${index}: src=${src}, display=${displayStyle}`);
-      }
-
-      for (let i = 0; i < 4; i++) {
-        const imageInput = document.getElementById('image' + i);
-        const removeButton = document.querySelector('.remove-image[data-index="' + i + '"]');
-
-        imageInput.addEventListener('change', function(event) {
+      // Handle image input changes for variant images
+      document.querySelectorAll('input[name="variantImages"]').forEach((input, index) => {
+        input.addEventListener('change', function(event) {
           const file = event.target.files[0];
           if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-              document.getElementById('cropperImage').src = e.target.result;
-              cropperModal.show();
-              currentImageIndex = i;
+              document.getElementById('cropperImage').src = e.target.result; // Set image in modal
+              cropperModal.show(); // Show the modal
+              currentImageIndex = index;
 
-              if (cropper) {
-                cropper.destroy();
-              }
-
+              // Initialize or reinitialize Cropper.js
+              if (cropper) cropper.destroy();
               cropper = new Cropper(document.getElementById('cropperImage'), {
                 aspectRatio: 1,
                 viewMode: 1,
@@ -255,74 +297,83 @@
             reader.readAsDataURL(file);
           }
         });
-
-        if (removeButton) {
-          removeButton.addEventListener('click', function(event) {
-            event.preventDefault(); 
-            const index = this.getAttribute('data-index');
-            console.log(`Remove button clicked for image ${index}`);
-
-            updateImagePreview(index, '', 'none');
-            document.getElementById('image' + index).value = '';
-            delete croppedImages[index];
-
-            // If there was an existing image, remove it from the backend
-            fetch(`/admin/removeProductImage/${productId}/${index}`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                }
-              })
-              .then(response => response.json())
-              .then(data => {
-                console.log('Image removed successfully from backend:', data);
-              })
-              .catch(error => {
-                console.error('Error removing image from backend:', error);
-              });
-          });
-        }
-      }
-
-      document.getElementById('cropImage').addEventListener('click', function() {
-        const canvas = cropper.getCroppedCanvas({
-          width: 150,
-          height: 150,
-        });
-
-        canvas.toBlob(function(blob) {
-          const url = URL.createObjectURL(blob);
-          updateImagePreview(currentImageIndex, url, 'block');
-          cropperModal.hide();
-
-          croppedImages[currentImageIndex] = blob;
-        }, 'image/jpeg');
       });
 
-      document.getElementById('submitButton').addEventListener('click', function() {
-        const formData = new FormData();
-
-        for (let index in croppedImages) {
-          const blob = croppedImages[index];
-          if (blob) {
-            formData.append('croppedImages[]', blob, `cropped-image-${index}.jpg`);
-          }
-        }
-
-        fetch(`/admin/editProduct/${productId}`, {
-            method: 'POST',
-            body: formData,
-          })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log('Cropped images uploaded successfully:', data);
-          })
-          .catch((error) => {
-            console.error('Error uploading cropped images:', error);
+      // Handle cropping logic
+      document.getElementById('cropImage').addEventListener('click', function() {
+        if (cropper) {
+          const canvas = cropper.getCroppedCanvas({
+            width: 500,
+            height: 500,
           });
+
+          // Convert cropped image to Blob and update the preview
+          canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const previewContainer = document.querySelectorAll('.image-preview img')[currentImageIndex];
+            previewContainer.src = url;
+            previewContainer.style.display = 'block';
+            cropperModal.hide();
+          }, 'image/jpeg');
+        }
+      });
+
+      // Reset modal and cropper on close
+      document.getElementById('cropperModal').addEventListener('hidden.bs.modal', function() {
+        if (cropper) cropper.destroy();
+        cropper = null;
+      });
+
+      // Remove image functionality
+      document.querySelectorAll('.remove-image').forEach((button, index) => {
+        button.addEventListener('click', function(event) {
+          event.preventDefault(); // Prevent default form submission
+          console.log(`Remove button clicked for image ${index}`);
+
+          // Get the image preview and input field for the specific index
+          const previewImg = document.querySelector(`#preview-img${index}`);
+          const imageInput = document.querySelector(`#image${index}`);
+          const previewContainer = document.querySelector(`#preview-image${index}`);
+
+          // Check if the preview image exists before modifying
+          if (previewImg) {
+            previewImg.src = '';
+            previewImg.style.display = 'none';
+          }
+
+          // Reset the background color of the preview container
+          if (previewContainer) {
+            previewContainer.style.backgroundColor = '#f5f5f5'; // Reset background color
+          }
+
+          // Clear the file input
+          if (imageInput) {
+            imageInput.value = ''; // Clear file input
+          }
+
+          // Send request to remove the image from the backend
+          const productId = document.getElementById('productId').value; // Get the product ID
+
+          fetch(`/admin/removeProductImage/${productId}/${index}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Image removed successfully from backend:', data);
+            })
+            .catch(error => {
+              console.error('Error removing image from backend:', error);
+            });
+        });
       });
     });
   </script>
+
+
+
 
   <script>
     document.getElementById('color').addEventListener('change', function() {
@@ -394,10 +445,10 @@
       }
 
       let totalImagesSelected = 0;
-      const imageInputs = document.querySelectorAll('input[type="file"][name^="image"]'); 
+      const imageInputs = document.querySelectorAll('input[type="file"][name^="image"]');
 
       imageInputs.forEach(function(imageInput) {
-        totalImagesSelected += imageInput.files.length; 
+        totalImagesSelected += imageInput.files.length;
       });
 
       if (!isValid) {

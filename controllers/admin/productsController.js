@@ -114,7 +114,7 @@ const getAllProducts = async (req, res) => {
         const page = req.query.page || 1;
         const limit = 8;
 
-        const ProductData = await Product.find({
+        const ProductData = await ProductV2.find({
             $or: [
                 { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
                 { brand: { $regex: new RegExp(".*" + search + ".*", "i") } }
@@ -126,7 +126,7 @@ const getAllProducts = async (req, res) => {
             .sort({ createdAt: -1 })
             .exec();
 
-        const count = await Product.find({
+        const count = await ProductV2.find({
             $or: [
                 { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
                 { brand: { $regex: new RegExp(".*" + search + ".*", "i") } }
@@ -170,7 +170,7 @@ const addProductOffer = async (req, res) => {
     try {
         const { productId, percentage } = req.body;
 
-        const findProduct = await Product.findOne({ _id: productId });
+        const findProduct = await ProductV2.findOne({ _id: productId });
         if (!findProduct) {
             return res.json({ status: false, message: 'Product not found' });
         }
@@ -208,7 +208,7 @@ const removeProductOffer = async (req, res) => {
     try {
         const { productId } = req.body;
 
-        const findProduct = await Product.findOne({ _id: productId });
+        const findProduct = await ProductV2.findOne({ _id: productId });
         if (!findProduct) {
             return res.json({ status: false, message: 'Product not found' });
         }
@@ -240,7 +240,7 @@ const removeProductOffer = async (req, res) => {
 const blockProduct = async (req, res) => {
     try {
         const { id, isBlocked } = req.body;
-        await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
+        await ProductV2.updateOne({ _id: id }, { $set: { isBlocked: true } });
         res.json({ message: 'Product blocked successfully!' });
     } catch (error) {
         console.error('Error blocking product:', error);
@@ -251,7 +251,7 @@ const blockProduct = async (req, res) => {
 const unblockProduct = async (req, res) => {
     try {
         const { id, isBlocked } = req.body;
-        await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
+        await ProductV2.updateOne({ _id: id }, { $set: { isBlocked: false } });
         res.json({ message: 'Product unblocked successfully!' });
     } catch (error) {
         console.error('Error unblocking product:', error);
@@ -263,7 +263,7 @@ const unblockProduct = async (req, res) => {
 const getEditProduct = async (req, res) => {
     try {
         const id = req.query.id;
-        const product = await Product.findOne({ _id: id });
+        const product = await ProductV2.findOne({ _id: id });
         const category = await Category.find({});
         const brand = await Brand.find({});
         const categoryMap = category.reduce((acc, cat) => {
@@ -294,7 +294,7 @@ const editProduct = async (req, res) => {
         const productId = req.params.id;
         const product = req.body;
 
-        const existingProduct = await Product.findById(productId);
+        const existingProduct = await ProductV2.findById(productId);
         if (!existingProduct) {
             req.flash('error', 'Product not found');
             return res.redirect(`/admin/editProduct/${productId}`);
@@ -369,11 +369,90 @@ const editProduct = async (req, res) => {
     }
 };
 
+const editVariant = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        const variantIndex = req.params.variantIndex;
+        const updatedVariant = req.body;
+
+        const existingProduct = await ProductV2.findById(productId);
+        if (!existingProduct) {
+            req.flash('error', 'Product not found');
+            return res.redirect(`/admin/editProduct/${productId}`);
+        }
+
+        const variant = existingProduct.variants[variantIndex];
+        if (!variant) {
+            req.flash('error', 'Variant not found');
+            return res.redirect(`/admin/editProduct/${productId}`);
+        }
+
+        const images = existingProduct.variants[variantIndex].images || [];
+        console.log('Images = ', images)
+        const croppedImageDir = path.join(__dirname, '../../public/uploads/prod-imgs');
+
+        if (!fs.existsSync(croppedImageDir)) {
+            fs.mkdirSync(croppedImageDir, { recursive: true });
+        }
+
+        console.log('Uploaded files:', req.files);
+        if (req.files.variantImages) {
+            for (const file of req.files.variantImages) {
+                const originalPath = file.path;
+                const uniqueId = uuidv4();
+                const croppedImagePath = path.join(
+                    croppedImageDir,
+                    `crd-${uniqueId}-${file.originalname}`
+                );
+
+                console.log(`Processing file: ${file.originalname}`);
+                console.log(`Original file path: ${originalPath}`);
+                console.log(`Cropped file path: ${croppedImagePath}`);
+
+                if (!fs.existsSync(originalPath)) {
+                    console.error(`File does not exist: ${originalPath}`);
+                    continue;
+                }
+
+                try {
+                    await sharp(originalPath)
+                        .resize(500, 500)
+                        .toFile(croppedImagePath);
+                    console.log('Cropping completed.');
+                    images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
+                } catch (err) {
+                    console.error('Error processing file with sharp:', err);
+                    continue;
+                }
+            }
+        }
+
+        // Update the specific variant
+        variant.color = updatedVariant.color === 'custom' ? updatedVariant.custom_color : updatedVariant.color;
+        variant.storage = updatedVariant.storage;
+        variant.regularPrice = updatedVariant.regularPrice;
+        variant.salePrice = updatedVariant.salePrice;
+        variant.stock = updatedVariant.quantity;
+        variant.images = images;
+        variant.updatedAt = new Date();
+
+        // Save the updated product
+        await existingProduct.save();
+
+        req.flash('success', 'Variant updated successfully!');
+        return res.redirect(`/admin/products`);
+
+    } catch (error) {
+        console.error('Error updating variant:', error);
+        res.redirect('/admin/error-page');
+    }
+};
+
 const removeProductImage = async (req, res) => {
     try {
         const { productId, index } = req.params;
 
-        const product = await Product.findById(productId);
+        const product = await ProductV2.findById(productId);
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
@@ -414,4 +493,5 @@ module.exports = {
     getEditProduct,
     editProduct,
     removeProductImage,
+    editVariant
 }

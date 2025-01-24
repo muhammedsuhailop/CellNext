@@ -38,6 +38,7 @@ router.patch('/product/unblock', adminAuth, productsController.unblockProduct);
 router.get('/editProduct', adminAuth, productsController.getEditProduct);
 router.post('/editProduct/:id', adminAuth, upload, productsController.editProduct);
 router.post('/removeProductImage/:productId/:index', adminAuth, productsController.removeProductImage);
+router.post('/editProductVariant/:id/variant/:variantIndex', adminAuth, upload, productsController.editVariant);
 //Brand Management 
 router.get('/brands', adminAuth, brandController.loadBrandPage);
 router.get('/addBrand', adminAuth, brandController.loadAddBrandPage);

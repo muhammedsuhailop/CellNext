@@ -3,20 +3,23 @@ const path = require('path');
 
 // Set storage engine
 const storage = multer.diskStorage({
-    destination: '../../public/uploads/product-images',
+    destination: '../../public/uploads/prod-imgs',
     filename: function (req, file, cb) {
         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
 });
 
-// Initialize upload variable and set file validation
+// Initialize upload variable and set file validation for multiple image fields
 const upload = multer({
     storage: storage,
     limits: { fileSize: 1000000 }, // 1 MB file size limit
     fileFilter: function (req, file, cb) {
         checkFileType(file, cb);
     }
-}).array('images', 5); // Specify allowed number of images
+}).fields([
+    { name: 'images', maxCount: 5 }, // Allows multiple files for 'images' field
+    { name: 'variantImages', maxCount: 4 } // Allows up to 4 variant images
+]); 
 
 // Check File Type
 function checkFileType(file, cb) {

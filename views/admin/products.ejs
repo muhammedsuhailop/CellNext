@@ -62,7 +62,7 @@
                           <td class="product-name"><%= product.productName %></td>
                           <td class="brand-name"><%= product.brand %></td>
                           <td><%= categoriesnames[product.category._id] || 'Unknown' %></td>
-                          <td><%= product.salePrice %></td>
+                          <td><%= product.variants[0].salePrice %></td>
                           <td><%= product.productOffer %></td>
                           <td>
                             <% if (product.productOffer > 0) { %>
@@ -73,7 +73,7 @@
                             <button class="btn btn-sm btn-secondary" onclick="addOffer('<%= product._id %>')">Add Offer</button>
                             <% } %>
                           </td>
-                          <td><%= product.quantity %></td>
+                          <td><%= product.variants[0].stock %></td>
                           <td>
                             <% if (product.isBlocked === false) { %>
                             <form id="blockForm<%= product._id %>" style="display:inline;">
