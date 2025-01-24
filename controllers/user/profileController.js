@@ -52,7 +52,8 @@ const securePassword = async (password) => {
 
 const getForgotPassword = async (req, res) => {
     try {
-        res.render('forgot-password');
+        const errorMessage = req.flash('error');
+        res.render('forgot-password', { message: errorMessage.length > 0 ? errorMessage[0] : null });
     } catch (error) {
         console.log('Error loading Forgot password page', error);
         res.redirect('/pageNotFound');
@@ -75,7 +76,8 @@ const forgotEmailValid = async (req, res) => {
                 res.json({ success: false, message: 'Failed to send OTP. Please try later' })
             }
         } else {
-            res.status(400).json({ success: false, message: 'User not found' });
+            req.flash('error', 'User not found');
+            return res.redirect('/forgot-password');
         }
     } catch (error) {
         console.log('Error Forgot password ', error);

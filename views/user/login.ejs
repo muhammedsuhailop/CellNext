@@ -17,6 +17,7 @@
   <div class="container">
     <div class="container-wrapper">
       <h3 class="login-text"><i class="bi bi-person-circle ac-logo"></i>Login</h3>
+      <h6 class="my-4"><span>Login with CellNext account</span></h6>
       <form method="post" action="/login" id="loginForm">
         <% if (locals.message && message.length > 0) { %>
         <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
@@ -30,13 +31,14 @@
         </div>
         <div class="item">
           <label for="password">Password</label>
-          <div class=" position-relative">
-            <input class="input" type="password" id="password" placeholder="Enter your password" name="password" required>
-            <button type="button" class="btn  position-absolute top-50 end-0 translate-middle-y mx-2" id="togglePassword">
+          <div class="position-relative">
+            <input class="input" type="password" id="password" placeholder="Enter your password" name="password" required />
+            <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y mx-2 toggle-visibility" id="togglePassword" style="opacity: 0; pointer-events: none;">
               <i class="bi bi-eye"></i>
             </button>
           </div>
         </div>
+
         <div class="item submit"><button type="submit">Login</button></div>
       </form>
       <h6><span>OR</span></h6>
@@ -61,15 +63,26 @@
         window.location.reload();
       }
     }
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordField = document.getElementById('password');
+    const passwordInput = document.getElementById("password");
+    const toggleButton = document.getElementById("togglePassword");
 
-    togglePassword.addEventListener('click', function() {
-      const type = passwordField.type === 'password' ? 'text' : 'password';
-      passwordField.type = type;
+    passwordInput.addEventListener("input", () => {
+      if (passwordInput.value.trim()) {
+        toggleButton.style.opacity = "1";
+        toggleButton.style.pointerEvents = "auto";
+      } else {
+        toggleButton.style.opacity = "0";
+        toggleButton.style.pointerEvents = "none";
+      }
+    });
 
-      this.querySelector('i').classList.toggle('bi-eye');
-      this.querySelector('i').classList.toggle('bi-eye-slash');
+    toggleButton.addEventListener("click", () => {
+      const type = passwordInput.type === "password" ? "text" : "password";
+      passwordInput.type = type;
+
+      const icon = toggleButton.querySelector("i");
+      icon.classList.toggle("bi-eye");
+      icon.classList.toggle("bi-eye-slash");
     });
   </script>
 </body>
