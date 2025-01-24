@@ -352,6 +352,11 @@
         return isValid;
       }
 
+      document.getElementById('color').addEventListener('change', function() {
+        const customColorContainer = document.getElementById('custom-color-container');
+        customColorContainer.style.display = this.value === 'custom' ? 'block' : 'none';
+      });
+
       function displayErrorMessage(form, elementId, message) {
         const errorElement = form.querySelector(`#${elementId}`);
         if (errorElement) {
