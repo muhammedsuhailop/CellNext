@@ -2,6 +2,7 @@ const User = require('../../models/userSchema');
 const Category = require('../../models/categorySchema');
 const Brand = require('../../models/brandSchema');
 const Product = require('../../models/productSchema');
+const ProductV2 = require('../../models/productsSchemaV2');
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
@@ -33,44 +34,32 @@ const addProduct = async (req, res) => {
     try {
         const product = req.body;
 
-        const productExists = await Product.findOne({ productName: product.productName });
+        const productExists = await ProductV2.findOne({ productName: product.productName });
         if (productExists) {
             req.flash('error', 'Product already exists');
             return res.redirect('/admin/addProduct');
         }
 
-        console.log('Directory name:', __dirname);
-        const images = [];
-        const croppedImageDir = path.join(__dirname, '../../public/uploads/product-images');
-
+        const croppedImageDir = path.join(__dirname, '../../public/uploads/prod-imgs');
         if (!fs.existsSync(croppedImageDir)) {
             fs.mkdirSync(croppedImageDir, { recursive: true });
         }
 
-        console.log('Uploaded files:', req.files);
+        const images = [];
+        const files = req.files || [];
 
-        for (const file of req.files) {
+        for (const file of files) {
             const originalPath = file.path;
             const uniqueId = uuidv4();
             const croppedImagePath = path.join(
                 croppedImageDir,
-                `crd-${uniqueId}-${file.originalname}`
+                `crd-img-${uniqueId}-${file.originalname}`
             );
-
-            console.log(`Processing file: ${file.originalname}`);
-            console.log(`Original file path: ${originalPath}`);
-            console.log(`Cropped file path: ${croppedImagePath}`);
-
-            if (!fs.existsSync(originalPath)) {
-                console.error(`File does not exist: ${originalPath}`);
-                continue;
-            }
 
             try {
                 await sharp(originalPath)
                     .resize(500, 500)
                     .toFile(croppedImagePath);
-                console.log('Cropping completed.');
                 images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
             } catch (err) {
                 console.error('Error processing file with sharp:', err);
@@ -80,22 +69,28 @@ const addProduct = async (req, res) => {
 
         const categoryId = await Category.findOne({ _id: product.category });
         if (!categoryId) {
-            return res.status(400).json('Invalid category name');
+            req.flash('error', 'Invalid category name');
+            return res.redirect('/admin/addProduct');
         }
 
         const color = product.color === 'custom' ? product.custom_color : product.color;
-        const newProduct = new Product({
+        const firstVariant = {
+            color,
+            size: product.size,
+            storage: product.storage,
+            regularPrice: parseFloat(product.regularPrice),
+            salePrice: parseFloat(product.salePrice),
+            stock: parseInt(product.quantity, 10),
+            images,
+        };
+
+        const newProduct = new ProductV2({
             productName: product.productName,
             description: product.descriptionid,
             category: product.category,
             brand: product.brand,
-            regularPrice: product.regularPrice,
-            salePrice: product.salePrice,
-            createdAt: new Date(),
-            quantity: product.quantity,
-            color: color,
-            storage: product.storage,
-            productImage: images,
+            productOffer: product.productOffer || 0,
+            variants: [firstVariant],
             status: 'Available',
         });
 
@@ -103,12 +98,15 @@ const addProduct = async (req, res) => {
 
         req.flash('success', 'Product added successfully!');
         return res.redirect('/admin/addProduct');
-
     } catch (error) {
         console.error('Error adding product:', error);
+        req.flash('error', 'An error occurred while adding the product.');
         res.redirect('/admin/error-page');
     }
 };
+
+module.exports = addProduct;
+
 
 const getAllProducts = async (req, res) => {
     try {
