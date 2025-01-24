@@ -10,6 +10,7 @@ const loadHomePage = async (req, res) => {
     try {
         const user = req.session.user;
         const categories = await Category.find({ isListed: true });
+        const brands = await Brand.find({ isBlocked: false });
         const productData = await Product.find({
             isBlocked: false,
             category: { $in: categories.map(category => category._id) }, quantity: { $gt: 0 }
@@ -17,30 +18,41 @@ const loadHomePage = async (req, res) => {
 
         productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+        const appleBrand = brands.find(brand => brand.brandName === 'Apple');
+        const appleId = appleBrand ? appleBrand._id : null;
         const heroData = [
             {
                 backgroundImage: "img/hero/oppo banner1.PNG",
                 collection: "New Year Collection",
                 title: "Exclusive New Year Collections ",
                 description: "Crafting the future of mobile phones, where luxury meets innovation. Designed with precision and ethically produced to deliver unmatched quality, each device is a testament to excellence in craftsmanship.",
-                link: "#"
+                link: "/shop"
             },
             {
                 backgroundImage: "img/hero/banner--5.PNG",
-                collection: "Summer Collection",
+                collection: "Apple Zone",
                 title: "iPhone: Where cutting-edge technology meets timeless elegance.",
                 description: "Designed to elevate your experience with unmatched performance and seamless style.",
-                link: "#"
+                link: appleId ? `/filter?brand=${appleId}` : "#"
             }
         ];
 
         if (user) {
             const userData = await User.findOne({ _id: user });
             console.log('User data', userData.name)
-            res.render('home', { user: userData, products: productData, heroData: heroData })
+            res.render('home', {
+                user: userData,
+                products: productData,
+                categories: categories,
+                heroData: heroData
+            })
         } else {
             console.log('No loggedin user');
-            return res.render('home', { products: productData, heroData: heroData });
+            return res.render('home', {
+                products: productData,
+                categories: categories,
+                heroData: heroData
+            });
         }
 
     } catch (error) {

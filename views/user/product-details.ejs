@@ -160,7 +160,7 @@
                 <label class="c-1" for="sp-1">
                   <input type="radio" id="sp-1">
                 </label>
-                <label class="c-2" for="sp-2">
+                <!-- <label class="c-2" for="sp-2">
                   <input type="radio" id="sp-2">
                 </label>
                 <label class="c-3" for="sp-3">
@@ -171,7 +171,7 @@
                 </label>
                 <label class="c-9" for="sp-9">
                   <input type="radio" id="sp-9">
-                </label>
+                </label> -->
               </div>
             </div>
             <div class="product__details__cart__option">
@@ -200,9 +200,9 @@
               <h5><span>Guaranteed Safe Checkout</span></h5>
               <img src="img/shop-details/details-payment.png" alt="">
               <ul>
-                <li><span>SKU:</span> 3812912</li>
+                <li><span>Brand:</span> <%= product.brand %></li>
                 <li><span>Categories:</span> <%= category.name %></li>
-                <li><span>Tag:</span> Clothes, Skin, Body</li>
+                <li><span>Tag:</span> Smartphones, Stylish, 5G</li>
               </ul>
             </div>
           </div>
@@ -429,11 +429,12 @@
   document.addEventListener('DOMContentLoaded', function() {
     const tabContentContainer = document.querySelector('.tab-content');
     const tabs = Array.from(tabContentContainer.querySelectorAll('.tab-pane'));
+    const thumbnails = Array.from(document.querySelectorAll('.nav-link'));
     const prevButton = document.getElementById('prev-image');
     const nextButton = document.getElementById('next-image');
 
-    if (!tabs.length) {
-      console.error('No image tabs found.');
+    if (!tabs.length || !thumbnails.length) {
+      console.error('No image tabs or thumbnails found.');
       return;
     }
 
@@ -442,6 +443,10 @@
     const updateActiveTab = () => {
       tabs.forEach((tab, i) => {
         tab.classList.toggle('active', i === currentIndex);
+      });
+
+      thumbnails.forEach((thumbnail, i) => {
+        thumbnail.classList.toggle('active', i === currentIndex);
       });
     };
 
@@ -457,5 +462,4 @@
 
     updateActiveTab();
   });
-  
 </script>

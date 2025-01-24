@@ -19,7 +19,7 @@
                   <% categoriesWithIds.forEach(category => { %>
                   <li>
                     <a href="/filter?category=<%= category._id %>">
-                      <%= category.name %> (<%= category.productCount || 0 %>)
+                      <%= category.name %>
                     </a>
                   </li>
                   <% }) %>

@@ -12,15 +12,14 @@
     <div class="navbar-nav align-items-center">
       <div class="nav-item d-flex align-items-center w-100">
         <form action="<%= typeof searchAction !== 'undefined' ? searchAction : '#' %>" method="GET" class="d-flex flex-grow-1 align-items-center m-0">
-          <!-- Search Input -->
-          <input type="text" name="search" class="form-control border-0" placeholder="Search..." aria-label="Search..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" style="min-width: 200px;" />
+          <input type="text" name="search" class="form-control border-0" placeholder="Search..." aria-label="Search..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" style="min-width: 200px;" id="searchInput" />
 
-          <!-- Search Icon Trigger -->
-          <button type="submit" class="btn btn-link p-0 ms-1" style="font-size: 1.5rem;">
+          <button type="submit" class="btn btn-link p-0 ms-1" style="font-size: 1.5rem;" id="searchIcon" style="display: none;">
             <i class="bx bx-search"></i>
           </button>
         </form>
       </div>
+
     </div>
     <!-- /Search -->
 
@@ -92,3 +91,24 @@
 </nav>
 
 <!-- / Navbar -->
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchIcon = document.getElementById('searchIcon');
+
+    searchIcon.style.display = 'none';
+
+    searchInput.addEventListener('input', function() {
+      if (searchInput.value.trim() !== "") {
+        searchIcon.style.display = 'block';
+      } else {
+        searchIcon.style.display = 'none';
+      }
+    });
+
+    if (searchInput.value.trim() !== "") {
+      searchIcon.style.display = 'block';
+    }
+  });
+</script>
