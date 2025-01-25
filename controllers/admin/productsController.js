@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
+const mongoose = require('mongoose');
 
 const getAddProduct = async (req, res) => {
     try {
@@ -113,8 +114,7 @@ const addProductVariant = async (req, res) => {
   
       const product = await ProductV2.findById(productId);
       if (!product) {
-        req.flash('error', 'Product not found');
-        return res.redirect(`/admin/editProduct?id=${productId}`);
+        return res.status(404).json({ success: false, message: 'Product not found' });
       }
 
       const existingVariant = product.variants.find(variant => 
@@ -123,8 +123,7 @@ const addProductVariant = async (req, res) => {
     );
 
     if (existingVariant) {
-        req.flash('error', 'A variant with the same color and storage already exists.');
-        return res.redirect(`/admin/editProduct?id=${productId}`);
+        return res.status(400).json({ success: false, message: 'A variant with the same color and storage already exists.' });
     }
   
       const croppedImageDir = path.join(__dirname, '../../public/uploads/prod-imgs');
@@ -168,12 +167,10 @@ const addProductVariant = async (req, res) => {
       product.variants.push(newVariant); 
       await product.save(); 
   
-      req.flash('success', 'Variant added successfully!');
-      res.redirect(`/admin/editProduct?id=${productId}`);
+      return res.status(200).json({ success: true, message: 'New variant added successfully!', variant: newVariant });
     } catch (error) {
       console.error('Error adding variant:', error);
-      req.flash('error', 'An error occurred while adding the variant.');
-      res.redirect('/admin/error-page');
+      return res.status(500).json({ success: false, message: 'An error occurred while adding the variant.' });
     }
   };
 
@@ -215,7 +212,6 @@ const getAllProducts = async (req, res) => {
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
 
-        // Render the products page with the necessary data
         res.render('products', {
             decodeURIata: ProductData,
             totalPages: totalPages,
@@ -413,16 +409,18 @@ const editVariant = async (req, res) => {
         const variantIndex = req.params.variantIndex;
         const updatedVariant = req.body;
 
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+            return res.status(400).json({ success: false, message: 'Invalid product ID' });
+        }
+
         const existingProduct = await ProductV2.findById(productId);
         if (!existingProduct) {
-            req.flash('error', 'Product not found');
-            return res.redirect(`/admin/editProduct?id=${productId}`);
+            return res.status(404).json({ success: false, message: 'Product not found' });
         }
 
         const variant = existingProduct.variants[variantIndex];
         if (!variant) {
-            req.flash('error', 'Variant not found');
-            return res.redirect(`/admin/editProduct?id=${productId}`);
+            return res.status(404).json({ success: false, message: 'Variant not found' });
         }
         const isColorOrStorageChanged = variant.color !== updatedVariant.color || variant.storage !== updatedVariant.storage;
 
@@ -436,8 +434,7 @@ const editVariant = async (req, res) => {
             });
 
             if (isDuplicate) {
-                req.flash('error', 'A variant with the same color and storage already exists.');
-                return res.redirect(`/admin/editProduct?id=${productId}`);
+                return res.status(400).json({ success: false, message: 'A variant with the same color and storage already exists.' });
             }
         }
         const images = existingProduct.variants[variantIndex].images || [];
@@ -480,7 +477,6 @@ const editVariant = async (req, res) => {
             }
         }
 
-        // Update the specific variant
         variant.color = updatedVariant.color === 'custom' ? updatedVariant.custom_color : updatedVariant.color;
         variant.storage = updatedVariant.storage;
         variant.regularPrice = updatedVariant.regularPrice;
@@ -489,15 +485,13 @@ const editVariant = async (req, res) => {
         variant.images = images;
         variant.updatedAt = new Date();
 
-        // Save the updated product
         await existingProduct.save();
 
-        req.flash('success', 'Variant updated successfully!');
-        res.redirect(`/admin/editProduct?id=${productId}`);
+        return res.status(200).json({ success: true, message: 'Variant updated successfully!', variant: variant });
 
     } catch (error) {
         console.error('Error updating variant:', error);
-        res.redirect('/admin/error-page');
+        return res.status(500).json({ success: false, message: 'An error occurred while updating the variant.' });
     }
 };
 

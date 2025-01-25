@@ -106,7 +106,7 @@
               <% product.variants.forEach((variant, index) => { %>
               <div class="card mb-4" id="variant-section-<%= index %>" style="<%= index === 0 ? '' : 'display: none;' %>">
                 <div class="card-header">
-                  <h5>Variant <%= index + 1 %> Deatils</h5>
+                  <h5>Variant : <%= variant.color %> - <%= variant.storage %></h5>
                 </div>
                 <div class="card-body">
                   <form id="edit-variant-form<%= index %>" data-index="<%= index %>" action="/admin/editProductVariant/<%= product._id %>/variant/<%= index %>" method="POST" enctype="multipart/form-data">
@@ -190,15 +190,12 @@
               </div>
               <% }); %>
             </div>
-
-
             <hr />
-
 
             <!-- Add New Variant Section -->
             <div class="card" id="new-variant-form-card">
               <div class="card-header">
-                <h5>New Variant</h5>
+                <h5 class="mt-2">Enter New Variant Details, Images</h5>
               </div>
               <div class="card-body">
                 <form id="new-variant-form" data-index="new" action="/admin/addProductVariant/<%= product._id %>" method="POST" enctype="multipart/form-data">
@@ -343,20 +340,18 @@
       const newVariantForm = document.getElementById('new-variant-form-card');
       const cancelNewVariantBtn = document.getElementById('cancel-new-variant-btn');
       const hideVariantButtons = document.querySelectorAll('.hide-variant-btn');
-      const newVariantAdditionalSection = document.getElementById('new-variant-additional-section');
 
       function showVariant(variantIndex) {
         variantSections.forEach((section, index) => {
-          section.style.display = (index == variantIndex) ? 'block' : 'none';
+          section.style.display = (index === variantIndex) ? 'block' : 'none';
         });
 
         variantButtons.forEach((button, index) => {
-          button.classList.toggle('btn-primary', index == variantIndex);
-          button.classList.toggle('btn-secondary', index != variantIndex);
+          button.classList.toggle('btn-primary', index === variantIndex);
+          button.classList.toggle('btn-secondary', index !== variantIndex);
         });
 
         newVariantForm.style.display = 'none';
-        newVariantAdditionalSection.style.display = 'none';
       }
 
       function hideVariant(variantIndex) {
@@ -499,133 +494,125 @@
     });
   </script>
   <script>
-    const form = document.querySelector('form[action="/admin/editProduct/<%= product._id %>"]');
+    function validateForm(form) {
+      let isValid = true;
 
-    if (form) {
-      form.addEventListener('submit', function(event) {
-        clearErrorMessages();
-
-        let isValid = true;
-
-        const productName = document.getElementById('product-name').value.trim();
-        const productDescription = document.getElementById('product-description').value.trim();
-        const category = document.querySelector('select[name="category"]').value;
-        const brand = document.querySelector('select[name="brand"]').value;
-
-        if (!productName || productName.length > 60) {
+      function validateInput(input, errorElement, errorMessage) {
+        if (!input.value.trim()) {
+          errorElement.textContent = errorMessage;
           isValid = false;
-          document.getElementById('productName-error').textContent = 'Product Name is required and should be less than 60 characters.';
+        } else {
+          errorElement.textContent = '';
         }
-
-        if (!productDescription || productDescription.length > 500) {
-          isValid = false;
-          document.getElementById('description-error').textContent = 'Product Description is required and should be less than 500 characters.';
-        }
-
-        if (!category) {
-          isValid = false;
-          document.getElementById('category-error').textContent = 'Category is required.';
-        }
-
-        if (!brand) {
-          isValid = false;
-          document.getElementById('brand-error').textContent = 'Brand is required.';
-        }
-
-        if (!isValid) {
-          event.preventDefault();
-        }
-      });
-    }
-
-    function clearErrorMessages() {
-      document.getElementById('productName-error').textContent = '';
-      document.getElementById('description-error').textContent = '';
-      document.getElementById('category-error').textContent = '';
-      document.getElementById('brand-error').textContent = '';
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      function validateForm(form) {
-        let isValid = true;
-
-        function validateInput(input, errorElement, errorMessage) {
-          if (!input.value.trim()) {
-            errorElement.textContent = errorMessage;
-            isValid = false;
-          } else {
-            errorElement.textContent = '';
-          }
-        }
-
-        function validatePositiveNumber(input, errorElement, errorMessage) {
-          if (!input.value.trim() || input.value <= 0) {
-            errorElement.textContent = errorMessage;
-            isValid = false;
-          } else {
-            errorElement.textContent = '';
-          }
-        }
-
-        function validatePrice(regularPriceInput, salePriceInput, regularPriceError, salePriceError) {
-          if (!regularPriceInput.value.trim()) {
-            regularPriceError.textContent = 'Regular Price is required';
-            isValid = false;
-          } else if (parseFloat(regularPriceInput.value) < 0) {
-            regularPriceError.textContent = 'Regular Price cannot be negative';
-            isValid = false;
-          } else {
-            regularPriceError.textContent = '';
-          }
-
-          if (!salePriceInput.value.trim()) {
-            salePriceError.textContent = 'Sale Price is required';
-            isValid = false;
-          } else if (parseFloat(salePriceInput.value) < 0) {
-            salePriceError.textContent = 'Sale Price cannot be negative';
-            isValid = false;
-          } else if (parseFloat(salePriceInput.value) > parseFloat(regularPriceInput.value)) {
-            salePriceError.textContent = 'Sale Price cannot be greater than Regular Price';
-            isValid = false;
-          } else {
-            salePriceError.textContent = '';
-          }
-        }
-
-        const storageInput = form.querySelector('[name="storage"]');
-        const storageError = form.querySelector('#size-error');
-        validateInput(storageInput, storageError, 'Storage Size is required');
-
-        const colorInput = form.querySelector('[name="color"]');
-        const colorError = form.querySelector('#color-error');
-        validateInput(colorInput, colorError, 'Color is required');
-
-        const quantityInput = form.querySelector('[name="quantity"]');
-        const quantityError = form.querySelector('#quantity-error');
-        validatePositiveNumber(quantityInput, quantityError, 'Quantity must be a positive number');
-
-        const regularPriceInput = form.querySelector('[name="regularPrice"]');
-        const regularPriceError = form.querySelector('#regularPrice-error');
-        const salePriceInput = form.querySelector('[name="salePrice"]');
-        const salePriceError = form.querySelector('#salePrice-error');
-        validatePrice(regularPriceInput, salePriceInput, regularPriceError, salePriceError);
-
-        return isValid;
       }
 
-      const forms = document.querySelectorAll('form[data-index]');
+      function validatePositiveNumber(input, errorElement, errorMessage) {
+        if (!input.value.trim() || input.value <= 0) {
+          errorElement.textContent = errorMessage;
+          isValid = false;
+        } else {
+          errorElement.textContent = '';
+        }
+      }
 
-      forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-          if (!validateForm(form)) {
-            e.preventDefault();
+      function validatePrice(regularPriceInput, salePriceInput, regularPriceError, salePriceError) {
+        if (!regularPriceInput.value.trim()) {
+          regularPriceError.textContent = 'Regular Price is required';
+          isValid = false;
+        } else if (parseFloat(regularPriceInput.value) < 0) {
+          regularPriceError.textContent = 'Regular Price cannot be negative';
+          isValid = false;
+        } else {
+          regularPriceError.textContent = '';
+        }
+
+        if (!salePriceInput.value.trim()) {
+          salePriceError.textContent = 'Sale Price is required';
+          isValid = false;
+        } else if (parseFloat(salePriceInput.value) < 0) {
+          salePriceError.textContent = 'Sale Price cannot be negative';
+          isValid = false;
+        } else if (parseFloat(salePriceInput.value) > parseFloat(regularPriceInput.value)) {
+          salePriceError.textContent = 'Sale Price cannot be greater than Regular Price';
+          isValid = false;
+        } else {
+          salePriceError.textContent = '';
+        }
+      }
+
+      const storageInput = form.querySelector('[name="storage"]');
+      const storageError = form.querySelector('#size-error');
+      validateInput(storageInput, storageError, 'Storage Size is required');
+
+      const colorInput = form.querySelector('[name="color"]');
+      const colorError = form.querySelector('#color-error');
+      validateInput(colorInput, colorError, 'Color is required');
+
+      const quantityInput = form.querySelector('[name="quantity"]');
+      const quantityError = form.querySelector('#quantity-error');
+      validatePositiveNumber(quantityInput, quantityError, 'Quantity must be a positive number');
+
+      const regularPriceInput = form.querySelector('[name="regularPrice"]');
+      const regularPriceError = form.querySelector('#regularPrice-error');
+      const salePriceInput = form.querySelector('[name="salePrice"]');
+      const salePriceError = form.querySelector('#salePrice-error');
+      validatePrice(regularPriceInput, salePriceInput, regularPriceError, salePriceError);
+
+      return isValid;
+    }
+
+    function submitFormViaAjax(form) {
+      const formData = new FormData(form);
+      const url = form.action;
+
+      if (!validateForm(form)) {
+        console.log("Form validation failed.");
+        return;
+      }
+
+      fetch(url, {
+          method: 'PUT',
+          body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (!data.success) {
+            Swal.fire({
+              title: 'Error!',
+              text: data.message || 'There was an error with your submission.',
+              icon: 'error',
+              confirmButtonText: 'OK',
+            });
+            return;
           }
+
+          Swal.fire({
+            title: 'Success!',
+            text: data.message || 'Form submitted successfully.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+          }).then(() => {
+            window.location.href = '/admin/products';
+          });
+        })
+        .catch(error => {
+          console.error('Error submitting form:', error);
+          Swal.fire({
+            title: 'Error!',
+            text: 'There was an error with your submission.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+          });
         });
+    }
+
+    document.querySelectorAll('form[data-index]').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitFormViaAjax(form);
       });
     });
   </script>
-
-
 
 </body>
 
