@@ -78,18 +78,22 @@
                     <label class="form-label" for="basic-default-message">Upload Product Images</label>
 
                     <% for (let i = 1; i <= 4; i++) { %>
+                    <% if (i % 2 !== 0) { %>
                     <div class="row mb-3">
-                      <div id="image<%= i %>-error" class="error-message text-danger"></div>
-                      <label class="col-sm-2 col-form-label" for="image<%= i %>">Image <%= i %></label>
-                      <div class="col-sm-4">
+                      <% } %>
+                      <div class="col-md-3">
                         <input type="file" class="form-control" id="image<%= i %>" name="images" accept="image/*" />
+                        <small id="image<%= i %>-error" class="text-danger d-block mt-1" style="display: none;"></small>
                       </div>
-                      <div class="col-sm-6" style="display: flex; align-items: center; justify-content: center;">
-                        <div class="image-preview" id="preview-image<%= i %>" style="width: 150px; height: 150px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border: 2px solid #979b9f">
+                      <div class="col-md-3">
+                        <div class="image-preview" id="preview-image<%= i %>" style="width: 150px; height: 150px; background-color: #f5f5f5; border: 1px solid #ddd; 
+                            display: flex; align-items: center; justify-content: center;">
                           <img id="preview-img<%= i %>" src="" alt="No image" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
                         </div>
                       </div>
+                      <% if (i % 2 === 0 || i === 4) { %>
                     </div>
+                    <% } %>
                     <% } %>
                     <!-- Modal for Image Cropping -->
                     <div id="cropperModal" class="modal" tabindex="-1" role="dialog">
@@ -117,27 +121,26 @@
                       <div class="col-md-4 mb-3">
                         <div id="size-error" class="error-message text-danger"></div>
                         <label for="storage-size" class="form-label">Storage Size</label>
-                        <select class="form-control" id="storage-size" name="storage">
-                          <option value="">Select Storage Size</option>
-                          <option value="NA">NA</option>
-                          <option value="64GB">64GB</option>
-                          <option value="128GB">128GB</option>
-                          <option value="256GB">256GB</option>
-                          <option value="512GB">512GB</option>
-                          <option value="1024GB">1024GB</option>
-                        </select>
+                        <input type="text" class="form-control text-uppercase" id="storage-size" name="storage" list="storage-options" placeholder="Enter or select Storage Size" pattern="[A-Za-z0-9]+" />
+                        <datalist id="storage-options">
+                          <option value="NA"></option>
+                          <option value="64GB"></option>
+                          <option value="128GB"></option>
+                          <option value="256GB"></option>
+                          <option value="512GB"></option>
+                          <option value="1024GB"></option>
+                        </datalist>
                       </div>
                       <div class="col-md-4 mb-3">
                         <div id="color-error" class="error-message text-danger"></div>
                         <label for="color" class="form-label">Color</label>
-                        <select class="form-control" id="color" name="color">
-                          <option value="">Select Color</option>
-                          <option value="black">Black</option>
-                          <option value="white">White</option>
-                          <option value="blue">Blue</option>
-                          <option value="red">Red</option>
-                          <option value="custom">Custom Color</option>
-                        </select>
+                        <input type="text" class="form-control text-uppercase" id="color" name="color" list="color-options" placeholder="Enter or select a color" pattern="[A-Za-z ]+" />
+                        <datalist id="color-options">
+                          <option value="BLACK"></option>
+                          <option value="WHITE"></option>
+                          <option value="BLUE"></option>
+                          <option value="RED"></option>
+                        </datalist>
                       </div>
                       <div class="col-md-4 mb-3" id="custom-color-container" style="display: none;">
                         <label for="custom-color" class="form-label">Enter Custom Color Name</label>

@@ -30,15 +30,17 @@ router.post('/removeCategoryOffer', adminAuth, categoryController.removeCategory
 //Product Management
 router.get('/addProduct', adminAuth, productsController.getAddProduct);
 router.post('/addProduct', adminAuth, upload, productsController.addProduct);
+router.post('/addProductVariant/:id',adminAuth,upload, productsController.addProductVariant);
 router.get('/products', adminAuth, productsController.getAllProducts);
 router.post('/addProductOffer', adminAuth, productsController.addProductOffer);
 router.post('/removeProductOffer', adminAuth, productsController.removeProductOffer);
 router.patch('/product/block', adminAuth, productsController.blockProduct);
 router.patch('/product/unblock', adminAuth, productsController.unblockProduct);
 router.get('/editProduct', adminAuth, productsController.getEditProduct);
-router.post('/editProduct/:id', adminAuth, upload, productsController.editProduct);
-router.post('/removeProductImage/:productId/:index', adminAuth, productsController.removeProductImage);
+router.post('/editProduct/:id', adminAuth, productsController.editProduct);
+// router.post('/removeProductImage/:productId/:index', adminAuth, productsController.removeProductImage);
 router.post('/editProductVariant/:id/variant/:variantIndex', adminAuth, upload, productsController.editVariant);
+router.delete('/removeProductImage/:productId/:variantIndex/:index',adminAuth,productsController.remeoveVariantImage);
 //Brand Management 
 router.get('/brands', adminAuth, brandController.loadBrandPage);
 router.get('/addBrand', adminAuth, brandController.loadAddBrandPage);

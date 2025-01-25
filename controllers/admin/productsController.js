@@ -94,10 +94,10 @@ const addProduct = async (req, res) => {
             status: 'Available',
         });
 
-        await newProduct.save();
+        const savedProduct = await newProduct.save();
 
         req.flash('success', 'Product added successfully!');
-        return res.redirect('/admin/addProduct');
+        return res.redirect(`/admin/editProduct?id=${savedProduct._id}`);
     } catch (error) {
         console.error('Error adding product:', error);
         req.flash('error', 'An error occurred while adding the product.');
@@ -105,7 +105,77 @@ const addProduct = async (req, res) => {
     }
 };
 
-module.exports = addProduct;
+const addProductVariant = async (req, res) => {
+    try {
+      const { id: productId } = req.params; 
+      const variantData = req.body; 
+      const files = req.files.variantImages || [];
+  
+      const product = await ProductV2.findById(productId);
+      if (!product) {
+        req.flash('error', 'Product not found');
+        return res.redirect(`/admin/editProduct?id=${productId}`);
+      }
+
+      const existingVariant = product.variants.find(variant => 
+        variant.color ===  variantData.color &&
+        variant.storage === variantData.storage
+    );
+
+    if (existingVariant) {
+        req.flash('error', 'A variant with the same color and storage already exists.');
+        return res.redirect(`/admin/editProduct?id=${productId}`);
+    }
+  
+      const croppedImageDir = path.join(__dirname, '../../public/uploads/prod-imgs');
+      if (!fs.existsSync(croppedImageDir)) {
+        fs.mkdirSync(croppedImageDir, { recursive: true });
+      }
+  
+      const images = [];
+  
+      for (const file of files) {
+        const originalPath = file.path;
+        const uniqueId = uuidv4();
+        const croppedImagePath = path.join(
+          croppedImageDir,
+          `crd-variant-img-${uniqueId}-${file.originalname}`
+        );
+  
+        try {
+          await sharp(originalPath)
+            .resize(500, 500)
+            .toFile(croppedImagePath);
+  
+          images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
+        } catch (err) {
+          console.error('Error processing file with sharp:', err);
+          continue;
+        }
+      }
+  
+      const newVariant = {
+        color: variantData.color === 'custom' ? variantData.custom_color : variantData.color,
+        storage: variantData.storage,
+        regularPrice: parseFloat(variantData.regularPrice),
+        salePrice: parseFloat(variantData.salePrice),
+        stock: parseInt(variantData.quantity, 10),
+        images,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+  
+      product.variants.push(newVariant); 
+      await product.save(); 
+  
+      req.flash('success', 'Variant added successfully!');
+      res.redirect(`/admin/editProduct?id=${productId}`);
+    } catch (error) {
+      console.error('Error adding variant:', error);
+      req.flash('error', 'An error occurred while adding the variant.');
+      res.redirect('/admin/error-page');
+    }
+  };
 
 
 const getAllProducts = async (req, res) => {
@@ -293,71 +363,37 @@ const editProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         const product = req.body;
+        console.log('req body: ',req.body);
 
         const existingProduct = await ProductV2.findById(productId);
         if (!existingProduct) {
             req.flash('error', 'Product not found');
-            return res.redirect(`/admin/editProduct/${productId}`);
+            return res.redirect(`/admin/products`);
         }
 
-        const images = existingProduct.productImage;
-        const croppedImageDir = path.join(__dirname, '../../public/uploads/product-images');
+        const duplicateProduct = await ProductV2.findOne({
+            productName: product.productName,
+            _id: { $ne: productId } 
+        });
 
-        if (!fs.existsSync(croppedImageDir)) {
-            fs.mkdirSync(croppedImageDir, { recursive: true });
+        if (duplicateProduct) {
+            req.flash('error', 'A product with this name already exists.');
+            return res.redirect(`/admin/editProduct/?id=${productId}`);
         }
 
-        console.log('Uploaded files:', req.files);
-
-        for (const file of req.files) {
-            const originalPath = file.path;
-            const uniqueId = uuidv4();
-            const croppedImagePath = path.join(
-                croppedImageDir,
-                `crd-${uniqueId}-${file.originalname}`
-            );
-
-            console.log(`Processing file: ${file.originalname}`);
-            console.log(`Original file path: ${originalPath}`);
-            console.log(`Cropped file path: ${croppedImagePath}`);
-
-            if (!fs.existsSync(originalPath)) {
-                console.error(`File does not exist: ${originalPath}`);
-                continue;
-            }
-
-            try {
-                await sharp(originalPath)
-                    .resize(500, 500)
-                    .toFile(croppedImagePath);
-                console.log('Cropping completed.');
-                images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
-            } catch (err) {
-                console.error('Error processing file with sharp:', err);
-                continue;
-            }
-        }
+        existingProduct.productName = product.productName || existingProduct.productName;
+        existingProduct.description = product.description || existingProduct.description;
+        existingProduct.category = product.category || existingProduct.category;
+        existingProduct.brand = product.brand || existingProduct.brand;
 
         const categoryId = await Category.findOne({ _id: product.category });
-        if (!categoryId) {
-            return res.status(400).json('Invalid category name');
+        if (product.category && !categoryId) {
+            req.flash('error', 'Invalid category');
+            return res.redirect(`/admin/editProduct?id=${productId}`);
         }
 
-        const color = product.color === 'custom' ? product.custom_color : product.color;
 
-        existingProduct.productName = product.productName;
-        existingProduct.description = product.descriptionid;
-        existingProduct.category = product.category;
-        existingProduct.brand = product.brand;
-        existingProduct.regularPrice = product.regularPrice;
-        existingProduct.salePrice = product.salePrice;
-        existingProduct.quantity = product.quantity;
-        existingProduct.color = color;
-        existingProduct.storage = product.storage;
-        existingProduct.productImage = images;
-        existingProduct.status = 'Available';
         existingProduct.updatedAt = new Date();
-
         await existingProduct.save();
 
         req.flash('success', 'Product updated successfully!');
@@ -369,24 +405,41 @@ const editProduct = async (req, res) => {
     }
 };
 
+
 const editVariant = async (req, res) => {
     try {
         const productId = req.params.id;
+        console.log('Uploaded files:', req.files);
         const variantIndex = req.params.variantIndex;
         const updatedVariant = req.body;
 
         const existingProduct = await ProductV2.findById(productId);
         if (!existingProduct) {
             req.flash('error', 'Product not found');
-            return res.redirect(`/admin/editProduct/${productId}`);
+            return res.redirect(`/admin/editProduct?id=${productId}`);
         }
 
         const variant = existingProduct.variants[variantIndex];
         if (!variant) {
             req.flash('error', 'Variant not found');
-            return res.redirect(`/admin/editProduct/${productId}`);
+            return res.redirect(`/admin/editProduct?id=${productId}`);
         }
+        const isColorOrStorageChanged = variant.color !== updatedVariant.color || variant.storage !== updatedVariant.storage;
 
+        if (isColorOrStorageChanged) {
+            const isDuplicate = existingProduct.variants.some((existingVariant, index) => {
+                if (index !== variantIndex) {
+                    return existingVariant.color === updatedVariant.color &&
+                        existingVariant.storage === updatedVariant.storage;
+                }
+                return false;
+            });
+
+            if (isDuplicate) {
+                req.flash('error', 'A variant with the same color and storage already exists.');
+                return res.redirect(`/admin/editProduct?id=${productId}`);
+            }
+        }
         const images = existingProduct.variants[variantIndex].images || [];
         console.log('Images = ', images)
         const croppedImageDir = path.join(__dirname, '../../public/uploads/prod-imgs');
@@ -440,7 +493,7 @@ const editVariant = async (req, res) => {
         await existingProduct.save();
 
         req.flash('success', 'Variant updated successfully!');
-        return res.redirect(`/admin/products`);
+        res.redirect(`/admin/editProduct?id=${productId}`);
 
     } catch (error) {
         console.error('Error updating variant:', error);
@@ -481,6 +534,44 @@ const removeProductImage = async (req, res) => {
     }
 };
 
+const remeoveVariantImage = async (req, res) => {
+    try {
+        const { productId, variantIndex, index } = req.params;
+
+        const product = await ProductV2.findById(productId);
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        const variant = product.variants[variantIndex];
+        if (!variant) {
+            return res.status(404).json({ error: 'Variant not found' });
+        }
+
+        if (variant.images && variant.images[index]) {
+            const imagePath = path.join(__dirname, '../../public', variant.images[index]);
+            fs.unlink(imagePath, (err) => {
+                if (err) {
+                    console.error('Error removing image file:', err);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+                variant.images.splice(index, 1);
+                product.save()
+                    .then(() => res.status(200).json({ success: 'Variant image removed successfully' }))
+                    .catch((error) => {
+                        console.error('Error saving product:', error);
+                        res.status(500).json({ error: 'Internal server error' });
+                    });
+            });
+        } else {
+            return res.status(400).json({ error: 'Image not found in variant' });
+        }
+    } catch (error) {
+        console.error('Error removing image:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 
 module.exports = {
     getAddProduct,
@@ -493,5 +584,7 @@ module.exports = {
     getEditProduct,
     editProduct,
     removeProductImage,
-    editVariant
+    editVariant,
+    remeoveVariantImage,
+    addProductVariant,
 }
