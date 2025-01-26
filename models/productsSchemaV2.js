@@ -21,6 +21,7 @@ const variantSchema = new Schema({
     },
     stock: { type: Number, required: true },
     images: { type: [String], required: true },
+    updatedAt: { type: Date, default: Date.now },
 }, { _id: false });
 
 const reviewSchema = new Schema({

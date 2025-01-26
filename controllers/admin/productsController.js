@@ -47,7 +47,7 @@ const addProduct = async (req, res) => {
         }
 
         const images = [];
-        const files = req.files || [];
+        const files = req.files?.images || [];
 
         for (const file of files) {
             const originalPath = file.path;
@@ -108,71 +108,71 @@ const addProduct = async (req, res) => {
 
 const addProductVariant = async (req, res) => {
     try {
-      const { id: productId } = req.params; 
-      const variantData = req.body; 
-      const files = req.files.variantImages || [];
-  
-      const product = await ProductV2.findById(productId);
-      if (!product) {
-        return res.status(404).json({ success: false, message: 'Product not found' });
-      }
+        const { id: productId } = req.params;
+        const variantData = req.body;
+        const files = req.files.variantImages || [];
 
-      const existingVariant = product.variants.find(variant => 
-        variant.color ===  variantData.color &&
-        variant.storage === variantData.storage
-    );
-
-    if (existingVariant) {
-        return res.status(400).json({ success: false, message: 'A variant with the same color and storage already exists.' });
-    }
-  
-      const croppedImageDir = path.join(__dirname, '../../public/uploads/prod-imgs');
-      if (!fs.existsSync(croppedImageDir)) {
-        fs.mkdirSync(croppedImageDir, { recursive: true });
-      }
-  
-      const images = [];
-  
-      for (const file of files) {
-        const originalPath = file.path;
-        const uniqueId = uuidv4();
-        const croppedImagePath = path.join(
-          croppedImageDir,
-          `crd-variant-img-${uniqueId}-${file.originalname}`
-        );
-  
-        try {
-          await sharp(originalPath)
-            .resize(500, 500)
-            .toFile(croppedImagePath);
-  
-          images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
-        } catch (err) {
-          console.error('Error processing file with sharp:', err);
-          continue;
+        const product = await ProductV2.findById(productId);
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
         }
-      }
-  
-      const newVariant = {
-        color: variantData.color === 'custom' ? variantData.custom_color : variantData.color,
-        storage: variantData.storage,
-        regularPrice: parseFloat(variantData.regularPrice),
-        salePrice: parseFloat(variantData.salePrice),
-        stock: parseInt(variantData.quantity, 10),
-        images,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-  
-      product.variants.push(newVariant); 
-      await product.save(); 
-  
-      return res.status(200).json({ success: true, message: 'New variant added successfully!', variant: newVariant });
+
+        const existingVariant = product.variants.find(variant =>
+            variant.color === variantData.color &&
+            variant.storage === variantData.storage
+        );
+
+        if (existingVariant) {
+            return res.status(400).json({ success: false, message: 'A variant with the same color and storage already exists.' });
+        }
+
+        const croppedImageDir = path.join(__dirname, '../../public/uploads/prod-imgs');
+        if (!fs.existsSync(croppedImageDir)) {
+            fs.mkdirSync(croppedImageDir, { recursive: true });
+        }
+
+        const images = [];
+
+        for (const file of files) {
+            const originalPath = file.path;
+            const uniqueId = uuidv4();
+            const croppedImagePath = path.join(
+                croppedImageDir,
+                `crd-variant-img-${uniqueId}-${file.originalname}`
+            );
+
+            try {
+                await sharp(originalPath)
+                    .resize(500, 500)
+                    .toFile(croppedImagePath);
+
+                images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
+            } catch (err) {
+                console.error('Error processing file with sharp:', err);
+                continue;
+            }
+        }
+
+        const newVariant = {
+            color: variantData.color === 'custom' ? variantData.custom_color : variantData.color,
+            storage: variantData.storage,
+            regularPrice: parseFloat(variantData.regularPrice),
+            salePrice: parseFloat(variantData.salePrice),
+            stock: parseInt(variantData.quantity, 10),
+            images,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+
+        product.variants.push(newVariant);
+        await product.save();
+
+        return res.status(200).json({ success: true, message: 'New variant added successfully!', variant: newVariant });
     } catch (error) {
-      console.error('Error adding variant:', error);
-      return res.status(500).json({ success: false, message: 'An error occurred while adding the variant.' });
+        console.error('Error adding variant:', error);
+        return res.status(500).json({ success: false, message: 'An error occurred while adding the variant.' });
     }
-  };
+};
 
 
 const getAllProducts = async (req, res) => {
@@ -181,7 +181,7 @@ const getAllProducts = async (req, res) => {
         const page = req.query.page || 1;
         const limit = 8;
 
-        const ProductData = await ProductV2.find({
+        const products = await ProductV2.find({
             $or: [
                 { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
                 { brand: { $regex: new RegExp(".*" + search + ".*", "i") } }
@@ -192,6 +192,25 @@ const getAllProducts = async (req, res) => {
             .populate('category')
             .sort({ createdAt: -1 })
             .exec();
+
+        // Flatten variants into separate "product-like" entries
+        const ProductData = products.flatMap((product) => {
+            return product.variants.map((variant, index) => ({
+                _id: product._id,
+                productName: product.productName,
+                brand: product.brand,
+                category: product.category,
+                regularPrice: variant.regularPrice,
+                salePrice: variant.salePrice,
+                color: variant.color,
+                storage: variant.storage,
+                stock: variant.stock,
+                isBlocked: product.isBlocked,
+                productOffer: product.productOffer,
+                variantNumber: index,
+                createdAt: product.createdAt,
+            }));
+        });
 
         const count = await ProductV2.find({
             $or: [
@@ -232,6 +251,7 @@ const getAllProducts = async (req, res) => {
     }
 };
 
+
 const addProductOffer = async (req, res) => {
     try {
         const { productId, percentage } = req.body;
@@ -246,19 +266,30 @@ const addProductOffer = async (req, res) => {
             return res.json({ status: false, message: 'Category not found' });
         }
 
-        let salePrice = findProduct.regularPrice;
-
-        if (findCategory.categoryOffer > 0) {
-            salePrice -= Math.floor(salePrice * (findCategory.categoryOffer / 100));
+        if (!findProduct.variants || findProduct.variants.length === 0) {
+            return res.json({ status: false, message: 'No variants found for the product' });
         }
 
-        if (percentage > 0 && percentage <= 100) {
-            salePrice -= Math.floor(salePrice * (percentage / 100));
-        } else {
+        if (percentage <= 0 || percentage > 100) {
             return res.json({ status: false, message: 'Invalid product offer percentage' });
         }
 
-        findProduct.salePrice = salePrice;
+        // Update sale price for each variant
+        findProduct.variants = findProduct.variants.map(variant => {
+            let salePrice = variant.regularPrice;
+
+            if (findCategory.categoryOffer > 0) {
+                salePrice -= Math.floor(salePrice * (findCategory.categoryOffer / 100));
+            }
+
+            salePrice -= Math.floor(salePrice * (percentage / 100));
+
+            return {
+                ...variant,
+                salePrice,
+            };
+        });
+
         findProduct.productOffer = parseInt(percentage);
         await findProduct.save();
 
@@ -284,23 +315,35 @@ const removeProductOffer = async (req, res) => {
             return res.json({ status: false, message: 'Category not found' });
         }
 
-        let salePrice = findProduct.regularPrice;
-
-        if (findCategory.categoryOffer > 0) {
-            salePrice -= Math.floor(salePrice * (findCategory.categoryOffer / 100));
+        if (!findProduct.variants || findProduct.variants.length === 0) {
+            return res.json({ status: false, message: 'No variants found for the product' });
         }
 
-        findProduct.salePrice = salePrice;
+        // Reset sale price for each variant
+        findProduct.variants = findProduct.variants.map(variant => {
+            let salePrice = variant.regularPrice;
+
+            if (findCategory.categoryOffer > 0) {
+                salePrice -= Math.floor(salePrice * (findCategory.categoryOffer / 100));
+            }
+
+            return {
+                ...variant,
+                salePrice,
+            };
+        });
+
         findProduct.productOffer = 0;
 
         await findProduct.save();
 
         res.json({ status: true, message: 'Product offer removed successfully' });
     } catch (error) {
-        console.error('Error removing offer product:', error);
+        console.error('Error removing product offer:', error);
         res.redirect('/admin/error-page');
     }
 };
+
 
 
 const blockProduct = async (req, res) => {
@@ -359,7 +402,7 @@ const editProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         const product = req.body;
-        console.log('req body: ',req.body);
+        console.log('req body: ', req.body);
 
         const existingProduct = await ProductV2.findById(productId);
         if (!existingProduct) {
@@ -369,7 +412,7 @@ const editProduct = async (req, res) => {
 
         const duplicateProduct = await ProductV2.findOne({
             productName: product.productName,
-            _id: { $ne: productId } 
+            _id: { $ne: productId }
         });
 
         if (duplicateProduct) {

@@ -62,18 +62,18 @@
                           <td class="product-name"><%= product.productName %></td>
                           <td class="brand-name"><%= product.brand %></td>
                           <td><%= categoriesnames[product.category._id] || 'Unknown' %></td>
-                          <td><%= product.variants[0].salePrice %></td>
+                          <td><%= product.salePrice %></td>
                           <td><%= product.productOffer %></td>
                           <td>
                             <% if (product.productOffer > 0) { %>
                             <!-- If product has an offer, show the "Edit Offer" button -->
-                            <button class="btn btn-sm btn-warning" onclick="removeOffer('<%= product._id %>')">Remove Offer</button>
+                            <button class="btn btn-sm btn-warning" onclick="removeOffer('<%= product._id %>')">Remove Product Offer</button>
                             <% } else { %>
                             <!-- If there is no offer, show the "Offer" button -->
-                            <button class="btn btn-sm btn-secondary" onclick="addOffer('<%= product._id %>')">Add Offer</button>
+                            <button class="btn btn-sm btn-secondary" onclick="addOffer('<%= product._id %>')">Add Product Offer</button>
                             <% } %>
                           </td>
-                          <td><%= product.variants[0].stock %></td>
+                          <td><%= product.stock %></td>
                           <td>
                             <% if (product.isBlocked === false) { %>
                             <form id="blockForm<%= product._id %>" style="display:inline;">
@@ -87,7 +87,7 @@
                             </form>
                             <% } %>
                           </td>
-                          <td><a href="/admin/editProduct?id=<%= product._id %>" class="btn btn-sm btn-primary">Edit</a></td>
+                          <td><a href="/admin/editProduct?id=<%= product._id %>" class="btn btn-sm btn-primary">Edit Product</a></td>
                         </tr>
                         <% }); %>
                       </tbody>
