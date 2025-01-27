@@ -34,7 +34,7 @@ router.get('/', userController.loadHomePage);
 router.get('/shop', userController.loadShopePage);
 router.get('/filter', userController.filterProduct);
 router.get('/filterPrice', userController.filterByPrice);
-router.post('/search', userController.searchProduts);
+router.post('/search', userController.searchProducts);
 
 //Product Management
 router.get('/productDetails', productcontroller.productDetails);

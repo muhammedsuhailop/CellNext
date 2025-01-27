@@ -4,7 +4,6 @@ const { Schema } = mongoose;
 const variantSchema = new Schema({
     color: { type: String, required: true },
     size: { type: String },
-    storage: { type: String },
     regularPrice: {
         type: Number,
         required: true

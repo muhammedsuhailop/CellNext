@@ -139,7 +139,7 @@
                       <div class="col-md-4">
                         <div id="size-error" class="error-message text-danger"></div>
                         <label for="storage-size">Storage Size</label>
-                        <input type="text" class="form-control" id="storage-size" name="storage" value="<%= variant.storage %>" placeholder="Enter Storage Size (e.g., 64GB)" list="storage-options" oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '')" />
+                        <input type="text" class="form-control" id="storage-size" name="size" value="<%= variant.size %>" placeholder="Enter Storage Size (e.g., 64GB)" list="storage-options" oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '')" />
                         <datalist id="storage-options">
                           <option value="NA"></option>
                           <option value="64GB"></option>
@@ -222,8 +222,8 @@
                   <div class="row mb-3">
                     <div class="col-md-4">
                       <div id="size-error" class="error-message text-danger"></div>
-                      <label for="new-storage-size">Storage Size</label>
-                      <input type="text" class="form-control" id="storage-size" name="storage" placeholder="Enter Storage Size (e.g., 64GB)" list="storage-options" oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '')" />
+                      <label for="new-storage-size">Select Size</label>
+                      <input type="text" class="form-control" id="storage-size" name="size" placeholder="Enter Size (e.g., 64GB)" list="storage-options" oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '')" />
                       <datalist id="storage-options">
                         <option value="NA"></option>
                         <option value="64GB"></option>
@@ -540,9 +540,9 @@
         }
       }
 
-      const storageInput = form.querySelector('[name="storage"]');
+      const storageInput = form.querySelector('[name="size"]');
       const storageError = form.querySelector('#size-error');
-      validateInput(storageInput, storageError, 'Storage Size is required');
+      validateInput(storageInput, storageError, 'Size is required');
 
       const colorInput = form.querySelector('[name="color"]');
       const colorError = form.querySelector('#color-error');

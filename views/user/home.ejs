@@ -85,10 +85,9 @@
     </div>
     <div class="row product__filter">
       <% products.slice(0, 4).forEach(function(product) { %>
-      <!-- Loop through the first 4 products -->
       <div class="col-lg-3 col-md-6 col-sm-6 col-md-6 col-sm-6 new-arrivals">
         <div class="product__item <%= product.onSale ? 'sale' : '' %>">
-          <div onclick="redirectToProduct('<%= product._id %>')" class="product__item__pic" style="background-image: url('<%= product.productImage[0] %>');">
+          <div onclick="redirectToProduct('<%= product._id %>')" class="product__item__pic" style="background-image: url('<%= product.variants[0] && product.variants[0].images[0] ? product.variants[0].images[0] : 'img/no-image.png' %>');">
             <span class="label"><%= product.productOffer > 5 ? 'Sale' : '' %></span>
             <ul class="product__hover">
               <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
@@ -98,7 +97,7 @@
           </div>
           <div class="product__item__text">
             <h6><%= product.productName %></h6>
-            <% if (product.quantity <= 0) { %>
+            <% if (product.variants[0].stock <= 0) { %>
             <a class="text-danger font-weight-bold">Out of Stock</a>
             <% } else { %>
             <a href="#" class="add-cart">+ Add To Cart</a>
@@ -112,10 +111,10 @@
               <% } %>
             </div>
             <h5>
-              ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(product.salePrice).replace('₹', '').trim() %>
+              ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(product.variants[0].salePrice).replace('₹', '').trim() %>
             </h5>
             <h6><span class="text-muted" style="text-decoration: line-through; font-size: 0.9em;">
-                ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(product.regularPrice).replace('₹', '').trim() %>
+                ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(product.variants[0].regularPrice).replace('₹', '').trim() %>
               </span></h6>
           </div>
         </div>

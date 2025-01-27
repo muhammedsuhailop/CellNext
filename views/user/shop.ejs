@@ -29,7 +29,14 @@
           <div class="row">
             <div class="col-lg-6 col-md-6 col-sm-6">
               <div class="shop__product__option__left">
-                <p>Showing <%= currentPage * 12 %>–<%= Math.min((currentPage + 1) * 12, totalProducts) %> of <%= totalProducts %> results</p>
+                <p>
+                  Showing
+                  <%= totalProducts === 0 
+                      ? 0 
+                      : (currentPage - 1) * 9 + 1 %>–
+                  <%= Math.min(currentPage * 9, totalProducts) %> of
+                  <%= totalProducts %> results
+                </p>
               </div>
             </div>
 
@@ -52,44 +59,63 @@
             <p class="text-center text-warning">No results found</p>
           </div>
           <% } else { %>
-          <% for(let i = 0; i < products.length; i++) { %>
+          <% for (let i = 0; i < products.length; i++) { %>
           <div class="col-lg-4 col-md-6 col-sm-6">
-            <div class="product__item <%= products[i].onSale ? 'sale' : '' %>">
-              <div onclick="redirectToProduct('<%= products[i]._id %>')" class="product__item__pic" style="background-image: url('<%= products[i].productImage[0] %>');">
-                <span class="label"><%= products[i].productOffer > 5 ? 'Sale' : '' %></span>
+            <div class="product__item <%= products[i].productOffer < products[i].variantRegularPrice ? '' : '' %>">
+              <!-- Product Image -->
+              <div onclick="redirectToProduct('<%= products[i].variantNumber %>')" class="product__item__pic" style="background-image: url('<%= products[i].variantImages[0] %>');">
+                <span class="label">
+                  <%= products[i].productOffer > 5 ? 'Sale' : '' %>
+                </span>
                 <ul class="product__hover">
                   <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
                   <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
                   <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
                 </ul>
               </div>
+
+              <!-- Product Details -->
               <div class="product__item__text">
-                <h6><%= products[i].productName %></h6>
-                <% if (products[i].quantity <= 0) { %>
+                <h6><%= products[i].productName %> <span class="text-muted"> |</span> <%= products[i].variantColor %>
+                  <% if (products[i].variantSize !== 'NA') { %>
+                  <span class="text-muted"> |</span> <%= products[i].variantSize %>
+                  <% } %>
+                </h6>
+                <% if (products[i].variantStock <= 0) { %>
                 <a class="text-danger font-weight-bold">Out of Stock</a>
                 <% } else { %>
                 <a href="#" class="add-cart">+ Add To Cart</a>
                 <% } %>
+
+                <!-- Rating -->
                 <div class="rating">
-                  <% for(let j = 0; j < products[i].rating; j++) { %>
+                  <% for (let j = 0; j < (products[i].rating || 0); j++) { %>
                   <i class="fa fa-star"></i>
                   <% } %>
-                  <% for(let j = products[i].rating; j < 5; j++) { %>
+                  <% for (let j = (products[i].rating || 0); j < 5; j++) { %>
                   <i class="fa fa-star-o"></i>
                   <% } %>
                 </div>
+
+                <!-- Price -->
                 <h5>
-                  ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(products[i].salePrice).replace('₹', '').trim() %>
+                  ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })
+                        .format(products[i].variantSalePrice).replace('₹', '').trim() %>
                 </h5>
-                <h6><span class="text-muted" style="text-decoration: line-through; font-size: 0.9em;">
-                    ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(products[i].regularPrice).replace('₹', '').trim() %>
-                  </span></h6>
+                <h6>
+                  <span class="text-muted" style="text-decoration: line-through; font-size: 0.9em;">
+                    ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })
+                          .format(products[i].variantRegularPrice).replace('₹', '').trim() %>
+                  </span>
+                </h6>
+
               </div>
             </div>
           </div>
           <% } %>
           <% } %>
         </div>
+
         <div class="row">
           <div class="col-lg-12">
             <div class="product__pagination">

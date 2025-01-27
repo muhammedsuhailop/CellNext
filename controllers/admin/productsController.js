@@ -79,11 +79,10 @@ const addProduct = async (req, res) => {
             return res.redirect('/admin/addProduct');
         }
 
-        const color = product.color === 'custom' ? product.custom_color : product.color;
+        const color = product.color.toUpperCase();
         const firstVariant = {
             color,
-            size: product.size,
-            storage: product.storage,
+            size: product.size.toUpperCase(),
             regularPrice: parseFloat(product.regularPrice),
             salePrice: parseFloat(product.salePrice),
             stock: parseInt(product.quantity, 10),
@@ -159,8 +158,8 @@ const addProductVariant = async (req, res) => {
         }
 
         const newVariant = {
-            color: variantData.color === 'custom' ? variantData.custom_color : variantData.color,
-            storage: variantData.storage,
+            color: variantData.color.toUpperCase(),
+            size: variantData.size.toUpperCase(),
             regularPrice: parseFloat(variantData.regularPrice),
             salePrice: parseFloat(variantData.salePrice),
             stock: parseInt(variantData.quantity, 10),
@@ -208,7 +207,7 @@ const getAllProducts = async (req, res) => {
                 regularPrice: variant.regularPrice,
                 salePrice: variant.salePrice,
                 color: variant.color,
-                storage: variant.storage,
+                size: variant.size,
                 stock: variant.stock,
                 isBlocked: product.isBlocked,
                 productOffer: product.productOffer,
@@ -520,6 +519,7 @@ const editVariant = async (req, res) => {
                     }
                     await sharp(originalPath)
                         .resize(500, 500)
+                        .jpeg({ quality: 100, chromaSubsampling: '4:4:4' })
                         .toFile(croppedImagePath);
                     console.log('Cropping completed.');
                     images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
@@ -530,8 +530,8 @@ const editVariant = async (req, res) => {
             }
         }
 
-        variant.color = updatedVariant.color === 'custom' ? updatedVariant.custom_color : updatedVariant.color;
-        variant.storage = updatedVariant.storage;
+        variant.color = updatedVariant.color.toUpperCase();
+        variant.size = updatedVariant.size.toUpperCase();
         variant.regularPrice = updatedVariant.regularPrice;
         variant.salePrice = updatedVariant.salePrice;
         variant.stock = updatedVariant.quantity;
