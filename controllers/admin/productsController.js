@@ -58,6 +58,11 @@ const addProduct = async (req, res) => {
             );
 
             try {
+                const imageMetadata = await sharp(originalPath).metadata();
+                if (!imageMetadata) {
+                    console.error('Invalid or corrupt image file:', originalPath);
+                    continue;
+                }
                 await sharp(originalPath)
                     .resize(500, 500)
                     .toFile(croppedImagePath);
@@ -508,6 +513,11 @@ const editVariant = async (req, res) => {
                 }
 
                 try {
+                    const imageMetadata = await sharp(originalPath).metadata();
+                    if (!imageMetadata) {
+                        console.error('Invalid or corrupt image file:', originalPath);
+                        continue;
+                    }
                     await sharp(originalPath)
                         .resize(500, 500)
                         .toFile(croppedImagePath);
