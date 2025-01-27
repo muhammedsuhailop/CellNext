@@ -4293,3 +4293,45 @@ ol {
 .color-label.disabled .color-name {
 	color: #999;
 }
+.product__details__option__size {
+	margin-bottom: 20px;
+  }
+  
+  .product__details__option__size span {
+	font-size: 16px;
+	font-weight: bold;
+	color: #333;
+	display: block;
+	margin-bottom: 10px;
+  }
+  
+  .size-label {
+	display: inline-block;
+	text-align: center;
+	font-size: 14px;
+	font-weight: bold;
+	text-transform: uppercase;
+	color: #333;
+	border: 1px solid #ccc;
+	padding: 8px 12px;
+	border-radius: 4px;
+	margin-right: 10px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+  }
+  
+  .size-label.active {
+	background-color: #333;
+	color: #fff;
+	border-color: #333;
+  }
+  
+  .size-label:hover {
+	background-color: #f1f1f1;
+	border-color: #aaa;
+  }
+  
+  .size-label input {
+	display: none; /* Hide the radio button */
+  }
+  

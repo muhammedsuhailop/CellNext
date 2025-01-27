@@ -115,40 +115,38 @@
             <p><%= product.description %></p>
             <div class="product__details__option">
               <% if (category.name !== 'Earphones') { %>
-              <div class="product__details__option__size">
-                <span>Size:</span>
+              <!-- <div class="product__details__option__size"> -->
+              <span>Size:</span>
 
-                <% 
+              <% 
                     const allSizes = [...new Set(product.variants.map(variant => variant.size))];
-                    
                     const currentSize = variant.size;
                   %>
 
-                <% allSizes.forEach(size => { %>
-                <label class="<%= currentSize === size ? 'active' : 'disabledSize text-muted' %>" for="size-<%= size %>">
-                  <%= size %>
-
-                  <input type="radio" id="size-<%= size %>" name="size" value="<%= size %>" <%= currentSize === size ? 'checked' : '' %> <%= currentSize !== size ? 'disabled' : '' %> />
-                </label>
-                <% }) %>
-              </div>
+              <% allSizes.forEach((size) => { %>
+              <% 
+                      const variantIndex = product.variants.findIndex(variant => variant.size === size);
+                    %>
+              <label class="size-label <%= currentSize === size ? 'active' : '' %>" data-variant-index="<%= variantIndex %>" onclick="navigateToVariant('<%= product._id %>', <%= variantIndex %>)">
+                <%= size %>
+                <input type="radio" name="size" value="<%= size %>" <%= currentSize === size ? 'checked' : '' %> />
+              </label>
+              <% }) %>
+              <!-- </div> -->
               <% } %>
 
               <span>Color: <b> <%= variant.color %></b></span>
-
               <% 
                   const allColors = [...new Set(product.variants.map(variant => variant.color))];
                   const currentColor = variant.color; 
                   %>
               <% allColors.forEach(color => { %>
-              <label class="color-label <%= color === currentColor ? 'active' : '' %> c-<%= color.toLowerCase().replace(/\s+/g, '') %>">
+              <label class="color-label <%= color === currentColor ? 'active' : '' %> c-<%= color.toLowerCase().replace(/\s+/g, '') %>" onclick="navigateToVariant('<%= product._id %>', <%= product.variants.findIndex(v => v.color === color) %>)">
                 <span class="color-swatch" style="background-color: var(--color-<%= color.toLowerCase().replace(/\s+/g, '') %>);"></span>
                 <span class="color-name"><%= color %></span>
                 <input type="radio" name="color" value="<%= color %>" <%= color === currentColor ? 'checked' : '' %> />
               </label>
               <% }) %>
-
-
             </div>
             <div class="product__details__cart__option">
               <% if (quantity <= 0) { %>
@@ -438,4 +436,9 @@
 
     updateActiveTab();
   });
+</script>
+<script>
+  function navigateToVariant(productId, variantIndex) {
+    window.location.href = `/productDetails?id=${productId}&variant=${variantIndex}`;
+  }
 </script>
