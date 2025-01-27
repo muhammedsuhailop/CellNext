@@ -1,32 +1,50 @@
 const User = require('../../models/userSchema');
 const Category = require('../../models/categorySchema');
-const Product = require('../../models/productSchema');
+const ProductV2 = require('../../models/productsSchemaV2');
 const Brand = require('../../models/brandSchema');
 
 const productDetails = async (req, res) => {
     try {
         const userId = req.session.user;
-        const userData = await User.findById(userId);
-        const productId = req.query.id;
-        const product = await Product.findById(productId);
+        const userData = userId ? await User.findById(userId) : null;
+        const productId = req.query.id; // Product ID
+        const variantIndex = parseInt(req.query.variant); // Variant index
+
+        // Fetch the product by ID
+        const product = await ProductV2.findById(productId).lean();
+        if (!product) {
+            return res.redirect('pageNotFound');
+        }
+
+        // Fetch the selected variant
+        const selectedVariant = product.variants[variantIndex];
+        if (!selectedVariant) {
+            return res.redirect('pageNotFound');
+        }
+
+        // Fetch the category and offers
         const findCategory = await Category.findOne({ _id: product.category });
         const categoryOffer = findCategory?.categoryOffer || 0;
         const productOffer = product.productOffer || 0;
-        const totalDiscountPercentage = (((product.regularPrice - product.salePrice) / product.regularPrice) * 100).toFixed(0);
+        const totalDiscountPercentage = (
+            ((selectedVariant.regularPrice - selectedVariant.salePrice) / selectedVariant.regularPrice) * 100
+        ).toFixed(0);
 
-        let relatedProducts = await Product.find({
+        // Fetch related products from the same category
+        let relatedProducts = await ProductV2.find({
             category: product.category,
             _id: { $ne: productId },
-            isBlocked: false
+            isBlocked: false,
         })
             .limit(4)
             .lean();
 
+        // If fewer than 4 related products, fetch additional products by brand
         if (relatedProducts.length < 4) {
-            const additionalProducts = await Product.find({
+            const additionalProducts = await ProductV2.find({
                 brand: product.brand,
                 _id: { $nin: [productId, ...relatedProducts.map((p) => p._id)] },
-                isBlocked: false
+                isBlocked: false,
             })
                 .limit(4 - relatedProducts.length)
                 .lean();
@@ -34,20 +52,23 @@ const productDetails = async (req, res) => {
             relatedProducts = [...relatedProducts, ...additionalProducts];
         }
 
+        // Render the product details page
         res.render('product-details', {
             user: userData,
             product: product,
-            quantity: product.quantity,
+            variant: selectedVariant, // Pass the selected variant
+            quantity: selectedVariant.stock,
             totalDiscountPercentage,
             categoryOffer,
             category: findCategory,
-            relatedProducts
+            relatedProducts,
         });
     } catch (error) {
-        console.error('search error:', error);
+        console.error('Product details error:', error);
         res.redirect('pageNotFound');
     }
-}
+};
+
 
 module.exports = {
     productDetails,

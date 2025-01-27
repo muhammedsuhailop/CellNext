@@ -314,6 +314,7 @@ const loadShopePage = async (req, res) => {
 
         const productVariants = products.flatMap(product =>
             product.variants.map((variant, variantIndex) => ({
+                _id: product._id,
                 productName: product.productName,
                 description: product.description,
                 brand: product.brand,
@@ -394,6 +395,7 @@ const filterProduct = async (req, res) => {
 
         const allVariants = findProducts.flatMap(product =>
             product.variants.map(variant => ({
+                _id: product._id,
                 productName: product.productName,
                 description: product.description,
                 brand: product.brand,
@@ -480,6 +482,7 @@ const filterByPrice = async (req, res) => {
             product.variants
                 .filter(variant => variant.salePrice > req.query.gt && variant.salePrice < req.query.lt)
                 .map(variant => ({
+                    _id: product._id,
                     productName: product.productName,
                     description: product.description,
                     brand: product.brand,
@@ -554,6 +557,7 @@ const searchProducts = async (req, res) => {
 
             searchResult = products.flatMap(product =>
                 product.variants.map(variant => ({
+                    _id: product._id,
                     productName: product.productName,
                     description: product.description,
                     brand: product.brand,

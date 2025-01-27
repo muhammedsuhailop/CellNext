@@ -63,7 +63,7 @@
           <div class="col-lg-4 col-md-6 col-sm-6">
             <div class="product__item <%= products[i].productOffer < products[i].variantRegularPrice ? '' : '' %>">
               <!-- Product Image -->
-              <div onclick="redirectToProduct('<%= products[i].variantNumber %>')" class="product__item__pic" style="background-image: url('<%= products[i].variantImages[0] %>');">
+              <div onclick="redirectToProduct('<%=products[i]._id%>','<%= products[i].variantNumber %>')" class="product__item__pic" style="background-image: url('<%= products[i].variantImages[0] %>');">
                 <span class="label">
                   <%= products[i].productOffer > 5 ? 'Sale' : '' %>
                 </span>
@@ -162,8 +162,8 @@
 <script src="js/owl.carousel.min.js"></script>
 <script src="js/main.js"></script>
 <script>
-  function redirectToProduct(productId) {
-    window.location.href = `/productDetails?id=${productId}`;
+  function redirectToProduct(productId, variant) {
+    window.location.href = `/productDetails?id=${productId}&variant=${variant}`;
   }
 </script>
 

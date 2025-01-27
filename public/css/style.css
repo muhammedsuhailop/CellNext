@@ -4006,3 +4006,290 @@ ol {
 .image-nav:hover {
 	background-color: rgba(0, 0, 0, 0.8);
 }
+
+/* Define Color Map Using CSS Variables */
+:root {
+	--color-titanium: #D1D5DB;
+	--color-teal: #008080;
+	--color-graphite: #4B4B4B;
+	--color-starlight: #ECE5C7;
+	--color-midnight: #191970;
+	--color-gold: #FFD700;
+	--color-pacificBlue: #1CA9C9;
+	--color-phantomBlack: #000000;
+	--color-roseGold: #B76E79;
+	--color-emerald: #50C878;
+	--color-coral: #FF7F50;
+	--color-navyBlue: #000080;
+
+	/* Additional Colors */
+	--color-white: #FFFFFF;
+	--color-black: #000000;
+	--color-red: #FF0000;
+	--color-blue: #0000FF;
+	--color-green: #008000;
+	--color-yellow: #FFFF00;
+	--color-pink: #FFC0CB;
+	--color-purple: #800080;
+	--color-orange: #FFA500;
+
+	/* Smartphone-Specific Colors */
+	--color-lavender: #E6E6FA;
+	--color-mintGreen: #98FF98;
+	--color-burgundy: #800020;
+	--color-champagne: #FAD6A5;
+	--color-sapphire: #0F52BA;
+	--color-graphiteGray: #2C2C2C;
+	--color-spaceGray: #1C1C1E;
+	--color-arcticSilver: #D6D6D6;
+	--color-forestGreen: #228B22;
+	--color-sunnyYellow: #FFEA00;
+	--color-aluminum: #A9A9A9;
+	/* Aluminum color */
+	--color-silver: #C0C0C0;
+	/* Silver color */
+}
+
+
+
+/* Color Mapping for all colors in the color map */
+
+/* General Colors */
+.color-label.c-white .color-swatch {
+	background: var(--color-white);
+	/* White color swatch */
+}
+
+.color-label.c-black .color-swatch {
+	background: var(--color-black);
+	/* Black color swatch */
+}
+
+.color-label.c-red .color-swatch {
+	background: var(--color-red);
+	/* Red color swatch */
+}
+
+.color-label.c-blue .color-swatch {
+	background: var(--color-blue);
+	/* Blue color swatch */
+}
+
+.color-label.c-green .color-swatch {
+	background: var(--color-green);
+	/* Green color swatch */
+}
+
+.color-label.c-yellow .color-swatch {
+	background: var(--color-yellow);
+	/* Yellow color swatch */
+}
+
+.color-label.c-pink .color-swatch {
+	background: var(--color-pink);
+	/* Pink color swatch */
+}
+
+.color-label.c-purple .color-swatch {
+	background: var(--color-purple);
+	/* Purple color swatch */
+}
+
+.color-label.c-orange .color-swatch {
+	background: var(--color-orange);
+	/* Orange color swatch */
+}
+
+/* Smartphone-Specific Colors */
+.color-label.c-titanium .color-swatch {
+	background: var(--color-titanium);
+	/* Titanium color swatch */
+}
+
+.color-label.c-teal .color-swatch {
+	background: var(--color-teal);
+	/* Teal color swatch */
+}
+
+.color-label.c-graphite .color-swatch {
+	background: var(--color-graphite);
+	/* Graphite color swatch */
+}
+
+.color-label.c-starlight .color-swatch {
+	background: var(--color-starlight);
+	/* Starlight color swatch */
+}
+
+.color-label.c-midnight .color-swatch {
+	background: var(--color-midnight);
+	/* Midnight color swatch */
+}
+
+.color-label.c-gold .color-swatch {
+	background: var(--color-gold);
+	/* Gold color swatch */
+}
+
+.color-label.c-pacificBlue .color-swatch {
+	background: var(--color-pacificBlue);
+	/* Pacific Blue color swatch */
+}
+
+.color-label.c-phantomBlack .color-swatch {
+	background: var(--color-phantomBlack);
+	/* Phantom Black color swatch */
+}
+
+.color-label.c-roseGold .color-swatch {
+	background: var(--color-roseGold);
+	/* Rose Gold color swatch */
+}
+
+.color-label.c-emerald .color-swatch {
+	background: var(--color-emerald);
+	/* Emerald color swatch */
+}
+
+.color-label.c-coral .color-swatch {
+	background: var(--color-coral);
+	/* Coral color swatch */
+}
+
+.color-label.c-navyBlue .color-swatch {
+	background: var(--color-navyBlue);
+	/* Navy Blue color swatch */
+}
+
+.color-label.c-lavender .color-swatch {
+	background: var(--color-lavender);
+	/* Lavender color swatch */
+}
+
+.color-label.c-mintGreen .color-swatch {
+	background: var(--color-mintGreen);
+	/* Mint Green color swatch */
+}
+
+.color-label.c-burgundy .color-swatch {
+	background: var(--color-burgundy);
+	/* Burgundy color swatch */
+}
+
+.color-label.c-champagne .color-swatch {
+	background: var(--color-champagne);
+	/* Champagne color swatch */
+}
+
+.color-label.c-sapphire .color-swatch {
+	background: var(--color-sapphire);
+	/* Sapphire color swatch */
+}
+
+.color-label.c-graphiteGray .color-swatch {
+	background: var(--color-graphiteGray);
+	/* Graphite Gray color swatch */
+}
+
+.color-label.c-spaceGray .color-swatch {
+	background: var(--color-spaceGray);
+	/* Space Gray color swatch */
+}
+
+.color-label.c-arcticSilver .color-swatch {
+	background: var(--color-arcticSilver);
+	/* Arctic Silver color swatch */
+}
+
+.color-label.c-forestGreen .color-swatch {
+	background: var(--color-forestGreen);
+	/* Forest Green color swatch */
+}
+
+.color-label.c-sunnyYellow .color-swatch {
+	background: var(--color-sunnyYellow);
+	/* Sunny Yellow color swatch */
+}
+
+.color-label.c-aluminum .color-swatch {
+	background: var(--color-aluminum);
+	/* Aluminum color swatch */
+}
+
+.color-label.c-silver .color-swatch {
+	background: var(--color-silver);
+	/* Silver color swatch */
+}
+
+.product__color__selector {
+	margin-bottom: 30px;
+}
+
+.product__color__selector span {
+	color: #111111;
+	font-size: 16px;
+	font-weight: bold;
+	display: inline-block;
+	margin-bottom: 10px;
+}
+
+.color-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+	margin-top: 10px;
+}
+
+.color-label {
+	height: 40px;
+	width: 40px;
+	top: 24px;
+	margin-left: 35px;
+	border-radius: 50%;
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	border: 2px solid transparent;
+	transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
+	border-color: #8b8b8b;
+}
+
+.color-label.active {
+	border-color: #111111;
+	transform: scale(1.1);
+}
+
+.color-label input {
+	position: absolute;
+	visibility: hidden;
+}
+
+.color-label .color-swatch {
+	height: 100%;
+	width: 100%;
+	border-radius: 50%;
+	display: inline-block;
+	position: relative;
+	background-color: var(--color-placeholder, #000);
+}
+
+.color-label .color-name {
+	text-align: center;
+	font-size: 12px;
+	color: #333;
+	margin-top: 5px;
+}
+
+.color-label:hover .color-swatch {
+	transform: scale(1.05);
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.color-label.disabled .color-swatch {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.color-label.disabled .color-name {
+	color: #999;
+}

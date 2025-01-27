@@ -19,8 +19,8 @@
       <div class="row">
         <div class="col-lg-3 col-md-3">
           <ul class="nav nav-tabs" role="tablist">
-            <% if (product.productImage && product.productImage.length > 0) { %>
-            <% product.productImage.forEach((image, index) => { %>
+            <% if (variant.images && variant.images.length > 0) { %>
+            <% variant.images.forEach((image, index) => { %>
             <li class="nav-item">
               <a class="nav-link <%= index === 0 ? 'active' : '' %>" data-toggle="tab" href="#tabs-<%= index + 1 %>" role="tab">
                 <div class="product__thumb__pic" style="background-image: url('<%= image %>');"></div>
@@ -30,7 +30,7 @@
             <% } else { %>
             <li class="nav-item">
               <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab">
-                <div class="product__thumb__pic" style="background-image: url('/img/default-thumbnail.png');"></div>
+                <div class="product__thumb__pic" style="background-image: url('/img/no-image.png');"></div>
               </a>
             </li>
             <% } %>
@@ -38,8 +38,8 @@
         </div>
         <div class="col-lg-6 col-md-9 position-relative">
           <div class="tab-content">
-            <% if (product.productImage && product.productImage.length > 0) { %>
-            <% product.productImage.forEach((image, index) => { %>
+            <% if (variant.images && variant.images.length > 0) { %>
+            <% variant.images.forEach((image, index) => { %>
             <div class="tab-pane <%= index === 0 ? 'active' : '' %>" id="tabs-<%= index + 1 %>" role="tabpanel" data-index="<%= index %>">
               <div class="product__details__pic__item text-center">
                 <img src="<%= image %>" alt="Product Image" class="zoom-image" data-zoom-image="<%= image %>">
@@ -49,7 +49,7 @@
             <% } else { %>
             <div class="tab-pane active" id="tabs-1" role="tabpanel">
               <div class="product__details__pic__item text-center">
-                <img src="/img/default-product.png" alt="Default Product Image" class="zoom-image" data-zoom-image="/img/default-product.png">
+                <img src="/img/no-image.png" alt="Default Product Image" class="zoom-image" data-zoom-image="/img/no-image.png">
               </div>
             </div>
             <% } %>
@@ -102,80 +102,56 @@
                         style: 'currency', 
                         currency: 'INR', 
                         minimumFractionDigits: 2 
-                    }).format(product.salePrice).replace('₹', '').trim() %>
+                    }).format(variant.salePrice).replace('₹', '').trim() %>
               <span style="font-size: 0.5em;">
                 ₹ <%= new Intl.NumberFormat('en-IN', { 
                         style: 'currency', 
                         currency: 'INR', 
                         minimumFractionDigits: 2 
-                        }).format(product.regularPrice).replace('₹', '').trim() %>
+                        }).format(variant.regularPrice).replace('₹', '').trim() %>
               </span>
             </h3>
 
             <p><%= product.description %></p>
             <div class="product__details__option">
-              <% if (category.name === 'Smartphones') { %>
+              <% if (category.name !== 'Earphones') { %>
               <div class="product__details__option__size">
-                <span>Storage:</span>
+                <span>Size:</span>
 
                 <% 
-                    const storageOptions = ['64GB', '128GB', '256GB', '512GB', '1024GB'];
+                    const allSizes = [...new Set(product.variants.map(variant => variant.size))];
                     
-                    const currentStorage = product.storage;
-                    const currentStorageValue = parseInt(currentStorage.replace('GB', '')); 
-                    
-                    const smallerStorages = storageOptions.filter(size => parseInt(size.replace('GB', '')) < currentStorageValue);
-                    const largerStorages = storageOptions.filter(size => parseInt(size.replace('GB', '')) > currentStorageValue);
-                    
-                    let displayedStorages = [];
-                    
-                    if (smallerStorages.length > 0) {
-                        displayedStorages = [
-                        smallerStorages[smallerStorages.length - 1], 
-                        currentStorage, 
-                        largerStorages[0] 
-                        ];
-                    } else {
-                        displayedStorages = [
-                        currentStorage, 
-                        largerStorages[0], 
-                        largerStorages[1] 
-                        ];
-                    }
-                    
-                    displayedStorages = [...new Set(displayedStorages)];
-                    %>
+                    const currentSize = variant.size;
+                  %>
 
-                <% displayedStorages.forEach(size => { %>
-                <label class="<%= currentStorage === size ? 'active' : 'disabledStorage text-muted' %>" for="storage-<%= size %>">
+                <% allSizes.forEach(size => { %>
+                <label class="<%= currentSize === size ? 'active' : 'disabledSize text-muted' %>" for="size-<%= size %>">
                   <%= size %>
-                  <input type="radio" id="storage-<%= size %>" name="storage" value="<%= size %>" <%= currentStorage === size ? 'checked' : '' %> <%= currentStorage !== size ? 'disabledStorage' : '' %> />
+
+                  <input type="radio" id="size-<%= size %>" name="size" value="<%= size %>" <%= currentSize === size ? 'checked' : '' %> <%= currentSize !== size ? 'disabled' : '' %> />
                 </label>
                 <% }) %>
               </div>
               <% } %>
 
-              <div class="product__details__option__color">
-                <span>Color: <strong> <%= product.color %></strong> </span>
-                <label class="c-1" for="sp-1">
-                  <input type="radio" id="sp-1">
-                </label>
-                <!-- <label class="c-2" for="sp-2">
-                  <input type="radio" id="sp-2">
-                </label>
-                <label class="c-3" for="sp-3">
-                  <input type="radio" id="sp-3">
-                </label>
-                <label class="c-4" for="sp-4">
-                  <input type="radio" id="sp-4">
-                </label>
-                <label class="c-9" for="sp-9">
-                  <input type="radio" id="sp-9">
-                </label> -->
-              </div>
+              <span>Color: <b> <%= variant.color %></b></span>
+
+              <% 
+                  const allColors = [...new Set(product.variants.map(variant => variant.color))];
+                  const currentColor = variant.color; 
+                  %>
+              <% allColors.forEach(color => { %>
+              <label class="color-label <%= color === currentColor ? 'active' : '' %> c-<%= color.toLowerCase().replace(/\s+/g, '') %>">
+                <span class="color-swatch" style="background-color: var(--color-<%= color.toLowerCase().replace(/\s+/g, '') %>);"></span>
+                <span class="color-name"><%= color %></span>
+                <input type="radio" name="color" value="<%= color %>" <%= color === currentColor ? 'checked' : '' %> />
+              </label>
+              <% }) %>
+
+
             </div>
             <div class="product__details__cart__option">
-              <% if (product.quantity <= 0) { %>
+              <% if (quantity <= 0) { %>
               <span class="text-danger font-weight-bold">Out of Stock</span>
               <% } else { %>
               <div class="quantity">
@@ -185,9 +161,9 @@
               </div>
               <a href="#" class="primary-btn">Add to Cart</a>
             </div>
-            <% if (product.quantity <10) { %>
+            <% if (quantity <10) { %>
             <p class="text-warning">
-              <strong>Hurry up!</strong> Only <%= product.quantity %> left in stock.
+              <strong>Hurry up!</strong> Only <%= quantity %> left in stock.
             </p>
             <% } %>
             <% } %>
@@ -344,7 +320,7 @@
       <% for(let i = 0; i < relatedProducts.length; i++) { %>
       <div class="col-lg-3 col-md-6 col-sm-6">
         <div class="product__item <%= relatedProducts[i].onSale ? 'sale' : '' %>">
-          <div onclick="redirectToProduct('<%= relatedProducts[i]._id %>')" class="product__item__pic" style="background-image: url('<%= relatedProducts[i].productImage[0] %>');">
+          <div onclick="redirectToProduct('<%= relatedProducts[i]._id %>')" class="product__item__pic" style="background-image: url('<%= relatedProducts[i].variants[0].images[0] %>');">
             <span class="label"><%= relatedProducts[i].productOffer > 5 ? 'Sale' : '' %></span>
             <ul class="product__hover">
               <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
