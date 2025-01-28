@@ -46,5 +46,8 @@ router.post('/verify-forgot-password-otp', profileController.verifyForgetPassOtp
 router.post('/forgot-password-resend-otp', profileController.resendOtp);
 router.get('/reset-password', profileController.getResetPassword);
 router.patch('/reset-password', profileController.resetPassword);
+router.get('/my-account', userAuth, profileController.loadMyAccounts);
+router.get('/edit-profile', userAuth, profileController.loadeditProfile);
+router.put('/update-profile', userAuth, profileController.editProfile);
 
 module.exports = router

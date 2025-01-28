@@ -1,0 +1,165 @@
+<%- include('../../views/partials/user/header') %>
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb__text">
+          <div class="breadcrumb__links">
+            <a href="/">Home</a>
+            <a href="/my-account">My Account</a>
+            <span>Edit Account</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<section class="shop spad">
+  <div class="container">
+    <div class="row">
+      <%- include('../../views/partials/user/acc-sidebar') %>
+
+      <section class="accounts">
+        <div class="container-fluid">
+          <div class="edit-prof">
+            <form id="updateProfileForm">
+              <div class="row w-100">
+                <div class="col-12">
+                  <h6 class="coupon__code"> My Account</h6>
+                  <h6 class="checkout__title"><i class="bx bx-edit-alt px-3" style="font-size: 1rem;"></i>Edit Profile</h6>
+                </div>
+                <div class="col-12">
+                  <div class="profile__input">
+                    <span class="text-danger name-error" style="display: none;">Error : </span>
+                    <p>First Name <span>*</span></p>
+                    <input type="text" id="firstName" placeholder="<%= user.name %>" name="firstName" value="<%= user.name %>">
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="checkout__input">
+                    <p>Last Name </p>
+                    <input type="text" id="lastName" placeholder="Enter Last Name" name="lastName" value="">
+                  </div>
+                </div>
+                <div class="col-12 ">
+                  <div class="checkout__input">
+                    <span class="text-danger phone-error" style="display: none;">Error : </span>
+                    <p>Mobile Number <span>*</span></p>
+                    <input type="text" id="phone" placeholder="<%= user.phone %>" name="phone" value="<%= user.phone %>">
+                  </div>
+                </div>
+              </div>
+              <div class="row w-100">
+                <div class="col-md-12 d-flex justify-content-center ">
+                  <div class="checkout__input">
+                    <button type="submit" class="prof-btn">Update Information</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+
+<!-- Footer Section -->
+<%- include('../../views/partials/user/footer') %>
+
+<!-- Search Begin -->
+<div class="search-model">
+  <div class="h-100 d-flex align-items-center justify-content-center">
+    <div class="search-close-switch">+</div>
+    <form class="search-model-form">
+      <input type="text" id="search-input" placeholder="Search here.....">
+    </form>
+  </div>
+</div>
+<!-- Search End -->
+
+<!-- Js Plugins -->
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery.nice-select.min.js"></script>
+<script src="js/jquery.nicescroll.min.js"></script>
+<script src="js/jquery.magnific-popup.min.js"></script>
+<script src="js/jquery.countdown.min.js"></script>
+<script src="js/jquery.slicknav.js"></script>
+<script src="js/mixitup.min.js"></script>
+<script src="js/owl.carousel.min.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+  $(document).ready(function() {
+    $('#updateProfileForm').on('submit', function(event) {
+      event.preventDefault();
+
+      var firstName = $('#firstName').val();
+      var lastName = $('#lastName').val();
+      var phone = $('#phone').val();
+
+      $('.name-error').hide();
+      $('.phone-error').hide();
+
+      if (!firstName || !/^[a-zA-Z ]+$/.test(firstName)) {
+        $('.name-error').text('Please enter a valid first name (only alphabets allowed).').show();
+        return;
+      }
+      if (lastName) {
+        if (!/^[a-zA-Z ]+$/.test(lastName)) {
+          $('.name-error').text('Please enter a valid name (only alphabets allowed).').show();
+          return;
+        }
+      }
+
+      if (!phone || !/^\d{10}$/.test(phone)) {
+        $('.phone-error').text('Please enter a valid phone number (10 digits).').show();
+        return;
+      }
+
+      $.ajax({
+        url: '/update-profile',
+        method: 'PUT',
+        data: {
+          firstName: firstName,
+          lastName: lastName,
+          phone: phone
+        },
+        success: function(response) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: response.message,
+            timer: 1500,
+            showConfirmButton: false,
+            willClose: () => {
+              window.location.href = '/my-account';
+            }
+          });
+        },
+        error: function(xhr, status, error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: xhr.message || error,
+            timer: 1500,
+            showConfirmButton: false,
+            willClose: () => {
+              window.location.reload();
+            }
+          });
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+
+</html>

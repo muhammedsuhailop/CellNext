@@ -87,7 +87,9 @@
       <% products.slice(0, 4).forEach(function(product) { %>
       <div class="col-lg-3 col-md-6 col-sm-6 col-md-6 col-sm-6 new-arrivals">
         <div class="product__item <%= product.onSale ? 'sale' : '' %>">
+          <% /* eslint-disable */ %>
           <div onclick="redirectToProduct('<%= product._id %>')" class="product__item__pic" style="background-image: url('<%= product.variants[0] && product.variants[0].images[0] ? product.variants[0].images[0] : 'img/no-image.png' %>');">
+            <% /* eslint-enable */ %>
             <span class="label"><%= product.productOffer > 5 ? 'Sale' : '' %></span>
             <ul class="product__hover">
               <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>

@@ -1,0 +1,45 @@
+<!-- Sidebar -->
+<div class="col-lg-3 col-md-4 sidebar p-3">
+  <h5 class="text-center mb-3">My Account</h5>
+  <nav class="nav flex-column">
+    <a href="/my-account" class="nav-link">
+      <i class="bx bx-user"></i> My Profile
+    </a>
+    <a href="/edit-profile" class="nav-link">
+      <i class="bx bx-edit-alt"></i> Edit Profile
+    </a>
+    <a href="#orders" class="nav-link">
+      <i class="bx bx-cart"></i> Orders
+    </a>
+    <a href="#wishlist" class="nav-link">
+      <i class="bx bx-heart"></i> Wishlist
+    </a>
+    <a href="#wallet" class="nav-link">
+      <i class="bx bx-wallet"></i> Wallet
+    </a>
+    <a href="#coupons" class="nav-link">
+      <i class="bx bx-gift"></i> Coupons
+    </a>
+    <a href="#track-order" class="nav-link">
+      <i class="bx bx-search"></i> Track Order
+    </a>
+    <a href="#settings" class="nav-link">
+      <i class="bx bx-cog"></i> Settings
+    </a>
+    <a href="#logout" class="nav-link">
+      <i class="bx bx-log-out"></i> Logout
+    </a>
+  </nav>
+</div>
+
+<script>
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const currentUrl = window.location.pathname;
+
+  navLinks.forEach(link => {
+    if (link.getAttribute('href') === currentUrl) {
+      link.classList.add('active');
+    }
+  });
+</script>
