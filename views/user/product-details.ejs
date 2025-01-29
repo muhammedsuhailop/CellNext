@@ -360,81 +360,119 @@
 <!-- Related Section End -->
 
 <script>
-  console.log('add to cart button clicked');
   document.getElementById('add-to-cart-btn').addEventListener('click', function() {
    console.log('add to cart button clicked');
  
-   // Get product details
-   const productId = '<%= product._id %>';  // Inject product ID from server
-   const variantId = getSelectedVariantId(); // Get selected variant ID
-   const quantity = parseInt(document.getElementById('cart-quantity').value, 10); // Correct quantity input field ID
+   const productId = '<%= product._id %>';  
+   const variantId = getSelectedVariantId(); 
+   const quantity = parseInt(document.getElementById('cart-quantity').value, 10); 
+   if(quantity > 5 ){
+    Swal.fire({
+        icon: 'error',
+        title: 'Exceeded Quantity Limit',
+        text:'Select qunatity maximum upto 5.',
+        confirmButtonText: 'Go to Cart',
+      })
+      return;
+   }
  
    if (variantId == null || isNaN(quantity) || quantity <= 0) {
      alert('Please select a valid variant and quantity.');
      return;
    }
  
-   // Prepare the data to send to the server
    const cartData = {
      productId: productId,
      variantId: variantId,
      quantity: quantity
    };
  
-   // Make an API request to add to cart
    fetch('/cart/add', {
-     method: 'POST',
-     headers: {
-       'Content-Type': 'application/json',
-       'Authorization': 'Bearer ' + localStorage.getItem('authToken')  // Optional for user authentication
-     },
-     body: JSON.stringify(cartData),
-   })
-   .then(response => response.json())
-   .then(data => {
-     if (data.success) {
-       alert('Item added to cart!');
-       updateCartDisplay(data.cart); // Update the cart display
-     } else {
-       alert('Failed to add item to cart. Please try again.');
-     }
-   })
-   .catch(error => {
-     console.error('Error adding to cart:', error);
-     alert('There was an error processing your request.');
-   });
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+  },
+  body: JSON.stringify(cartData),
+})
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Item added to cart!',
+        text: data.message || 'You can view your cart or continue shopping.',
+        confirmButtonText: 'Go to Cart',
+      }).then(() => {
+        updateCartDisplay(data.cart);  
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to add item to cart',
+        text: data.message ||'Please try again later.',
+        confirmButtonText: 'Try Again'
+      });
+    }
+  })
+  .catch(error => {
+    console.error('Error adding to cart:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'There was an error',
+      text: error.message || 'There was an error processing your request. Please try again later.',
+      confirmButtonText: 'OK'
+    });
+  });
+
  });
  
- // Function to get selected variantId based on size and color
  function getSelectedVariantId() {
-   const selectedSize = document.querySelector('input[name="size"]:checked');
-   const selectedColor = document.querySelector('input[name="color"]:checked');
+  const selectedSize = document.querySelector('input[name="size"]:checked');
+  const selectedColor = document.querySelector('input[name="color"]:checked');
+  
+  if (selectedColor) {
+    const color = selectedColor.value;
+    let variantIndex = null;
+
+    if (selectedSize) {
+      const size = selectedSize.value;
+      variantIndex = findVariantIndex(size, color);
+    }
+
+    if (variantIndex === null) {
+      variantIndex = findVariantIndexByColorOnly(color);
+    }
+
+    return variantIndex;
+  }
+
+  return null;  
+}
+
+function findVariantIndexByColorOnly(color) {
+  const variants = <%- JSON.stringify(product.variants) %>;
+
+  for (let i = 0; i < variants.length; i++) {
+    if (variants[i].color === color) {
+      return i;  
+    }
+  }
+  return null;  
+}
+
  
-   if (selectedSize && selectedColor) {
-     const size = selectedSize.value;
-     const color = selectedColor.value;
- 
-     // Find the variant index that matches the selected size and color
-     const variantIndex = findVariantIndex(size, color); // This function should match the size/color with variants
-     return variantIndex;
-   }
-   return null;  // Return null if no selection is made
- }
- 
- // Function to find the variant index based on size and color
  function findVariantIndex(size, color) {
-  const variants = <%- JSON.stringify(product.variants) %>;  // Inject product variants into JS
+  const variants = <%- JSON.stringify(product.variants) %>;  
    for (let i = 0; i < variants.length; i++) {
      if (variants[i].size === size && variants[i].color === color) {
-       return i; // Return the variant index
+       return i; 
      }
    }
-   return null;  // If no match found
+   return null;  
  }
  
- // Implement your cart display update function (for example)
  function updateCartDisplay(cart) {
-   // Update the cart UI with the latest data (you can render it dynamically or update a cart counter)
    console.log('Updated cart:', cart);
  }
  

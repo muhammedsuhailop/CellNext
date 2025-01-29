@@ -58,7 +58,8 @@ router.put('/update-address', userAuth, profileController.editAddress);
 router.delete('/delete-address', userAuth, profileController.deleteAddress);
 
 //CartManagement
-router.post('/cart/add',userAuth,cartController.addToCart);
-router.get('/cart',userAuth,cartController.loadCartPage);
+router.post('/cart/add', userAuth, cartController.addToCart);
+router.get('/cart', userAuth, cartController.loadCartPage);
+router.delete('/cart/remove/:productId', userAuth, cartController.removeProductFromCart);
 
 module.exports = router

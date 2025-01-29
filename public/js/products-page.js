@@ -74,3 +74,6 @@ $(document).ready(function() {
   function navigateToVariant(productId, variantIndex) {
     window.location.href = `/productDetails?id=${productId}&variant=${variantIndex}`;
   }
+
+
+  
