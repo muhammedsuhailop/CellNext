@@ -153,7 +153,11 @@ const loadMyAccounts = async (req, res) => {
         const addressData = await Address.findOne({ userId: userData._id });
         console.log('AddressData: ', addressData);
 
-        res.render('my-account', { user: userData, addressData: addressData });
+        res.render('my-account', {
+            user: userData,
+            addressData: addressData,
+
+        });
 
     } catch (error) {
         console.log('error'.error);
@@ -228,6 +232,7 @@ const addAddress = async (req, res) => {
             await userAddress.save();
         }
 
+        req.flash('success', 'New Address Added Successfully.');
         res.redirect('/my-account');
 
     } catch (error) {

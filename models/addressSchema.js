@@ -46,7 +46,7 @@ const addressSchema = new Schema({
         },
         alternatePhone: {
             type: String,
-            required: true
+            required: false
         },
         isDefault: {
             type: Boolean,

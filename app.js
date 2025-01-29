@@ -30,6 +30,7 @@ app.use(session({
     }
 }))
 app.use(flash());
+
 // app.use(morgan('dev'));
 
 app.use(passport.initialize());
@@ -41,6 +42,13 @@ app.set('views', [path.join(__dirname, 'views/user'), path.join(__dirname, 'view
 app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res, next) => {
     res.locals.currentPath = req.url;
+    next();
+});
+app.use((req, res, next) => {
+    res.locals.messages = {
+        success: req.flash('success'),
+        error: req.flash('error')
+    };
     next();
 });
 
