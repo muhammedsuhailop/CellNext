@@ -150,21 +150,23 @@
             </div>
             <div class="product__details__cart__option">
               <% if (quantity <= 0) { %>
-              <span class="text-danger font-weight-bold">Out of Stock</span>
+                <span class="text-danger font-weight-bold">Out of Stock</span>
               <% } else { %>
-              <div class="quantity">
-                <div class="pro-qty">
-                  <input type="text" value="1">
+                <div class="quantity">
+                  <div class="pro-qty">
+                    <input type="text" value="1" id="cart-quantity">
+                  </div>
                 </div>
+                <button class="primary-btn" id="add-to-cart-btn">Add to Cart</button>
               </div>
-              <a href="#" class="primary-btn">Add to Cart</a>
-            </div>
-            <% if (quantity <10) { %>
-            <p class="text-warning">
-              <strong>Hurry up!</strong> Only <%= quantity %> left in stock.
-            </p>
+              
+              <% if (quantity < 10) { %>
+                <p class="text-warning">
+                  <strong>Hurry up!</strong> Only <%= quantity %> left in stock.
+                </p>
+              <% } %>
             <% } %>
-            <% } %>
+          </div>
 
             <div class="product__details__btns__option">
               <a href="#"><i class="fa fa-heart"></i> add to wishlist</a>
@@ -358,87 +360,88 @@
 <!-- Related Section End -->
 
 <script>
-  function redirectToProduct(productId) {
-    window.location.href = `/productDetails?id=${productId}`;
-  }
-</script>
+  console.log('add to cart button clicked');
+  document.getElementById('add-to-cart-btn').addEventListener('click', function() {
+   console.log('add to cart button clicked');
+ 
+   // Get product details
+   const productId = '<%= product._id %>';  // Inject product ID from server
+   const variantId = getSelectedVariantId(); // Get selected variant ID
+   const quantity = parseInt(document.getElementById('cart-quantity').value, 10); // Correct quantity input field ID
+ 
+   if (variantId == null || isNaN(quantity) || quantity <= 0) {
+     alert('Please select a valid variant and quantity.');
+     return;
+   }
+ 
+   // Prepare the data to send to the server
+   const cartData = {
+     productId: productId,
+     variantId: variantId,
+     quantity: quantity
+   };
+ 
+   // Make an API request to add to cart
+   fetch('/cart/add', {
+     method: 'POST',
+     headers: {
+       'Content-Type': 'application/json',
+       'Authorization': 'Bearer ' + localStorage.getItem('authToken')  // Optional for user authentication
+     },
+     body: JSON.stringify(cartData),
+   })
+   .then(response => response.json())
+   .then(data => {
+     if (data.success) {
+       alert('Item added to cart!');
+       updateCartDisplay(data.cart); // Update the cart display
+     } else {
+       alert('Failed to add item to cart. Please try again.');
+     }
+   })
+   .catch(error => {
+     console.error('Error adding to cart:', error);
+     alert('There was an error processing your request.');
+   });
+ });
+ 
+ // Function to get selected variantId based on size and color
+ function getSelectedVariantId() {
+   const selectedSize = document.querySelector('input[name="size"]:checked');
+   const selectedColor = document.querySelector('input[name="color"]:checked');
+ 
+   if (selectedSize && selectedColor) {
+     const size = selectedSize.value;
+     const color = selectedColor.value;
+ 
+     // Find the variant index that matches the selected size and color
+     const variantIndex = findVariantIndex(size, color); // This function should match the size/color with variants
+     return variantIndex;
+   }
+   return null;  // Return null if no selection is made
+ }
+ 
+ // Function to find the variant index based on size and color
+ function findVariantIndex(size, color) {
+  const variants = <%- JSON.stringify(product.variants) %>;  // Inject product variants into JS
+   for (let i = 0; i < variants.length; i++) {
+     if (variants[i].size === size && variants[i].color === color) {
+       return i; // Return the variant index
+     }
+   }
+   return null;  // If no match found
+ }
+ 
+ // Implement your cart display update function (for example)
+ function updateCartDisplay(cart) {
+   // Update the cart UI with the latest data (you can render it dynamically or update a cart counter)
+   console.log('Updated cart:', cart);
+ }
+ 
+ </script>
+
 
 <%- include('../../views/partials/user/footer') %>
+ 
+ <script src="js/products-page.js"></script>
 
-<!-- Initialize ElevateZoom with lens effect -->
-<script>
-  $(document).ready(function() {
-    function applyZoom() {
-      var lensSize = 300;
-
-      if ($(window).width() < 768) {
-        lensSize = 200;
-      }
-
-      $('.zoom-image').elevateZoom({
-        zoomType: 'lens',
-        lensShape: 'round',
-        lensSize: lensSize,
-        borderSize: 3,
-        borderColor: '#ccc',
-        zoomWindowWidth: 400,
-        zoomWindowHeight: 400,
-        zoomWindowPosition: 1,
-        scrollZoom: true,
-        zoomWindowFadeIn: 500,
-        zoomWindowFadeOut: 500,
-      });
-    }
-
-    applyZoom();
-
-    $(window).resize(function() {
-      applyZoom();
-    });
-  });
-</script>
-
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const tabContentContainer = document.querySelector('.tab-content');
-    const tabs = Array.from(tabContentContainer.querySelectorAll('.tab-pane'));
-    const thumbnails = Array.from(document.querySelectorAll('.nav-link'));
-    const prevButton = document.getElementById('prev-image');
-    const nextButton = document.getElementById('next-image');
-
-    if (!tabs.length || !thumbnails.length) {
-      console.error('No image tabs or thumbnails found.');
-      return;
-    }
-
-    let currentIndex = 0;
-
-    const updateActiveTab = () => {
-      tabs.forEach((tab, i) => {
-        tab.classList.toggle('active', i === currentIndex);
-      });
-
-      thumbnails.forEach((thumbnail, i) => {
-        thumbnail.classList.toggle('active', i === currentIndex);
-      });
-    };
-
-    prevButton.addEventListener('click', () => {
-      currentIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-      updateActiveTab();
-    });
-
-    nextButton.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % tabs.length;
-      updateActiveTab();
-    });
-
-    updateActiveTab();
-  });
-</script>
-<script>
-  function navigateToVariant(productId, variantIndex) {
-    window.location.href = `/productDetails?id=${productId}&variant=${variantIndex}`;
-  }
-</script>
