@@ -7,6 +7,7 @@ const loadCartPage = async (req, res) => {
         const userId = req.session.user;
         const userData = await User.findById(userId);
         const cart = await Cart.findOne({ userId: userId }).populate('items.productId');
+        let outOfStockMessage = null;
 
         if (!cart || cart.items.length === 0) {
             return res.render('cart', {
@@ -20,10 +21,18 @@ const loadCartPage = async (req, res) => {
             const product = item.productId;
             const variant = product.variants[item.variantId];
 
+            if (!variant || variant.stock <= 0) {
+                item.quantity = 0;
+                total = 0;
+                outOfStockMessage = "Some items in your cart are out of stock and have been set to zero.";
+            }
+
             return {
                 productId: product._id,
                 variantId: item.variantId,
-                name: product.name,
+                name: product.productName,
+                color: variant.color,
+                size: variant ? variant.size : 'NA',
                 image: variant ? variant.images[0] : '/img/no-image.png',
                 price: variant ? variant.salePrice : 0,
                 quantity: item.quantity,
@@ -36,7 +45,8 @@ const loadCartPage = async (req, res) => {
         res.render('cart', {
             cartItems,
             totalAmount,
-            user: userData
+            user: userData,
+            outOfStockMessage
         });
     } catch (error) {
         console.error(error);
@@ -49,6 +59,8 @@ const addToCart = async (req, res) => {
         console.log('In Add to cart...')
         const { productId, variantId, quantity } = req.body;
         const userId = req.session.user;
+
+        console.log({ productId, variantId, quantity });
 
         const product = await ProductV2.findById(productId);
         if (!product) {
@@ -76,16 +88,16 @@ const addToCart = async (req, res) => {
         const existingItem = cart.items.find(item => item.productId.toString() === productId && item.variantId === variantId);
 
         if (existingItem) {
+            if (existingItem.quantity + quantity > 5) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Maximum cart quantity: 5`
+                });
+            }
             if (existingItem.quantity + quantity > variant.stock) {
                 return res.status(400).json({
                     success: false,
                     message: `Item in cart!. Insufficient stock `
-                });
-            }
-            if (existingItem.quantity + quantity > 5) {
-                return res.status(400).json({
-                    success: false,
-                    message: `Item in cart!. Maximum cart quantity: 5`
                 });
             }
             existingItem.quantity += quantity;

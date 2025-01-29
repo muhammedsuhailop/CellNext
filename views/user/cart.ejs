@@ -29,7 +29,13 @@
     <div class="row">
       <div class="col-lg-8">
         <div class="shopping__cart__table">
+            <% if (outOfStockMessage) { %>
+                <div class="alert alert-warning">
+                    <%= outOfStockMessage %>
+                </div>
+            <% } %>
           <table>
+            <% if (cartItems.length > 0) { %>
             <thead>
               <tr>
                 <th>Product</th>
@@ -39,27 +45,32 @@
               </tr>
             </thead>
             <tbody>
-              <% if (cartItems.length > 0) { %>
               <% cartItems.forEach(item => { %>
-              <tr>
+              <tr data-product-id="<%= item.productId %>" data-variant-id="<%= item.variantId %>">
                 <td class="product__cart__item">
                   <div class="product__cart__item__pic">
                     <img src="<%= item.image %>" alt="<%= item.name %>">
                   </div>
                   <div class="product__cart__item__text">
                     <h6><%= item.name %></h6>
-                    <h5>₹ <%= new Intl.NumberFormat('en-IN', { 
+                    <h6>₹ <%= new Intl.NumberFormat('en-IN', { 
                         style: 'currency', 
                         currency: 'INR', 
                         minimumFractionDigits: 2 
                     }).format(item.price).replace('₹', '').trim() %>
-                    </h5>
+                    </h6>
+                    <span class="font-weight-light"><%= item.color %>
+                      <% if (item.size !== 'NA') { %>
+                      | <%= item.size %>
+                      <% } %>
+                    </span>
                   </div>
                 </td>
                 <td class="quantity__item">
                   <div class="quantity">
                     <div class="pro-qty-2">
-                      <input type="text" value="<%= item.quantity %>">
+                      <input type="text" class="quantity-input" value="<%= item.quantity %>" readonly hidden>
+                      <span value="<%= item.quantity %>" readonly> - <%= item.quantity %> - </span>
                     </div>
                   </div>
                 </td>
@@ -184,5 +195,75 @@
         }
       });
     });
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('#dec-quantity').forEach(function(decBtn) {
+      decBtn.addEventListener('click', function() {
+        const parentRow = this.closest('tr');
+        const productId = parentRow.getAttribute('data-product-id');
+        const variantId = parentRow.getAttribute('data-variant-id');
+        const quantityInput = parentRow.querySelector('.quantity-input');
+        let quantity = parseInt(quantityInput.value);
+        if (quantity <= 1) {
+          return;
+        } else {
+          updateCart(productId, variantId, -1);
+        }
+      });
+    });
+
+    document.querySelectorAll('#inc-quantity').forEach(function(incBtn) {
+      incBtn.addEventListener('click', function() {
+        const parentRow = this.closest('tr');
+        const productId = parentRow.getAttribute('data-product-id');
+        const variantId = parentRow.getAttribute('data-variant-id');
+        const quantityInput = parentRow.querySelector('.quantity-input');
+        let quantity = parseInt(quantityInput.value);
+        if (quantity >= 5) {
+          return;
+        } else {
+          updateCart(productId, variantId, '1');
+        }
+      });
+    });
+
+    function updateCart(productId, variantId, quantity) {
+      const cartData = {
+        productId: productId,
+        variantId: parseInt(variantId, 10),
+        quantity: parseInt(quantity, 10)
+      };
+      fetch('/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(cartData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.reload();
+          } else {
+            Swal.fire({
+              title: 'Error!',
+              text: data.message || 'An unexpected error occurred.',
+              icon: 'error',
+              confirmButtonText: 'Try again',
+              timer: 1500,
+              timerProgressBar: true,
+            }).then(() => {
+              window.location.reload();
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error updating cart');
+        });
+    }
   });
 </script>
