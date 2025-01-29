@@ -50,4 +50,8 @@ router.get('/my-account', userAuth, profileController.loadMyAccounts);
 router.get('/edit-profile', userAuth, profileController.loadeditProfile);
 router.put('/update-profile', userAuth, profileController.editProfile);
 
+//Address Management
+router.get('/add-address', userAuth, profileController.loadAddAddress);
+router.post('/add-address', userAuth, profileController.addAddress);
+
 module.exports = router

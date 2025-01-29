@@ -4500,3 +4500,30 @@ ol {
 	line-height: 24px;
 	margin-bottom: 22px;
 }
+
+@media (min-width: 768px) {
+	.address__form {
+		width: 50vw;
+	}
+}
+
+.checkout__input select {
+	height: 50px;
+	width: 100%;
+	border: 1px solid #e1e1e1;
+	font-size: 14px;
+	padding-left: 20px;
+	margin-bottom: 20px;
+	background-color: #fff;
+	color: #333;
+	appearance: none;
+	/* Remove default dropdown styling (for webkit and Firefox browsers) */
+	-webkit-appearance: none;
+	/* For webkit-based browsers */
+	-moz-appearance: none;
+	/* For Firefox */
+}
+
+.adr-out {
+	background-color: #f5f5f5
+}

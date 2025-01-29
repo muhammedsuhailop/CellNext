@@ -20,11 +20,19 @@ const addressSchema = new Schema({
             type: String,
             required: true
         },
+        houseName: {
+            type: String,
+            required: true
+        },
         landmark: {
             type: String,
             required: true
         },
         state: {
+            type: String,
+            required: true
+        },
+        country: {
             type: String,
             required: true
         },
@@ -36,9 +44,13 @@ const addressSchema = new Schema({
             type: String,
             required: true
         },
-        altPhone: {
+        alternatePhone: {
             type: String,
             required: true
+        },
+        isDefault: {
+            type: Boolean,
+            default: false
         }
     }]
 })

@@ -26,27 +26,30 @@
         <div class="container-fluid">
           <div class="checkout__form">
             <form action="#">
-              <div class="row w-100">
-                <div class="col-12">
-                  <h6 class="coupon__code"> My Account</h6>
-                  <h6 class="checkout__title"><i class="bx bx-user px-3" style="font-size: 1rem;"></i>Account Details</h6>
-                </div>
-                <div class="col-12 col-md-8">
-                  <div class="profile__input">
-                    <p>Name</p>
-                    <input class="prof" type="text" placeholder="<%= user.name %>" disabled>
-                  </div>
-                </div>
-                <div class="col-12 col-md-8">
-                  <div class="profile__input">
-                    <p>Mobile Number</p>
-                    <input class="prof" type="text" placeholder="<%= user.phone %>" disabled>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <div class="profile__input">
-                    <p>Email Address</p>
-                    <input class="prof" type="text" placeholder="<%= user.email %>" disabled>
+              <div class="address-section border p-3  mb-3 adr-out">
+                <h5>My Profile</h5>
+                <div class="card mt-4">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-12 col-md-6 mb-3">
+                        <div class="profile__input">
+                          <p><strong>Name:</strong></p>
+                          <input class="prof form-control" type="text" placeholder="<%= user.name %>" disabled>
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-6 mb-3">
+                        <div class="profile__input">
+                          <p><strong>Mobile Number:</strong></p>
+                          <input class="prof form-control" type="text" placeholder="<%= user.phone %>" disabled>
+                        </div>
+                      </div>
+                      <div class="col-12 mb-3">
+                        <div class="profile__input">
+                          <p><strong>Email Address:</strong></p>
+                          <input class="prof form-control" type="text" placeholder="<%= user.email %>" disabled>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -54,6 +57,7 @@
                 <div class="col-md-12 d-flex justify-content-center ">
                   <div class="profile__input my-4">
                     <a href="/edit-profile"><label class="prof-btn">Edit Profile</label></a>
+                    <a href="/add-address"><label class="prof-btn">Add New Address</label></a>
                     <a href="/forgot-password">
                       <lable class="prof-btn ">Reset Password</label>
                     </a>
@@ -61,12 +65,54 @@
                 </div>
               </div>
             </form>
+            <h4>Saved Address</h4>
+            <div class="address-section border p-3  mb-3 adr-out">
+              <h5>My Addresses</h5>
+              <div class="list-group mt-4 ">
+                <% if (addressData && addressData.address && addressData.address.length > 0) { %>
+                <% addressData.address.forEach((adrs, index) => { %>
+                <div class="card mb-3  ">
+                  <div class="card-body adr-body">
+                    <h5 class="card-title">Address <%= index + 1 %></h5>
+                    <div class="row">
+                      <div class="col-lg-6 col-md-6">
+                        <p><strong>Address Type:</strong> <%= adrs.addressType %></p>
+                        <p><strong>Name:</strong> <%= adrs.name %></p>
+                        <p><strong>Location:</strong> <%= adrs.city %>, <%= adrs.state %>, <%= adrs.country %></p>
+                      </div>
+                      <div class="col-lg-6 col-md-6">
+                        <p><strong>House No., Building Name:</strong> <%= adrs.houseName %></p>
+                        <p><strong>Landmark:</strong> <%= adrs.landmark %></p>
+                        <p><strong>PIN Code:</strong> <%= adrs.pinCode %></p>
+                      </div>
+                      <div class="col-lg-6 col-md-6">
+                        <p><strong>Phone:</strong> <%= adrs.phone %></p>
+                        <% if (adrs.alternatePhone) { %>
+                        <p><strong>Alternate Phone:</strong> <%= adrs.alternatePhone %></p>
+                        <% } %>
+                      </div>
+                    </div>
+                    <button class="btn btn-sm btn-primary">Edit Address</button>
+                  </div>
+                </div>
+                <% }); %>
+                <% } else { %>
+                <div class="alert alert-warning text-center" role="alert">
+                  Address not available.
+                </div>
+                <% } %>
+              </div>
+            </div>
+
           </div>
+
         </div>
-      </section>
     </div>
-  </div>
 </section>
+</div>
+</div>
+</section>
+
 
 
 <!-- Footer Section -->

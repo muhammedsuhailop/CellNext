@@ -1,4 +1,5 @@
 const User = require('../../models/userSchema');
+const Address = require('../../models/addressSchema');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const env = require('dotenv').config();
@@ -146,9 +147,13 @@ const resetPassword = async (req, res) => {
 const loadMyAccounts = async (req, res) => {
     try {
         const user = req.session.user;
-
         const userData = await User.findById(user);
-        res.render('my-account', { user: userData });
+        console.log('User just user', user);
+        console.log('User id', userData._id)
+        const addressData = await Address.findOne({ userId: userData._id });
+        console.log('AddressData: ', addressData);
+
+        res.render('my-account', { user: userData, addressData: addressData });
 
     } catch (error) {
         console.log('error'.error);
@@ -191,6 +196,46 @@ const editProfile = async (req, res) => {
     }
 }
 
+const loadAddAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const userData = await User.findById(userId);
+        res.render('add-address', { user: userData })
+    } catch (error) {
+        console.log('error'.error);
+        res.redirect('/pageNotFound');
+    }
+}
+const addAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const userData = await User.findById(userId);
+
+        const { firstName, lastName, city, state, houseName,
+            landmark, addressType, country, pinCode, phone, alternatePhone } = req.body;
+
+        const userAddress = await Address.findOne({ userId: userData._id });
+        const name = `${firstName} ${lastName}`;
+
+        if (!userAddress) {
+            const newAddress = new Address({
+                userId: userData._id,
+                address: [{ addressType, name, city, state, houseName, landmark, country, pinCode, phone, alternatePhone }]
+            })
+            await newAddress.save();
+        } else {
+            userAddress.address.push({ addressType, name, city, state, houseName, landmark, country, pinCode, phone, alternatePhone });
+            await userAddress.save();
+        }
+
+        res.redirect('/my-account');
+
+    } catch (error) {
+        console.log('error'.error);
+        res.redirect('/pageNotFound');
+    }
+}
+
 module.exports = {
     getForgotPassword,
     forgotEmailValid,
@@ -200,5 +245,7 @@ module.exports = {
     resetPassword,
     loadMyAccounts,
     loadeditProfile,
-    editProfile
+    editProfile,
+    loadAddAddress,
+    addAddress,
 }

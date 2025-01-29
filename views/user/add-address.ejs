@@ -1,0 +1,292 @@
+<%- include('../../views/partials/user/header') %>
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb__text">
+          <div class="breadcrumb__links">
+            <a href="/">Home</a>
+            <a href="/my-account">My Account</a>
+            <span>Add Address</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<section class="shop spad">
+  <div class="container">
+    <div class="row">
+      <%- include('../../views/partials/user/acc-sidebar') %>
+
+      <section class="accounts">
+        <div class="container-fluid">
+          <div class="address__form">
+            <form action="/add-address" method="POST" id="new-address-form">
+              <div class="row w-100">
+                <div class="col-lg-12 col-md-10">
+                  <h6 class="coupon__code"><span class="icon_tag_alt"></span> Have a coupon? <a href="#">Click here</a> to enter your code</h6>
+                  <h6 class="checkout__title">Billing Details</h6>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <div class="checkout__input">
+                        <p>First Name<span>*</span></p>
+                        <input type="text" id="firstName" name="firstName">
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="checkout__input">
+                        <p>Last Name<span>*</span></p>
+                        <input type="text" id="lastName" name="lastName">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <div class="checkout__input">
+                        <p>City<span>*</span></p>
+                        <input type="text" id="city" name="city">
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="checkout__input">
+                        <p>State<span>*</span></p>
+                        <input type="text" id="state" name="state">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="checkout__input">
+                    <p>House No., Building Name<span>*</span></p>
+                    <input type="text" id="houseName" name="houseName" placeholder="Building no or name" class="checkout__input__add">
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <div class="checkout__input">
+                        <p>Landmark<span>*</span></p>
+                        <input type="text" id="landmark" name="landmark">
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="checkout__input">
+                        <p>Address Type<span>*</span></p>
+                        <select id="addressType" name="addressType" class="form-select">
+                          <option value="" disabled selected>Select Address Type</option>
+                          <option value="Home">Home</option>
+                          <option value="Office">Office</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <div class="checkout__input">
+                        <p>Country<span>*</span></p>
+                        <select id="country" name="country" class="form-select">
+                          <option value="" disabled selected>Select Country</option>
+                          <!-- Country options will be added dynamically -->
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="checkout__input">
+                        <p>PIN code<span>*</span></p>
+                        <input type="number" id="pinCode" name="pinCode">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <div class="checkout__input">
+                        <p>Phone<span>*</span></p>
+                        <input type="text" id="phone" name="phone">
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="checkout__input">
+                        <p>Alternate Phone</p>
+                        <input type="text" id="alternatePhone" name="alternatePhone">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row w-100">
+                  <div class="col-md-12 d-flex justify-content-center">
+                    <div class="profile__input my-4">
+                      <button type="submit" class="prof-btn">Save Address</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+
+<!-- Footer Section -->
+<%- include('../../views/partials/user/footer') %>
+
+<!-- Search Begin -->
+<div class="search-model">
+  <div class="h-100 d-flex align-items-center justify-content-center">
+    <div class="search-close-switch">+</div>
+    <form class="search-model-form">
+      <input type="text" id="search-input" placeholder="Search here.....">
+    </form>
+  </div>
+</div>
+<!-- Search End -->
+
+<!-- Js Plugins -->
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery.nice-select.min.js"></script>
+<script src="js/jquery.nicescroll.min.js"></script>
+<script src="js/jquery.magnific-popup.min.js"></script>
+<script src="js/jquery.countdown.min.js"></script>
+<script src="js/jquery.slicknav.js"></script>
+<script src="js/mixitup.min.js"></script>
+<script src="js/owl.carousel.min.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+  $(document).ready(function() {
+    $('#new-address-form').on('submit', function(event) {
+      event.preventDefault();
+
+      $('.text-danger').remove();
+
+      let isValid = true;
+
+      const firstName = $('#firstName').val();
+      const firstNameRegex = /^[A-Za-z\s]+$/;
+      if (!firstName) {
+        $('#firstName').after('<span class="text-danger">First name is required.</span>');
+        isValid = false;
+      } else if (!firstNameRegex.test(firstName)) {
+        $('#firstName').after('<span class="text-danger">First name must contain only alphabets and spaces.</span>');
+        isValid = false;
+      }
+
+      const lastName = $('#lastName').val();
+      if (lastName && !firstNameRegex.test(lastName)) {
+        $('#lastName').after('<span class="text-danger">Last name must contain only alphabets and spaces.</span>');
+        isValid = false;
+      }
+
+      const city = $('#city').val();
+      const state = $('#state').val();
+      const country = $('#country').val();
+      const landmark = $('#landmark').val();
+      const alphaRegex = /^[A-Za-z\s]+$/;
+      const extendedRegex = /^[A-Za-z\s.,'()\[\]-]+$/;
+
+      if (!city) {
+        $('#city').after('<span class="text-danger">City is required.</span>');
+        isValid = false;
+      } else if (!extendedRegex.test(city)) {
+        $('#city').after('<span class="text-danger">City must contain only alphabets, spaces, and valid characters like . , \' () [] -.</span>');
+        isValid = false;
+      }
+
+      if (!state) {
+        $('#state').after('<span class="text-danger">State is required.</span>');
+        isValid = false;
+      } else if (!alphaRegex.test(state)) {
+        $('#state').after('<span class="text-danger">State must contain only alphabets and spaces.</span>');
+        isValid = false;
+      }
+
+      if (!country) {
+        $('#country').after('<span class="text-danger">Country is required.</span>');
+        isValid = false;
+      } else if (!alphaRegex.test(country)) {
+        $('#country').after('<span class="text-danger">Country must contain only alphabets and spaces.</span>');
+        isValid = false;
+      }
+
+      if (!landmark) {
+        $('#landmark').after('<span class="text-danger">Landmark is required.</span>');
+        isValid = false;
+      } else if (!extendedRegex.test(landmark)) {
+        $('#landmark').after('<span class="text-danger">Landmark must contain only alphabets, spaces, and valid characters like . , \' () [] -.</span>');
+        isValid = false;
+      }
+
+      const pinCode = $('#pinCode').val();
+      const pinCodeRegex = /^[0-9]{6}$/;
+      if (!pinCode) {
+        $('#pinCode').after('<span class="text-danger">PIN code is required.</span>');
+        isValid = false;
+      } else if (!pinCodeRegex.test(pinCode)) {
+        $('#pinCode').after('<span class="text-danger">PIN code must be a 6-digit number.</span>');
+        isValid = false;
+      }
+
+      const phone = $('#phone').val();
+      const altPhone = $('#alternatePhone').val();
+      const phoneRegex = /^[0-9]{10}$/;
+
+      if (!phone) {
+        $('#phone').after('<span class="text-danger">Phone number is required.</span>');
+        isValid = false;
+      } else if (!phoneRegex.test(phone)) {
+        $('#phone').after('<span class="text-danger">Phone number must be a 10-digit number.</span>');
+        isValid = false;
+      }
+
+      if (altPhone && phone === altPhone) {
+        $('#alternatePhone').after('<span class="text-danger">Alternate phone number cannot be the same as the primary phone.</span>');
+        isValid = false;
+      }
+
+      if (isValid) {
+        this.submit();
+      }
+    });
+  });
+</script>
+<script>
+  $(document).ready(function() {
+    $('#addressType,#country').niceSelect('destroy'); // This disables nice-select for this dropdown
+  });
+
+  $(document).ready(function() {
+    // Fetch country data from REST Countries API
+    fetch('https://restcountries.com/v3.1/all')
+      .then(response => response.json())
+      .then(countries => {
+        countries.sort((a, b) => {
+          const nameA = a.name.common.toUpperCase();
+          const nameB = b.name.common.toUpperCase();
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return 1;
+          }
+          return 0;
+        });
+
+        const countrySelect = $('#country');
+        countries.forEach(country => {
+          const option = document.createElement('option');
+          option.value = country.name.common;
+          option.textContent = country.name.common;
+          countrySelect.append(option);
+        });
+      })
+      .catch(error => console.error('Error fetching countries:', error));
+  });
+</script>
+
+</body>
+
+</html>
