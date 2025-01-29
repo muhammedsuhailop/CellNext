@@ -54,5 +54,6 @@ router.put('/update-profile', userAuth, profileController.editProfile);
 router.get('/add-address', userAuth, profileController.loadAddAddress);
 router.post('/add-address', userAuth, profileController.addAddress);
 router.put('/update-address', userAuth, profileController.editAddress);
+router.delete('/delete-address', userAuth, profileController.deleteAddress);
 
 module.exports = router

@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const env = require('dotenv').config();
 const session = require('express-session');
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
 function generateOtp() {
     const digits = '1234567890';
@@ -217,6 +218,8 @@ const addAddress = async (req, res) => {
         const { firstName, lastName, city, state, houseName,
             landmark, addressType, country, pinCode, phone, alternatePhone } = req.body;
 
+        console.log("req", req.body);
+
         const userAddress = await Address.findOne({ userId: userData._id });
         const normalizedAddressType = addressType.toLowerCase();
 
@@ -247,7 +250,7 @@ const addAddress = async (req, res) => {
         res.redirect('/my-account');
 
     } catch (error) {
-        console.log('error'.error);
+        console.log('Error:', error);
         res.redirect('/pageNotFound');
     }
 }
@@ -303,7 +306,30 @@ const editAddress = async (req, res) => {
     }
 };
 
+const deleteAddress = async (req, res) => {
+    try {
+        const { addressId } = req.body;
 
+        const userAddress = await Address.findOne({ userId: req.session.user });
+
+        if (!userAddress) {
+            return res.status(404).json({ success: false, message: 'User address not found' });
+        }
+
+        const addressIndex = userAddress.address.findIndex(addr => addr._id.toString() === addressId);
+
+        if (addressIndex !== -1) {
+            userAddress.address.splice(addressIndex, 1);
+            await userAddress.save();
+            return res.json({ success: true, message: 'Address deleted successfully' });
+        } else {
+            return res.status(404).json({ success: false, message: 'Address not found' });
+        }
+    } catch (error) {
+        console.log('Error:', error);
+        res.redirect('/pageNotFound');
+    }
+}
 
 
 
@@ -319,5 +345,6 @@ module.exports = {
     editProfile,
     loadAddAddress,
     addAddress,
-    editAddress
+    editAddress,
+    deleteAddress,
 }

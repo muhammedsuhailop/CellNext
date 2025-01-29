@@ -113,8 +113,11 @@
                         <% } %>
                       </div>
                     </div>
-                    <button class="btn btn-sm btn-primary edit-address-btn" data-address-id="<%= adrs._id %>" data-name="<%= adrs.name %>" data-address-type="<%= adrs.addressType %>" data-house-name="<%= adrs.houseName %>" data-city="<%= adrs.city %>" data-state="<%= adrs.state %>" data-country="<%= adrs.country %>" data-pin-code="<%= adrs.pinCode %>" data-phone="<%= adrs.phone %>" data-alternate-phone="<%= adrs.alternatePhone %>">
+                    <button class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>" data-name="<%= adrs.name %>" data-address-type="<%= adrs.addressType %>" data-house-name="<%= adrs.houseName %>" data-city="<%= adrs.city %>" data-state="<%= adrs.state %>" data-country="<%= adrs.country %>" data-pin-code="<%= adrs.pinCode %>" data-phone="<%= adrs.phone %>" data-alternate-phone="<%= adrs.alternatePhone %>">
                       Edit Address
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-address-btn" data-address-id="<%= adrs._id %>">
+                      Delete Address
                     </button>
                   </div>
                 </div>
@@ -198,15 +201,12 @@
               </div>
             </div>
           </div>
-
-
         </div>
     </div>
 </section>
 </div>
 </div>
 </section>
-
 
 
 <!-- Footer Section -->
@@ -266,7 +266,6 @@
   $('#save-address-btn').on('click', async function(event) {
     event.preventDefault();
 
-    // Clear previous error messages
     $('.error-message').remove();
 
     var isValid = true;
@@ -282,13 +281,11 @@
     var phone = $('#address-modal').find('input[name="phone"]').val().trim();
     var alternatePhone = $('#address-modal').find('input[name="alternatePhone"]').val().trim();
 
-    // Validation function
     function showError(input, message) {
       $(input).after(`<span class="error-message" style="color: red; font-size: 12px;">${message}</span>`);
       isValid = false;
     }
 
-    // Basic Validations
     if (!name) showError('input[name="name"]', 'Name is required');
     if (!addressType) showError('input[name="addressType"]', 'Address Type is required');
     if (!houseName) showError('input[name="houseName"]', 'House Name is required');
@@ -358,6 +355,51 @@
         title: 'Error',
         text: 'Error updating address: ' + error.message,
       });
+    }
+  });
+</script>
+<script>
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList.contains('delete-address-btn')) {
+      var addressId = e.target.getAttribute('data-address-id');
+
+      swal.fire({
+          title: "Are you sure?",
+          text: "Once deleted, this address cannot be recovered!",
+          icon: "warning",
+          showCancelButton: true, // Show the cancel button
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'No, keep it',
+          confirmButtonColor: '#d33', // Set the confirm button color to red
+          cancelButtonColor: '#3085d6', // Set the cancel button color to blue
+        })
+        .then((result) => {
+          if (result.isConfirmed) { // If the user clicked "Yes"
+            fetch('/delete-address', {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  addressId: addressId
+                }),
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  swal.fire("Success!", "Address deleted successfully.", "success");
+                  location.reload();
+                } else {
+                  swal.fire("Error!", data.message, "error");
+                }
+              })
+              .catch(error => {
+                swal.fire("Error!", "Something went wrong. Please try again.", "error");
+              });
+          } else {
+            swal.fire("Your address is safe!");
+          }
+        });
     }
   });
 </script>
