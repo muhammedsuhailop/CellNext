@@ -73,11 +73,11 @@
                     <div class="col-lg-6">
                       <div class="checkout__input">
                         <p>Address Type<span>*</span></p>
-                        <select id="addressType" name="addressType" class="form-select">
-                          <option value="" disabled selected>Select Address Type</option>
-                          <option value="Home">Home</option>
-                          <option value="Office">Office</option>
-                        </select>
+                        <input type="text" id="addressType" name="addressType" class="form-control" list="addressTypeOptions" placeholder="Enter or select Address Type" onblur="this.value = this.value.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')">
+                        <datalist id="addressTypeOptions">
+                          <option value="Home Address"></option>
+                          <option value="Office Address"></option>
+                        </datalist>
                       </div>
                     </div>
                   </div>

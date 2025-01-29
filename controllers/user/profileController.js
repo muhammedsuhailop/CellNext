@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const env = require('dotenv').config();
 const session = require('express-session');
+const mongoose = require('mongoose');
 
 function generateOtp() {
     const digits = '1234567890';
@@ -148,10 +149,8 @@ const loadMyAccounts = async (req, res) => {
     try {
         const user = req.session.user;
         const userData = await User.findById(user);
-        console.log('User just user', user);
-        console.log('User id', userData._id)
+        console.log('On load my accounts User:', user);
         const addressData = await Address.findOne({ userId: userData._id });
-        console.log('AddressData: ', addressData);
 
         res.render('my-account', {
             user: userData,
@@ -219,6 +218,18 @@ const addAddress = async (req, res) => {
             landmark, addressType, country, pinCode, phone, alternatePhone } = req.body;
 
         const userAddress = await Address.findOne({ userId: userData._id });
+        const normalizedAddressType = addressType.toLowerCase();
+
+        if (userAddress) {
+            const existingAddress = userAddress.address.find(
+                (addr) => addr.addressType.toLowerCase() === normalizedAddressType
+            );
+
+            if (existingAddress) {
+                req.flash('error', 'This address type already exists.');
+                return res.redirect('/my-account');
+            }
+        }
         const name = `${firstName} ${lastName}`;
 
         if (!userAddress) {
@@ -241,6 +252,61 @@ const addAddress = async (req, res) => {
     }
 }
 
+
+const editAddress = async (req, res) => {
+    try {
+        console.log('On update address');
+        const { addressId, name, addressType, houseName, city, state, country, pinCode, phone, alternatePhone } = req.body;
+
+        if (!addressId || !name || !addressType || !houseName || !city || !state || !country || !pinCode || !phone) {
+            return res.status(400).json({ success: false, message: 'All fields are required' });
+        }
+
+        const userAddress = await Address.findOne({ userId: req.session.user });
+        const normalizedAddressType = addressType.trim().toLowerCase();
+
+        const existingAddress = userAddress.address.find(
+            (addr) => addr.addressType.toLowerCase() === normalizedAddressType && addr._id.toString() !== addressId
+        );
+
+        if (existingAddress) {
+            return res.json({ success: false, message: 'An address with this type already exists' });
+        }
+        const updatedAddress = await Address.findOneAndUpdate(
+            { userId: req.session.user, 'address._id': req.body.addressId },
+            {
+                $set: {
+                    'address.$.name': name,
+                    'address.$.addressType': addressType,
+                    'address.$.houseName': houseName,
+                    'address.$.city': city,
+                    'address.$.state': state,
+                    'address.$.country': country,
+                    'address.$.pinCode': pinCode,
+                    'address.$.phone': phone,
+                    'address.$.alternatePhone': alternatePhone
+                }
+            },
+            { new: true }
+        );
+
+        console.log('Updated Address:', updatedAddress);
+
+        if (updatedAddress) {
+            return res.json({ success: true, message: 'Address updated successfully', data: updatedAddress });
+        } else {
+            return res.status(404).json({ success: false, message: 'Address update failed' });
+        }
+    } catch (error) {
+        console.error('Error updating address:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+
+
+
+
 module.exports = {
     getForgotPassword,
     forgotEmailValid,
@@ -253,4 +319,5 @@ module.exports = {
     editProfile,
     loadAddAddress,
     addAddress,
+    editAddress
 }

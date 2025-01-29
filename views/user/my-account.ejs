@@ -113,7 +113,9 @@
                         <% } %>
                       </div>
                     </div>
-                    <button class="btn btn-sm btn-primary">Edit Address</button>
+                    <button class="btn btn-sm btn-primary edit-address-btn" data-address-id="<%= adrs._id %>" data-name="<%= adrs.name %>" data-address-type="<%= adrs.addressType %>" data-house-name="<%= adrs.houseName %>" data-city="<%= adrs.city %>" data-state="<%= adrs.state %>" data-country="<%= adrs.country %>" data-pin-code="<%= adrs.pinCode %>" data-phone="<%= adrs.phone %>" data-alternate-phone="<%= adrs.alternatePhone %>">
+                      Edit Address
+                    </button>
                   </div>
                 </div>
                 <% }); %>
@@ -125,6 +127,79 @@
               </div>
             </div>
           </div>
+          <!-- Modal HTML -->
+          <div class="modal fade" id="address-modal" tabindex="-1" role="dialog" aria-labelledby="addressModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="addressModalLabel">Edit Address</h5>
+                  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <form id="address-modal-form">
+                    <!-- Hidden Input to store Address ID -->
+                    <input type="hidden" name="addressId">
+
+                    <div class="mb-3">
+                      <label for="name" class="form-label">Name</label>
+                      <input type="text" class="form-control" name="name" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Address Type</label>
+                      <input type="text" id="addressType" name="addressType" class="form-control" list="addressTypeOptions" onblur="this.value = this.value.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')">
+
+                      <datalist id="addressTypeOptions">
+                        <option value="Home"></option>
+                        <option value="Office"></option>
+                      </datalist>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="houseName" class="form-label">House No., Building Name</label>
+                      <input type="text" class="form-control" name="houseName" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="city" class="form-label">City</label>
+                      <input type="text" class="form-control" name="city" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="state" class="form-label">State</label>
+                      <input type="text" class="form-control" name="state" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="country" class="form-label">Country</label>
+                      <input type="text" class="form-control" name="country" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="pinCode" class="form-label">PIN Code</label>
+                      <input type="text" class="form-control" name="pinCode" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="phone" class="form-label">Phone</label>
+                      <input type="text" class="form-control" name="phone" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="alternatePhone" class="form-label">Alternate Phone</label>
+                      <input type="text" class="form-control" name="alternatePhone">
+                    </div>
+
+                    <button id="save-address-btn" type="submit" class="btn btn-primary">Save Changes</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
         </div>
     </div>
 </section>
@@ -159,6 +234,133 @@
 <script src="js/mixitup.min.js"></script>
 <script src="js/owl.carousel.min.js"></script>
 <script src="js/main.js"></script>
+
+<script>
+  $(document).on('click', '.edit-address-btn', function() {
+    var addressId = $(this).data('address-id');
+
+    var name = $(this).data('name');
+    var addressType = $(this).data('address-type');
+    var houseName = $(this).data('house-name');
+    var city = $(this).data('city');
+    var state = $(this).data('state');
+    var country = $(this).data('country');
+    var pinCode = $(this).data('pin-code');
+    var phone = $(this).data('phone');
+    var alternatePhone = $(this).data('alternate-phone');
+
+    $('#address-modal').find('input[name="addressId"]').val(addressId);
+    $('#address-modal').find('input[name="addressType"]').val(addressType);
+    $('#address-modal').find('input[name="name"]').val(name);
+    $('#address-modal').find('input[name="houseName"]').val(houseName);
+    $('#address-modal').find('input[name="city"]').val(city);
+    $('#address-modal').find('input[name="state"]').val(state);
+    $('#address-modal').find('input[name="country"]').val(country);
+    $('#address-modal').find('input[name="pinCode"]').val(pinCode);
+    $('#address-modal').find('input[name="phone"]').val(phone);
+    $('#address-modal').find('input[name="alternatePhone"]').val(alternatePhone);
+
+    $('#address-modal').modal('show');
+  });
+
+  $('#save-address-btn').on('click', async function(event) {
+    event.preventDefault();
+
+    // Clear previous error messages
+    $('.error-message').remove();
+
+    var isValid = true;
+
+    var addressId = $('#address-modal').find('input[name="addressId"]').val().trim();
+    var name = $('#address-modal').find('input[name="name"]').val().trim();
+    var addressType = $('#address-modal').find('input[name="addressType"]').val().trim();
+    var houseName = $('#address-modal').find('input[name="houseName"]').val().trim();
+    var city = $('#address-modal').find('input[name="city"]').val().trim();
+    var state = $('#address-modal').find('input[name="state"]').val().trim();
+    var country = $('#address-modal').find('input[name="country"]').val().trim();
+    var pinCode = $('#address-modal').find('input[name="pinCode"]').val().trim();
+    var phone = $('#address-modal').find('input[name="phone"]').val().trim();
+    var alternatePhone = $('#address-modal').find('input[name="alternatePhone"]').val().trim();
+
+    // Validation function
+    function showError(input, message) {
+      $(input).after(`<span class="error-message" style="color: red; font-size: 12px;">${message}</span>`);
+      isValid = false;
+    }
+
+    // Basic Validations
+    if (!name) showError('input[name="name"]', 'Name is required');
+    if (!addressType) showError('input[name="addressType"]', 'Address Type is required');
+    if (!houseName) showError('input[name="houseName"]', 'House Name is required');
+    if (!city) showError('input[name="city"]', 'City is required');
+    if (!state) showError('input[name="state"]', 'State is required');
+    if (!country) showError('input[name="country"]', 'Country is required');
+    if (!pinCode) showError('input[name="pinCode"]', 'Pin Code is required');
+    else if (!/^\d{6}$/.test(pinCode)) showError('input[name="pinCode"]', 'Pin Code must be 6 digits');
+
+    if (!phone) showError('input[name="phone"]', 'Phone number is required');
+    else if (!/^\d{10}$/.test(phone)) showError('input[name="phone"]', 'Phone number must be 10 digits');
+
+    if (alternatePhone && !/^\d{10}$/.test(alternatePhone))
+      showError('input[name="alternatePhone"]', 'Alternate phone must be 10 digits');
+
+    if (!isValid) return;
+
+    const data = {
+      addressId,
+      name,
+      addressType,
+      houseName,
+      city,
+      state,
+      country,
+      pinCode,
+      phone,
+      alternatePhone
+    };
+
+    try {
+      const response = await fetch('/update-address', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        console.error('Server error:', response.status);
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+
+      if (responseData.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: responseData.message || 'Address updated successfully!',
+        }).then(() => {
+          $('#address-modal').modal('hide');
+          location.reload();
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed',
+          text: responseData.message,
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error updating address: ' + error.message,
+      });
+    }
+  });
+</script>
 
 </body>
 
