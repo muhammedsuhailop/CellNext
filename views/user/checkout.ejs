@@ -35,49 +35,108 @@
                 here</a> to enter your code</h6>
             <h4>Saved Address</h4>
             <div class="address-section border p-3  mb-3 adr-out">
-              <h5>My Addresses</h5>
+
               <div class="list-group mt-4 ">
-                <button id="add-address-btn" class="btn btn-primary">Add New Address</button>
-                <% if (addressData && addressData.address && addressData.address.length > 0) { %>
-                <% addressData.address.forEach((adrs, index) => { %>
-                <div class="card mb-3">
-                  <div class="card-body adr-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <h5 class="card-title">Address <%= index + 1 %></h5>
-                      <!-- Select Address -->
-                      <input type="radio" name="selectedAddress" value="<%= adrs._id %>" class="select-address">
-                    </div>
-                    <p><strong>Address Type:</strong> <%= adrs.addressType %></p>
-                    <p><strong>Name:</strong> <%= adrs.name %></p>
-                    <p><strong>Location:</strong> <%= adrs.city %>, <%= adrs.state %>, <%= adrs.country %></p>
+                <div class="d-flex justify-content-between m-2">
+                  <h5>My Addresses</h5>
+                  <button id="add-address-btn" class="btn btn-secondary"> Add New Address <i class='bx bxs-plus-square'></i></button>
+                </div>
 
-                    <!-- Hidden Details Section -->
-                    <div class="hidden-details" style="display: none;">
-                      <p><strong>House No., Building Name:</strong> <%= adrs.houseName %></p>
-                      <p><strong>Landmark:</strong> <%= adrs.landmark %></p>
-                      <p><strong>PIN Code:</strong> <%= adrs.pinCode %></p>
-                      <p><strong>Phone:</strong> <%= adrs.phone %></p>
-                      <% if (adrs.alternatePhone) { %>
-                      <p><strong>Alternate Phone:</strong> <%= adrs.alternatePhone %></p>
-                      <% } %>
-                      <button type="button" class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>" data-name="<%= adrs.name %>" data-address-type="<%= adrs.addressType %>" data-house-name="<%= adrs.houseName %>" data-city="<%= adrs.city %>" data-state="<%= adrs.state %>" data-country="<%= adrs.country %>" data-pin-code="<%= adrs.pinCode %>" data-phone="<%= adrs.phone %>" data-alternate-phone="<%= adrs.alternatePhone %>" data-landmark="<%= adrs.landmark %>">
-                        Edit Address
+                <form id="orderForm" action="/place-order" method="POST">
+                  <% if (addressData && addressData.address && addressData.address.length > 0) { %>
+                  <% addressData.address.forEach((adrs, index) => { %>
+                  <div class="card mb-3">
+                    <div class="card-body adr-body">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <span class="card-title text-muted">Address <%= index + 1 %></span>
+                        <!-- Select Address -->
+                        <input type="radio" name="selectedAddress" value="<%= adrs._id %>" class="select-address" required>
+                      </div>
+                      <p><strong>Address Type:</strong> <%= adrs.addressType %></p>
+                      <p><strong>Name:</strong> <%= adrs.name %></p>
+                      <p><strong>Location:</strong> <%= adrs.city %>, <%= adrs.state %>, <%= adrs.country %></p>
+
+                      <!-- Hidden Details Section -->
+                      <div class="hidden-details" style="display: none;">
+                        <p><strong>House No., Building Name:</strong> <%= adrs.houseName %></p>
+                        <p><strong>Landmark:</strong> <%= adrs.landmark %></p>
+                        <p><strong>PIN Code:</strong> <%= adrs.pinCode %></p>
+                        <p><strong>Phone:</strong> <%= adrs.phone %></p>
+                        <% if (adrs.alternatePhone) { %>
+                        <p><strong>Alternate Phone:</strong> <%= adrs.alternatePhone %></p>
+                        <% } %>
+                        <button type="button" class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>">
+                          Edit Address
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-address-btn" data-address-id="<%= adrs._id %>">
+                          Delete Address
+                        </button>
+                      </div>
+
+                      <button type="button" class="btn btn-sm btn-secondary toggle-details" style="float: right;">
+                        Show More <i class='bx bxs-chevron-down'></i>
                       </button>
-                      <button class="btn btn-sm btn-danger delete-address-btn" data-address-id="<%= adrs._id %>">
-                        Delete Address
-                      </button>
                     </div>
-
-                    <button type="button" class="btn btn-sm btn-primary toggle-details" style="float: right;">Show More</button>
-
                   </div>
-                </div>
-                <% }); %>
-                <% } else { %>
-                <div class="alert alert-warning text-center" role="alert">
-                  Address not available.
-                </div>
-                <% } %>
+                  <% }); %>
+
+                  <!-- Order Details Input -->
+                  <div class="mb-3">
+                    <label for="orderDetails" class="form-label">Additional Order Details</label>
+                    <textarea class="form-control" id="orderDetails" name="orderDetails" rows="3" placeholder="Enter any specific instructions..."></textarea>
+                  </div>
+
+                  <!-- Payment Method Selection -->
+                  <div class="container">
+                    <div class="row">
+                      <!-- Left Column for Payment Methods -->
+                      <div class="col-md-8">
+                        <div class="checkout__payment">
+                          <h5 class="mb-2">Select Preffered Payment Method</h5>
+
+                          <div class="checkout__input__checkbox">
+                            <label for="paypal">
+                              <input type="radio" name="paymentMethod" id="paypal" value="PayPal" required>
+                              PayPal
+                              <span class="checkmark"></span>
+                            </label>
+                          </div>
+
+                          <div class="checkout__input__checkbox">
+                            <label for="wallet">
+                              <input type="radio" name="paymentMethod" id="wallet" value="CellNext Wallet">
+                              CellNext Wallet
+                              <span class="checkmark"></span>
+                            </label>
+                          </div>
+
+                          <div class="checkout__input__checkbox">
+                            <label for="cod">
+                              <input type="radio" name="paymentMethod" id="cod" value="COD">
+                              Cash on Delivery (COD)
+                              <span class="checkmark"></span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Right Column for Place Order Button -->
+                      <div class="col-md-4 d-flex justify-content-center align-items-center">
+                        <div class="text-center">
+                          <button type="submit" class="btn btn-dark">Place Order</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <% } else { %>
+                  <div class="alert alert-warning text-center" role="alert">
+                    Address not available.
+                  </div>
+                  <% } %>
+                </form>
+
               </div>
             </div>
           </div>
@@ -162,13 +221,25 @@
           <div class="col-lg-4 col-md-6">
             <div class="checkout__order">
               <h4 class="order__title">Your Cart</h4>
-              <div class="checkout__order__products">Product <span>Total</span></div>
-              <ul class="checkout__total__products">
+              <div class="checkout__order__products">Items</div>
+              <ul class="checkout__order__list">
                 <% cartItems.forEach((item, index) => { %>
-                <li>
-                  <%= String(index + 1).padStart(2, '0') %>. <%= item.name %>
-                  <span>₹ <%= item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %> x <%= item.quantity %> = ₹
-                    <%= item.total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                <li class="checkout__order__item">
+                  <div class="checkout__order__info">
+                    <div class="checkout__order__item-name">
+                      <%= String(index + 1).padStart(2, '0') %> :
+                      <%= item.name.length > 30 ? item.name.slice(0, 30) + '...' : item.name %>
+                    </div>
+                  </div>
+                  <div class="checkout__order__details">
+                    <div class="checkout__order__quantity-price">
+                      <span class="checkout__order__price">₹ <%= item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                      <span class="checkout__order__quantity">X Qty <%= item.quantity %></span>
+                    </div>
+                    <div class="checkout__order__total-price">
+                      ₹ <%= item.total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                    </div>
+                  </div>
                 </li>
                 <% }); %>
               </ul>
@@ -177,29 +248,38 @@
                 <li>Subtotal <span>₹ <%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span></li>
                 <li>Total <span>₹ <%= total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span></li>
               </ul>
-              <div class="checkout__input__checkbox">
+              <!-- <div class="checkout__input__checkbox">
                 <label for="acc-or">
                   Create an account?
                   <input type="checkbox" id="acc-or">
                   <span class="checkmark"></span>
                 </label>
-              </div>
-              <p>Lorem ipsum dolor sit amet, consectetur adip elit, sed do eiusmod tempor incididunt
-                ut labore et dolore magna aliqua.</p>
-              <div class="checkout__input__checkbox">
-                <label for="payment">
-                  Check Payment
-                  <input type="checkbox" id="payment">
-                  <span class="checkmark"></span>
-                </label>
-              </div>
+              </div> -->
+              <p>We accept various payment methods: Credit/Debit cards, UPI, CellNext Wallet, and Cash on Delivery.</p>
               <div class="checkout__input__checkbox">
                 <label for="paypal">
                   Paypal
-                  <input type="checkbox" id="paypal">
+                  <input type="radio" id="paypal" name="payment_method">
                   <span class="checkmark"></span>
                 </label>
               </div>
+
+              <div class="checkout__input__checkbox">
+                <label for="wallet">
+                  CellNext Wallet
+                  <input type="radio" id="wallet" name="payment_method">
+                  <span class="checkmark"></span>
+                </label>
+              </div>
+
+              <div class="checkout__input__checkbox">
+                <label for="cod">
+                  Cash on Delivery
+                  <input type="radio" id="cod" name="payment_method">
+                  <span class="checkmark"></span>
+                </label>
+              </div>
+
               <button type="submit" class="site-btn">PLACE ORDER</button>
             </div>
           </div>
@@ -211,6 +291,73 @@
 </section>
 </section>
 <!-- Checkout Section End -->
+<style>
+  /* Styles for the list of cart items */
+  .checkout__order__list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Product container */
+  .checkout__order__item {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+  }
+
+  /* Product index and name on the same line */
+  .checkout__order__info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Quantity and price details */
+  .checkout__order__details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #888;
+    margin-top: 3px;
+  }
+
+  /* Total price aligned to the right */
+  .checkout__order__total-price {
+    font-weight: bold;
+    font-size: 14px;
+    text-align: right;
+  }
+
+  /* Styles for the total summary section */
+  .checkout__order__totals {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 15px;
+  }
+
+  .checkout__order__totals li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 16px;
+    font-weight: bold;
+    border-top: 1px solid #ddd;
+  }
+
+  .checkout__order__totals li span {
+    color: #000;
+    font-size: 16px;
+  }
+</style>
 
 <%- include('../../views/partials/user/footer') %>
 
@@ -221,7 +368,7 @@
         const details = this.previousElementSibling;
         if (details.style.display === "none" || details.style.display === "") {
           details.style.display = "block";
-          this.textContent = "Show Less";
+          this.innerHTML = "Show Less <i class='bx bxs-chevron-up'></i>";
         } else {
           details.style.display = "none";
           this.textContent = "Show More";
@@ -380,5 +527,51 @@
         });
       }
     });
+  });
+</script>
+
+<script>
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList.contains('delete-address-btn')) {
+      var addressId = e.target.getAttribute('data-address-id');
+
+      swal.fire({
+          title: "Are you sure?",
+          text: "Once deleted, this address cannot be recovered!",
+          icon: "warning",
+          showCancelButton: true, // Show the cancel button
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'No, keep it',
+          confirmButtonColor: '#d33', // Set the confirm button color to red
+          cancelButtonColor: '#3085d6', // Set the cancel button color to blue
+        })
+        .then((result) => {
+          if (result.isConfirmed) { // If the user clicked "Yes"
+            fetch('/delete-address', {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  addressId: addressId
+                }),
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  swal.fire("Success!", "Address deleted successfully.", "success");
+                  location.reload();
+                } else {
+                  swal.fire("Error!", data.message, "error");
+                }
+              })
+              .catch(error => {
+                swal.fire("Error!", "Something went wrong. Please try again.", "error");
+              });
+          } else {
+            swal.fire("Your address is safe!");
+          }
+        });
+    }
   });
 </script>
