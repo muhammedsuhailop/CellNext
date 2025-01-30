@@ -214,3 +214,9 @@
     });
 
 })(jQuery);
+
+//// Reset form
+window.onload = function() {
+    document.querySelector('form').reset(); 
+    document.querySelectorAll('.checkmark').forEach(mark => mark.classList.remove('checked'));
+  };

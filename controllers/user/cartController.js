@@ -85,6 +85,11 @@ const addToCart = async (req, res) => {
 
         if (!cart) {
             cart = new Cart({ userId, items: [] });
+            await cart.save();
+
+            await User.findByIdAndUpdate(userId, {
+                $push: { cart: cart._id }
+            });
         }
 
         const existingItem = cart.items.find(item => item.productId.toString() === productId && item.variantId === variantId);

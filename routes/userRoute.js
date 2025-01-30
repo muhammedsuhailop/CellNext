@@ -5,6 +5,7 @@ const productcontroller = require('../controllers/user/productController');
 const profileController = require('../controllers/user/profileController');
 const cartController = require('../controllers/user/cartController');
 const checkoutController = require('../controllers/user/checkoutController');
+const orderController = require('../controllers/user/orderController');
 const passport = require('passport');
 const { userAuth, adminAuth } = require('../middlewares/auth')
 
@@ -64,6 +65,7 @@ router.get('/cart', userAuth, cartController.loadCartPage);
 router.delete('/cart/remove/:productId', userAuth, cartController.removeProductFromCart);
 
 //Checkout Management
-router.get('/checkout',userAuth,checkoutController.getCheckout);
+router.get('/checkout', userAuth, checkoutController.getCheckout);
+router.post('/place-order', userAuth, orderController.placeOrder);
 
 module.exports = router

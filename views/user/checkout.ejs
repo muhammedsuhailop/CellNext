@@ -28,550 +28,271 @@
 <section class="checkout spad">
   <div class="container">
     <div class="checkout__form">
-      <form action="#">
-        <div class="row">
-          <div class="col-lg-8 col-md-6">
-            <h6 class="coupon__code"><span class="icon_tag_alt"></span> Have a coupon? <a href="#">Click
-                here</a> to enter your code</h6>
-            <h4>Saved Address</h4>
-            <div class="address-section border p-3  mb-3 adr-out">
+      <!-- <form action="#"> -->
+      <div class="row">
+        <div class="col-lg-8 col-md-6">
+          <h6 class="coupon__code"><span class="icon_tag_alt"></span> Have a coupon? <a href="#">Click
+              here</a> to enter your code</h6>
+          <h4>Saved Address</h4>
+          <div class="address-section border p-3  mb-3 adr-out">
 
-              <div class="list-group mt-4 ">
-                <div class="d-flex justify-content-between m-2">
-                  <h5>My Addresses</h5>
-                  <button id="add-address-btn" class="btn btn-secondary"> Add New Address <i class='bx bxs-plus-square'></i></button>
-                </div>
+            <div class="list-group mt-4 ">
+              <div class="d-flex justify-content-between m-2">
+                <h5>My Addresses</h5>
+                <button id="add-address-btn" class="btn btn-secondary"> Add New Address <i class='bx bxs-plus-square'></i></button>
+              </div>
 
-                <form id="orderForm" action="/place-order" method="POST">
-                  <% if (addressData && addressData.address && addressData.address.length > 0) { %>
-                  <% addressData.address.forEach((adrs, index) => { %>
-                  <div class="card mb-3">
-                    <div class="card-body adr-body">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <span class="card-title text-muted">Address <%= index + 1 %></span>
-                        <!-- Select Address -->
-                        <input type="radio" name="selectedAddress" value="<%= adrs._id %>" class="select-address" required>
-                      </div>
-                      <p><strong>Address Type:</strong> <%= adrs.addressType %></p>
-                      <p><strong>Name:</strong> <%= adrs.name %></p>
-                      <p><strong>Location:</strong> <%= adrs.city %>, <%= adrs.state %>, <%= adrs.country %></p>
+              <form id="orderForm" >
+                <% if (addressData && addressData.address && addressData.address.length > 0) { %>
+                <% addressData.address.forEach((adrs, index) => { %>
+                <div class="card mb-3">
+                  <div class="card-body adr-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span class="card-title text-muted">Address <%= index + 1 %></span>
+                      <!-- Select Address -->
+                      <input type="radio" name="selectedAddress" value="<%= adrs._id %>" class="select-address" required>
+                    </div>
+                    <p><strong>Address Type:</strong> <%= adrs.addressType %></p>
+                    <p><strong>Name:</strong> <%= adrs.name %></p>
+                    <p><strong>Location:</strong> <%= adrs.city %>, <%= adrs.state %>, <%= adrs.country %></p>
 
-                      <!-- Hidden Details Section -->
-                      <div class="hidden-details" style="display: none;">
-                        <p><strong>House No., Building Name:</strong> <%= adrs.houseName %></p>
-                        <p><strong>Landmark:</strong> <%= adrs.landmark %></p>
-                        <p><strong>PIN Code:</strong> <%= adrs.pinCode %></p>
-                        <p><strong>Phone:</strong> <%= adrs.phone %></p>
-                        <% if (adrs.alternatePhone) { %>
-                        <p><strong>Alternate Phone:</strong> <%= adrs.alternatePhone %></p>
-                        <% } %>
-                        <button type="button" class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>">
-                          Edit Address
-                        </button>
-                        <button class="btn btn-sm btn-danger delete-address-btn" data-address-id="<%= adrs._id %>">
-                          Delete Address
-                        </button>
-                      </div>
-
-                      <button type="button" class="btn btn-sm btn-secondary toggle-details" style="float: right;">
-                        Show More <i class='bx bxs-chevron-down'></i>
+                    <!-- Hidden Details Section -->
+                    <div class="hidden-details" style="display: none;">
+                      <p><strong>House No., Building Name:</strong> <%= adrs.houseName %></p>
+                      <p><strong>Landmark:</strong> <%= adrs.landmark %></p>
+                      <p><strong>PIN Code:</strong> <%= adrs.pinCode %></p>
+                      <p><strong>Phone:</strong> <%= adrs.phone %></p>
+                      <% if (adrs.alternatePhone) { %>
+                      <p><strong>Alternate Phone:</strong> <%= adrs.alternatePhone %></p>
+                      <% } %>
+                      <button type="button" class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>">
+                        Edit Address
+                      </button>
+                      <button class="btn btn-sm btn-danger delete-address-btn" data-address-id="<%= adrs._id %>">
+                        Delete Address
                       </button>
                     </div>
+
+                    <button type="button" class="btn btn-sm btn-secondary toggle-details" style="float: right;">
+                      Show More <i class='bx bxs-chevron-down'></i>
+                    </button>
                   </div>
-                  <% }); %>
-
-                  <!-- Order Details Input -->
-                  <div class="mb-3">
-                    <label for="orderDetails" class="form-label">Additional Order Details</label>
-                    <textarea class="form-control" id="orderDetails" name="orderDetails" rows="3" placeholder="Enter any specific instructions..."></textarea>
-                  </div>
-
-                  <!-- Payment Method Selection -->
-                  <div class="container">
-                    <div class="row">
-                      <!-- Left Column for Payment Methods -->
-                      <div class="col-md-8">
-                        <div class="checkout__payment">
-                          <h5 class="mb-2">Select Preffered Payment Method</h5>
-
-                          <div class="checkout__input__checkbox">
-                            <label for="paypal">
-                              <input type="radio" name="paymentMethod" id="paypal" value="PayPal" required>
-                              PayPal
-                              <span class="checkmark"></span>
-                            </label>
-                          </div>
-
-                          <div class="checkout__input__checkbox">
-                            <label for="wallet">
-                              <input type="radio" name="paymentMethod" id="wallet" value="CellNext Wallet">
-                              CellNext Wallet
-                              <span class="checkmark"></span>
-                            </label>
-                          </div>
-
-                          <div class="checkout__input__checkbox">
-                            <label for="cod">
-                              <input type="radio" name="paymentMethod" id="cod" value="COD">
-                              Cash on Delivery (COD)
-                              <span class="checkmark"></span>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Right Column for Place Order Button -->
-                      <div class="col-md-4 d-flex justify-content-center align-items-center">
-                        <div class="text-center">
-                          <button type="submit" class="btn btn-dark">Place Order</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <% } else { %>
-                  <div class="alert alert-warning text-center" role="alert">
-                    Address not available.
-                  </div>
-                  <% } %>
-                </form>
-
-              </div>
-            </div>
-          </div>
-
-          <!-- Modal HTML -->
-          <div class="modal fade" id="address-modal" tabindex="-1" role="dialog" aria-labelledby="addressModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="addressModalLabel">Edit Address</h5>
-                  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
                 </div>
-                <div class="modal-body">
-                  <form id="address-modal-form">
-                    <!-- Hidden Input to store Address ID -->
-                    <input type="hidden" name="addressId">
-
-                    <div class="mb-3">
-                      <label for="name" class="form-label">Name</label>
-                      <input type="text" class="form-control" name="name" required>
-                    </div>
-
-                    <div class="mb-3">
-                      <label class="form-label">Address Type</label>
-                      <input type="text" id="addressType" name="addressType" class="form-control" list="addressTypeOptions" onblur="this.value = this.value.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')">
-
-                      <datalist id="addressTypeOptions">
-                        <option value="Home"></option>
-                        <option value="Office"></option>
-                      </datalist>
-                    </div>
-
-                    <div class="mb-3">
-                      <label for="houseName" class="form-label">House No., Building Name</label>
-                      <input type="text" class="form-control" name="houseName" required>
-                    </div>
-
-                    <div class="mb-3">
-                      <label for="landmark" class="form-label">Landmark</label>
-                      <input type="text" class="form-control" name="landmark" required>
-                    </div>
-
-                    <div class="mb-3">
-                      <label for="city" class="form-label">City</label>
-                      <input type="text" class="form-control" name="city" required>
-                    </div>
-
-                    <div class="mb-3">
-                      <label for="state" class="form-label">State</label>
-                      <input type="text" class="form-control" name="state" required>
-                    </div>
-
-                    <div class="mb-3">
-                      <label for="country" class="form-label">Country</label>
-                      <input type="text" class="form-control" name="country" required>
-                    </div>
-
-                    <div class="mb-3">
-                      <label for="pinCode" class="form-label">PIN Code</label>
-                      <input type="text" class="form-control" name="pinCode" required>
-                    </div>
-
-                    <div class="mb-3">
-                      <label for="phone" class="form-label">Phone</label>
-                      <input type="text" class="form-control" name="phone" required>
-                    </div>
-
-                    <div class="mb-3">
-                      <label for="alternatePhone" class="form-label">Alternate Phone</label>
-                      <input type="text" class="form-control" name="alternatePhone">
-                    </div>
-
-                    <button id="save-address-btn" type="submit" class="btn btn-primary">Save Changes</button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- </div> -->
-          <div class="col-lg-4 col-md-6">
-            <div class="checkout__order">
-              <h4 class="order__title">Your Cart</h4>
-              <div class="checkout__order__products">Items</div>
-              <ul class="checkout__order__list">
-                <% cartItems.forEach((item, index) => { %>
-                <li class="checkout__order__item">
-                  <div class="checkout__order__info">
-                    <div class="checkout__order__item-name">
-                      <%= String(index + 1).padStart(2, '0') %> :
-                      <%= item.name.length > 30 ? item.name.slice(0, 30) + '...' : item.name %>
-                    </div>
-                  </div>
-                  <div class="checkout__order__details">
-                    <div class="checkout__order__quantity-price">
-                      <span class="checkout__order__price">₹ <%= item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
-                      <span class="checkout__order__quantity">X Qty <%= item.quantity %></span>
-                    </div>
-                    <div class="checkout__order__total-price">
-                      ₹ <%= item.total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                    </div>
-                  </div>
-                </li>
                 <% }); %>
-              </ul>
 
-              <ul class="checkout__total__all">
-                <li>Subtotal <span>₹ <%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span></li>
-                <li>Total <span>₹ <%= total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span></li>
-              </ul>
-              <!-- <div class="checkout__input__checkbox">
+                <!-- Order Details Input -->
+                <div class="mb-3">
+                  <label for="orderDetails" class="form-label">Additional Order Details</label>
+                  <textarea class="form-control" id="orderDetails" name="orderDetails" rows="3" placeholder="Enter any specific instructions..."></textarea>
+                </div>
+
+                <!-- Payment Method Selection -->
+                <div class="container">
+                  <div class="row">
+                    <!-- Left Column for Payment Methods -->
+                    <div class="col-md-8">
+                      <div class="checkout__payment">
+                        <h5 class="mb-2">Select Preffered Payment Method</h5>
+
+                        <div class="checkout__input__checkbox">
+                          <label for="paypal">
+                            <input type="radio" name="paymentMethod" id="paypal" value="PayPal">
+                            PayPal
+                            <span class="checkmark"></span>
+                          </label>
+                        </div>
+
+                        <div class="checkout__input__checkbox">
+                          <label for="wallet">
+                            <input type="radio" name="paymentMethod" id="wallet" value="CellNext Wallet">
+                            CellNext Wallet
+                            <span class="checkmark"></span>
+                          </label>
+                        </div>
+
+                        <div class="checkout__input__checkbox">
+                          <label for="cod">
+                            <input type="radio" name="paymentMethod" id="cod" value="COD">
+                            Cash on Delivery (COD)
+                            <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Right Column for Place Order Button -->
+                    <div class="col-md-4 d-flex justify-content-center align-items-center">
+                      <div class="text-center">
+                        <button type="button "  class="btn btn-dark place-order-btn">Place Order</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <% } else { %>
+                <div class="alert alert-warning text-center" role="alert">
+                  Address not available.
+                </div>
+                <% } %>
+              </form>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal HTML -->
+        <div class="modal fade" id="address-modal" tabindex="-1" role="dialog" aria-labelledby="addressModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addressModalLabel">Edit Address</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form id="address-modal-form">
+                  <!-- Hidden Input to store Address ID -->
+                  <input type="hidden" name="addressId">
+
+                  <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" name="name" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Address Type</label>
+                    <input type="text" id="addressType" name="addressType" class="form-control" list="addressTypeOptions" onblur="this.value = this.value.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')">
+
+                    <datalist id="addressTypeOptions">
+                      <option value="Home"></option>
+                      <option value="Office"></option>
+                    </datalist>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="houseName" class="form-label">House No., Building Name</label>
+                    <input type="text" class="form-control" name="houseName" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="landmark" class="form-label">Landmark</label>
+                    <input type="text" class="form-control" name="landmark" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="city" class="form-label">City</label>
+                    <input type="text" class="form-control" name="city" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="state" class="form-label">State</label>
+                    <input type="text" class="form-control" name="state" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="country" class="form-label">Country</label>
+                    <input type="text" class="form-control" name="country" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="pinCode" class="form-label">PIN Code</label>
+                    <input type="text" class="form-control" name="pinCode" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" name="phone" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="alternatePhone" class="form-label">Alternate Phone</label>
+                    <input type="text" class="form-control" name="alternatePhone">
+                  </div>
+
+                  <button id="save-address-btn" type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- </div> -->
+        <div class="col-lg-4 col-md-6">
+          <div class="checkout__order">
+            <h4 class="order__title">Your Cart</h4>
+            <div class="checkout__order__products">Items</div>
+            <ul class="checkout__order__list">
+              <% cartItems.forEach((item, index) => { %>
+              <li class="checkout__order__item">
+                <div class="checkout__order__info">
+                  <div class="checkout__order__item-name">
+                    <%= String(index + 1).padStart(2, '0') %> :
+                    <%= item.name.length > 30 ? item.name.slice(0, 30) + '...' : item.name %>
+                  </div>
+                </div>
+                <div class="checkout__order__details">
+                  <div class="checkout__order__quantity-price">
+                    <span class="checkout__order__price">₹ <%= item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                    <span class="checkout__order__quantity">X Qty <%= item.quantity %></span>
+                  </div>
+                  <div class="checkout__order__total-price">
+                    <span >
+                    ₹ <%= item.total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                </span>
+                  </div>
+                </div>
+              </li>
+              <% }); %>
+            </ul>
+
+            <ul class="checkout__total__all">
+              <li>Subtotal <span>₹ <%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span></li>
+              <li>Total <span id="checkout-total-amount">₹ <%= total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span></li>
+            </ul>
+            <!-- <div class="checkout__input__checkbox">
                 <label for="acc-or">
                   Create an account?
                   <input type="checkbox" id="acc-or">
                   <span class="checkmark"></span>
                 </label>
               </div> -->
-              <p>We accept various payment methods: Credit/Debit cards, UPI, CellNext Wallet, and Cash on Delivery.</p>
-              <div class="checkout__input__checkbox">
-                <label for="paypal">
-                  Paypal
-                  <input type="radio" id="paypal" name="payment_method">
-                  <span class="checkmark"></span>
-                </label>
-              </div>
-
-              <div class="checkout__input__checkbox">
-                <label for="wallet">
-                  CellNext Wallet
-                  <input type="radio" id="wallet" name="payment_method">
-                  <span class="checkmark"></span>
-                </label>
-              </div>
-
-              <div class="checkout__input__checkbox">
-                <label for="cod">
-                  Cash on Delivery
-                  <input type="radio" id="cod" name="payment_method">
-                  <span class="checkmark"></span>
-                </label>
-              </div>
-
-              <button type="submit" class="site-btn">PLACE ORDER</button>
+            <p>We accept various payment methods: Credit/Debit cards, UPI, CellNext Wallet, and Cash on Delivery.</p>
+            <div class="checkout__input__checkbox">
+              <label for="paypal">
+                Paypal
+                <input type="radio" id="paypal" name="payment_method">
+                <span class="checkmark"></span>
+              </label>
             </div>
+
+            <div class="checkout__input__checkbox">
+              <label for="wallet">
+                CellNext Wallet
+                <input type="radio" id="wallet" name="payment_method">
+                <span class="checkmark"></span>
+              </label>
+            </div>
+
+            <div class="checkout__input__checkbox">
+              <label for="cod">
+                Cash on Delivery
+                <input type="radio" id="cod" name="payment_method">
+                <span class="checkmark"></span>
+              </label>
+            </div>
+
+            <button type="button" class="site-btn">PLACE ORDER</button>
           </div>
         </div>
-      </form>
+      </div>
+      <!-- </form> -->
     </div>
   </div>
   </div>
 </section>
 </section>
 <!-- Checkout Section End -->
-<style>
-  /* Styles for the list of cart items */
-  .checkout__order__list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  /* Product container */
-  .checkout__order__item {
-    display: flex;
-    flex-direction: column;
-    padding: 12px 0;
-    border-bottom: 1px solid #ddd;
-    font-size: 14px;
-  }
-
-  /* Product index and name on the same line */
-  .checkout__order__info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: bold;
-    font-size: 14px;
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* Quantity and price details */
-  .checkout__order__details {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: #888;
-    margin-top: 3px;
-  }
-
-  /* Total price aligned to the right */
-  .checkout__order__total-price {
-    font-weight: bold;
-    font-size: 14px;
-    text-align: right;
-  }
-
-  /* Styles for the total summary section */
-  .checkout__order__totals {
-    list-style-type: none;
-    padding: 0;
-    margin-top: 15px;
-  }
-
-  .checkout__order__totals li {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    font-size: 16px;
-    font-weight: bold;
-    border-top: 1px solid #ddd;
-  }
-
-  .checkout__order__totals li span {
-    color: #000;
-    font-size: 16px;
-  }
-</style>
 
 <%- include('../../views/partials/user/footer') %>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll(".toggle-details").forEach((button) => {
-      button.addEventListener("click", function() {
-        const details = this.previousElementSibling;
-        if (details.style.display === "none" || details.style.display === "") {
-          details.style.display = "block";
-          this.innerHTML = "Show Less <i class='bx bxs-chevron-up'></i>";
-        } else {
-          details.style.display = "none";
-          this.textContent = "Show More";
-        }
-      });
-    });
+<script src="/js/checkout.js"></script>
 
-    document.querySelectorAll(".select-address").forEach((radio) => {
-      radio.addEventListener("change", function() {
-        document.querySelectorAll(".card").forEach((card) => {
-          card.classList.remove("selected-address");
-        });
-
-        this.closest(".card").classList.add("selected-address");
-      });
-    });
-  });
-</script>
-
-<script>
-  $(document).ready(function() {
-    $(document).on("click", ".edit-address-btn", function() {
-      var addressId = $(this).data("address-id");
-      $("#address-modal").find('input[name="addressId"]').val(addressId);
-      $("#address-modal").find('input[name="name"]').val($(this).data("name"));
-      $("#address-modal").find('input[name="addressType"]').val($(this).data("address-type"));
-      $("#address-modal").find('input[name="houseName"]').val($(this).data("house-name"));
-      $("#address-modal").find('input[name="city"]').val($(this).data("city"));
-      $("#address-modal").find('input[name="state"]').val($(this).data("state"));
-      $("#address-modal").find('input[name="country"]').val($(this).data("country"));
-      $("#address-modal").find('input[name="pinCode"]').val($(this).data("pin-code"));
-      $("#address-modal").find('input[name="phone"]').val($(this).data("phone"));
-      $("#address-modal").find('input[name="alternatePhone"]').val($(this).data("alternate-phone"));
-      $("#address-modal").find('input[name="landmark"]').val($(this).data("landmark"));
-
-      console.log({
-        addressId: addressId,
-        name: $(this).data("name"),
-        addressType: $(this).data("address-type"),
-        houseName: $(this).data("house-name"),
-        city: $(this).data("city"),
-        state: $(this).data("state"),
-        country: $(this).data("country"),
-        pinCode: $(this).data("pin-code"),
-        phone: $(this).data("phone"),
-        alternatePhone: $(this).data("alternate-phone"),
-        landmark: $(this).data("landmark")
-      });
-
-      $("#modal-title").text("Edit Address");
-      $("#save-address-btn").text("Update Address");
-      $("#address-modal").modal("show");
-    });
-
-    $(document).on("click", "#add-address-btn", function() {
-      $("#address-modal").find("input").val("");
-
-      $("#modal-title").text("Add New Address");
-      $("#save-address-btn").text("Save Address");
-      $("#address-modal").modal("show");
-    });
-
-    $("#save-address-btn").on("click", async function(event) {
-      event.preventDefault();
-      $(".error-message").remove();
-
-      var isValid = true;
-
-      function showError(input, message) {
-        $(input).after(`<span class="error-message" style="color: red; font-size: 12px;">${message}</span>`);
-        isValid = false;
-      }
-
-      var addressId = $('#address-modal').find('input[name="addressId"]').val().trim();
-      var name = $('#address-modal').find('input[name="name"]').val().trim();
-      var addressType = $('#address-modal').find('input[name="addressType"]').val().trim();
-      var houseName = $('#address-modal').find('input[name="houseName"]').val().trim();
-      var city = $('#address-modal').find('input[name="city"]').val().trim();
-      var state = $('#address-modal').find('input[name="state"]').val().trim();
-      var country = $('#address-modal').find('input[name="country"]').val().trim();
-      var pinCode = $('#address-modal').find('input[name="pinCode"]').val().trim();
-      var phone = $('#address-modal').find('input[name="phone"]').val().trim();
-      var alternatePhone = $('#address-modal').find('input[name="alternatePhone"]').val().trim();
-      var landmark = $('#address-modal').find('input[name="landmark"]').val().trim();
-
-      if (!name) showError('input[name="name"]', 'Name is required');
-      if (!addressType) showError('input[name="addressType"]', 'Address Type is required');
-      if (!houseName) showError('input[name="houseName"]', 'House Name is required');
-      if (!city) showError('input[name="city"]', 'City is required');
-      if (!state) showError('input[name="state"]', 'State is required');
-      if (!country) showError('input[name="country"]', 'Country is required');
-      if (!pinCode) showError('input[name="pinCode"]', 'Pin Code is required');
-      else if (!/^\d{6}$/.test(pinCode)) showError('input[name="pinCode"]', 'Pin Code must be 6 digits');
-      if (!landmark) showError('input[name="landmark"]', 'landmark is required');
-
-      if (!phone) showError('input[name="phone"]', 'Phone number is required');
-      else if (!/^\d{10}$/.test(phone)) showError('input[name="phone"]', 'Phone number must be 10 digits');
-
-      if (alternatePhone && !/^\d{10}$/.test(alternatePhone))
-        showError('input[name="alternatePhone"]', 'Alternate phone must be 10 digits');
-
-      if (!isValid) return;
-
-      const data = {
-        name,
-        addressType,
-        houseName,
-        city,
-        state,
-        country,
-        pinCode,
-        phone,
-        alternatePhone,
-        landmark,
-      };
-
-      const url = addressId ? "/update-address" : "/add-address";
-      const method = addressId ? "PUT" : "POST";
-
-      if (addressId) data.addressId = addressId;
-
-      try {
-        const response = await fetch(url, {
-          method,
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(data),
-        });
-
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-
-        const responseData = await response.json();
-
-        if (responseData.success) {
-          Swal.fire({
-            icon: "success",
-            title: "Success",
-            text: responseData.message || (addressId ? "Address updated!" : "Address added!"),
-          }).then(() => {
-            $("#address-modal").modal("hide");
-            location.reload();
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Failed",
-            text: responseData.message,
-          });
-        }
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Error saving address: " + error.message,
-        });
-      }
-    });
-  });
-</script>
-
-<script>
-  document.addEventListener('click', function(e) {
-    if (e.target && e.target.classList.contains('delete-address-btn')) {
-      var addressId = e.target.getAttribute('data-address-id');
-
-      swal.fire({
-          title: "Are you sure?",
-          text: "Once deleted, this address cannot be recovered!",
-          icon: "warning",
-          showCancelButton: true, // Show the cancel button
-          confirmButtonText: 'Yes, delete it!',
-          cancelButtonText: 'No, keep it',
-          confirmButtonColor: '#d33', // Set the confirm button color to red
-          cancelButtonColor: '#3085d6', // Set the cancel button color to blue
-        })
-        .then((result) => {
-          if (result.isConfirmed) { // If the user clicked "Yes"
-            fetch('/delete-address', {
-                method: 'DELETE',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  addressId: addressId
-                }),
-              })
-              .then(response => response.json())
-              .then(data => {
-                if (data.success) {
-                  swal.fire("Success!", "Address deleted successfully.", "success");
-                  location.reload();
-                } else {
-                  swal.fire("Error!", data.message, "error");
-                }
-              })
-              .catch(error => {
-                swal.fire("Error!", "Something went wrong. Please try again.", "error");
-              });
-          } else {
-            swal.fire("Your address is safe!");
-          }
-        });
-    }
-  });
-</script>

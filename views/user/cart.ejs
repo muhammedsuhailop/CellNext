@@ -103,11 +103,11 @@
               <a href="/shop">Continue Shopping</a>
             </div>
           </div>
-          <div class="col-lg-6 col-md-6 col-sm-6">
+          <!-- <div class="col-lg-6 col-md-6 col-sm-6">
             <div class="continue__btn update__btn">
               <a href="/cart"><i class="fa fa-spinner"></i> Update cart</a>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
       <div class="col-lg-4">
@@ -125,7 +125,11 @@
 
             <li>Total <span>₹ <%= (totalAmount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></span></li>
           </ul>
+          <% if (cartItems.length > 0) { %>
           <a href="/checkout" class="primary-btn">Proceed to checkout</a>
+          <% } else { %>
+          <a href="/shop" class="primary-btn">Continue Shopping</a>
+          <% } %>
         </div>
 
       </div>
