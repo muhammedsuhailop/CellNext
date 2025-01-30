@@ -26,7 +26,7 @@
       <section class="accounts">
         <div class="container-fluid">
           <div class="address__form">
-            <form action="/add-address" method="POST" id="new-address-form">
+            <form id="new-address-form">
               <div class="row w-100">
                 <div class="col-lg-12 col-md-10">
                   <h6 class="coupon__code"><span class="icon_tag_alt"></span> Have a coupon? <a href="#">Click here</a> to enter your code</h6>
@@ -144,114 +144,147 @@
 </div>
 <!-- Search End -->
 
-<!-- Js Plugins -->
-<script src="js/jquery-3.3.1.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/jquery.nice-select.min.js"></script>
-<script src="js/jquery.nicescroll.min.js"></script>
-<script src="js/jquery.magnific-popup.min.js"></script>
-<script src="js/jquery.countdown.min.js"></script>
-<script src="js/jquery.slicknav.js"></script>
-<script src="js/mixitup.min.js"></script>
-<script src="js/owl.carousel.min.js"></script>
-<script src="js/main.js"></script>
 
 <script>
   $(document).ready(function() {
-    $('#new-address-form').on('submit', function(event) {
-      event.preventDefault();
+  $('#new-address-form').on('submit', async function(event) {
+    event.preventDefault(); // Prevent traditional form submission
 
-      $('.text-danger').remove();
+    $('.text-danger').remove(); // Clear any previous validation messages
 
-      let isValid = true;
+    let isValid = true;
 
-      const firstName = $('#firstName').val();
-      const firstNameRegex = /^[A-Za-z\s]+$/;
-      if (!firstName) {
-        $('#firstName').after('<span class="text-danger">First name is required.</span>');
-        isValid = false;
-      } else if (!firstNameRegex.test(firstName)) {
-        $('#firstName').after('<span class="text-danger">First name must contain only alphabets and spaces.</span>');
-        isValid = false;
-      }
+    // Validation logic
+    const firstName = $('#firstName').val();
+    const firstNameRegex = /^[A-Za-z\s]+$/;
+    if (!firstName) {
+      $('#firstName').after('<span class="text-danger">First name is required.</span>');
+      isValid = false;
+    } else if (!firstNameRegex.test(firstName)) {
+      $('#firstName').after('<span class="text-danger">First name must contain only alphabets and spaces.</span>');
+      isValid = false;
+    }
 
-      const lastName = $('#lastName').val();
-      if (lastName && !firstNameRegex.test(lastName)) {
-        $('#lastName').after('<span class="text-danger">Last name must contain only alphabets and spaces.</span>');
-        isValid = false;
-      }
+    const lastName = $('#lastName').val();
+    if (lastName && !firstNameRegex.test(lastName)) {
+      $('#lastName').after('<span class="text-danger">Last name must contain only alphabets and spaces.</span>');
+      isValid = false;
+    }
 
-      const city = $('#city').val();
-      const state = $('#state').val();
-      const country = $('#country').val();
-      const landmark = $('#landmark').val();
-      const alphaRegex = /^[A-Za-z\s]+$/;
-      const extendedRegex = /^[A-Za-z\s.,'()\[\]-]+$/;
+    const city = $('#city').val();
+    const state = $('#state').val();
+    const country = $('#country').val();
+    const landmark = $('#landmark').val();
+    const alphaRegex = /^[A-Za-z\s]+$/;
+    const extendedRegex = /^[A-Za-z\s.,'()\[\]-]+$/;
 
-      if (!city) {
-        $('#city').after('<span class="text-danger">City is required.</span>');
-        isValid = false;
-      } else if (!extendedRegex.test(city)) {
-        $('#city').after('<span class="text-danger">City must contain only alphabets, spaces, and valid characters like . , \' () [] -.</span>');
-        isValid = false;
-      }
+    if (!city) {
+      $('#city').after('<span class="text-danger">City is required.</span>');
+      isValid = false;
+    } else if (!extendedRegex.test(city)) {
+      $('#city').after('<span class="text-danger">City must contain only alphabets, spaces, and valid characters like . , \' () [] -.</span>');
+      isValid = false;
+    }
 
-      if (!state) {
-        $('#state').after('<span class="text-danger">State is required.</span>');
-        isValid = false;
-      } else if (!alphaRegex.test(state)) {
-        $('#state').after('<span class="text-danger">State must contain only alphabets and spaces.</span>');
-        isValid = false;
-      }
+    if (!state) {
+      $('#state').after('<span class="text-danger">State is required.</span>');
+      isValid = false;
+    } else if (!alphaRegex.test(state)) {
+      $('#state').after('<span class="text-danger">State must contain only alphabets and spaces.</span>');
+      isValid = false;
+    }
 
-      if (!country) {
-        $('#country').after('<span class="text-danger">Country is required.</span>');
-        isValid = false;
-      } else if (!alphaRegex.test(country)) {
-        $('#country').after('<span class="text-danger">Country must contain only alphabets and spaces.</span>');
-        isValid = false;
-      }
+    if (!country) {
+      $('#country').after('<span class="text-danger">Country is required.</span>');
+      isValid = false;
+    } else if (!alphaRegex.test(country)) {
+      $('#country').after('<span class="text-danger">Country must contain only alphabets and spaces.</span>');
+      isValid = false;
+    }
 
-      if (!landmark) {
-        $('#landmark').after('<span class="text-danger">Landmark is required.</span>');
-        isValid = false;
-      } else if (!extendedRegex.test(landmark)) {
-        $('#landmark').after('<span class="text-danger">Landmark must contain only alphabets, spaces, and valid characters like . , \' () [] -.</span>');
-        isValid = false;
-      }
+    if (!landmark) {
+      $('#landmark').after('<span class="text-danger">Landmark is required.</span>');
+      isValid = false;
+    } else if (!extendedRegex.test(landmark)) {
+      $('#landmark').after('<span class="text-danger">Landmark must contain only alphabets, spaces, and valid characters like . , \' () [] -.</span>');
+      isValid = false;
+    }
 
-      const pinCode = $('#pinCode').val();
-      const pinCodeRegex = /^[0-9]{6}$/;
-      if (!pinCode) {
-        $('#pinCode').after('<span class="text-danger">PIN code is required.</span>');
-        isValid = false;
-      } else if (!pinCodeRegex.test(pinCode)) {
-        $('#pinCode').after('<span class="text-danger">PIN code must be a 6-digit number.</span>');
-        isValid = false;
-      }
+    const pinCode = $('#pinCode').val();
+    const pinCodeRegex = /^[0-9]{6}$/;
+    if (!pinCode) {
+      $('#pinCode').after('<span class="text-danger">PIN code is required.</span>');
+      isValid = false;
+    } else if (!pinCodeRegex.test(pinCode)) {
+      $('#pinCode').after('<span class="text-danger">PIN code must be a 6-digit number.</span>');
+      isValid = false;
+    }
 
-      const phone = $('#phone').val();
-      const altPhone = $('#alternatePhone').val();
-      const phoneRegex = /^[0-9]{10}$/;
+    const phone = $('#phone').val();
+    const altPhone = $('#alternatePhone').val();
+    const phoneRegex = /^[0-9]{10}$/;
 
-      if (!phone) {
-        $('#phone').after('<span class="text-danger">Phone number is required.</span>');
-        isValid = false;
-      } else if (!phoneRegex.test(phone)) {
-        $('#phone').after('<span class="text-danger">Phone number must be a 10-digit number.</span>');
-        isValid = false;
-      }
+    if (!phone) {
+      $('#phone').after('<span class="text-danger">Phone number is required.</span>');
+      isValid = false;
+    } else if (!phoneRegex.test(phone)) {
+      $('#phone').after('<span class="text-danger">Phone number must be a 10-digit number.</span>');
+      isValid = false;
+    }
 
-      if (altPhone && phone === altPhone) {
-        $('#alternatePhone').after('<span class="text-danger">Alternate phone number cannot be the same as the primary phone.</span>');
-        isValid = false;
-      }
+    if (altPhone && phone === altPhone) {
+      $('#alternatePhone').after('<span class="text-danger">Alternate phone number cannot be the same as the primary phone.</span>');
+      isValid = false;
+    }
 
-      if (isValid) {
-        this.submit();
-      }
+    if (!isValid) return; // Stop the process if validation fails
+
+    // Collect form data and submit via fetch if validation passes
+    const formData = new FormData(this);
+    const data = {};
+
+    formData.forEach((value, key) => {
+        data[key] = value;
     });
+
+    try {
+        const response = await fetch('/add-address', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: result.message || 'Address added successfully!',
+            }).then(() => {
+              window.location.replace('/my-account'); // Redirect after success
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: result.message || 'Failed to add address!',
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while adding the address.',
+        });
+    }
   });
+});
+
+</script>
 </script>
 <script>
   $(document).ready(function() {

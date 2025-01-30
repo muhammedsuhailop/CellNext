@@ -1,0 +1,384 @@
+<link rel="stylesheet" href="css/product-page.css" type="text/css">
+
+<%- include('../../views/partials/user/header') %>
+<!-- Header Section End -->
+
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb__text">
+          <h4>Checkout</h4>
+          <div class="breadcrumb__links">
+            <a href="/">Home</a>
+            <a href="/shop">Shop</a>
+            <a href="/cart">Cart</a>
+            <span>Checkout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<!-- Checkout Section Begin -->
+<section class="checkout spad">
+  <div class="container">
+    <div class="checkout__form">
+      <form action="#">
+        <div class="row">
+          <div class="col-lg-8 col-md-6">
+            <h6 class="coupon__code"><span class="icon_tag_alt"></span> Have a coupon? <a href="#">Click
+                here</a> to enter your code</h6>
+            <h4>Saved Address</h4>
+            <div class="address-section border p-3  mb-3 adr-out">
+              <h5>My Addresses</h5>
+              <div class="list-group mt-4 ">
+                <button id="add-address-btn" class="btn btn-primary">Add New Address</button>
+                <% if (addressData && addressData.address && addressData.address.length > 0) { %>
+                <% addressData.address.forEach((adrs, index) => { %>
+                <div class="card mb-3">
+                  <div class="card-body adr-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <h5 class="card-title">Address <%= index + 1 %></h5>
+                      <!-- Select Address -->
+                      <input type="radio" name="selectedAddress" value="<%= adrs._id %>" class="select-address">
+                    </div>
+                    <p><strong>Address Type:</strong> <%= adrs.addressType %></p>
+                    <p><strong>Name:</strong> <%= adrs.name %></p>
+                    <p><strong>Location:</strong> <%= adrs.city %>, <%= adrs.state %>, <%= adrs.country %></p>
+
+                    <!-- Hidden Details Section -->
+                    <div class="hidden-details" style="display: none;">
+                      <p><strong>House No., Building Name:</strong> <%= adrs.houseName %></p>
+                      <p><strong>Landmark:</strong> <%= adrs.landmark %></p>
+                      <p><strong>PIN Code:</strong> <%= adrs.pinCode %></p>
+                      <p><strong>Phone:</strong> <%= adrs.phone %></p>
+                      <% if (adrs.alternatePhone) { %>
+                      <p><strong>Alternate Phone:</strong> <%= adrs.alternatePhone %></p>
+                      <% } %>
+                      <button type="button" class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>" data-name="<%= adrs.name %>" data-address-type="<%= adrs.addressType %>" data-house-name="<%= adrs.houseName %>" data-city="<%= adrs.city %>" data-state="<%= adrs.state %>" data-country="<%= adrs.country %>" data-pin-code="<%= adrs.pinCode %>" data-phone="<%= adrs.phone %>" data-alternate-phone="<%= adrs.alternatePhone %>" data-landmark="<%= adrs.landmark %>">
+                        Edit Address
+                      </button>
+                      <button class="btn btn-sm btn-danger delete-address-btn" data-address-id="<%= adrs._id %>">
+                        Delete Address
+                      </button>
+                    </div>
+
+                    <button type="button" class="btn btn-sm btn-primary toggle-details" style="float: right;">Show More</button>
+
+                  </div>
+                </div>
+                <% }); %>
+                <% } else { %>
+                <div class="alert alert-warning text-center" role="alert">
+                  Address not available.
+                </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal HTML -->
+          <div class="modal fade" id="address-modal" tabindex="-1" role="dialog" aria-labelledby="addressModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="addressModalLabel">Edit Address</h5>
+                  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <form id="address-modal-form">
+                    <!-- Hidden Input to store Address ID -->
+                    <input type="hidden" name="addressId">
+
+                    <div class="mb-3">
+                      <label for="name" class="form-label">Name</label>
+                      <input type="text" class="form-control" name="name" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Address Type</label>
+                      <input type="text" id="addressType" name="addressType" class="form-control" list="addressTypeOptions" onblur="this.value = this.value.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')">
+
+                      <datalist id="addressTypeOptions">
+                        <option value="Home"></option>
+                        <option value="Office"></option>
+                      </datalist>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="houseName" class="form-label">House No., Building Name</label>
+                      <input type="text" class="form-control" name="houseName" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="landmark" class="form-label">Landmark</label>
+                      <input type="text" class="form-control" name="landmark" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="city" class="form-label">City</label>
+                      <input type="text" class="form-control" name="city" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="state" class="form-label">State</label>
+                      <input type="text" class="form-control" name="state" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="country" class="form-label">Country</label>
+                      <input type="text" class="form-control" name="country" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="pinCode" class="form-label">PIN Code</label>
+                      <input type="text" class="form-control" name="pinCode" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="phone" class="form-label">Phone</label>
+                      <input type="text" class="form-control" name="phone" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="alternatePhone" class="form-label">Alternate Phone</label>
+                      <input type="text" class="form-control" name="alternatePhone">
+                    </div>
+
+                    <button id="save-address-btn" type="submit" class="btn btn-primary">Save Changes</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- </div> -->
+          <div class="col-lg-4 col-md-6">
+            <div class="checkout__order">
+              <h4 class="order__title">Your Cart</h4>
+              <div class="checkout__order__products">Product <span>Total</span></div>
+              <ul class="checkout__total__products">
+                <% cartItems.forEach((item, index) => { %>
+                <li>
+                  <%= String(index + 1).padStart(2, '0') %>. <%= item.name %>
+                  <span>₹ <%= item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %> x <%= item.quantity %> = ₹
+                    <%= item.total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                </li>
+                <% }); %>
+              </ul>
+
+              <ul class="checkout__total__all">
+                <li>Subtotal <span>₹ <%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span></li>
+                <li>Total <span>₹ <%= total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span></li>
+              </ul>
+              <div class="checkout__input__checkbox">
+                <label for="acc-or">
+                  Create an account?
+                  <input type="checkbox" id="acc-or">
+                  <span class="checkmark"></span>
+                </label>
+              </div>
+              <p>Lorem ipsum dolor sit amet, consectetur adip elit, sed do eiusmod tempor incididunt
+                ut labore et dolore magna aliqua.</p>
+              <div class="checkout__input__checkbox">
+                <label for="payment">
+                  Check Payment
+                  <input type="checkbox" id="payment">
+                  <span class="checkmark"></span>
+                </label>
+              </div>
+              <div class="checkout__input__checkbox">
+                <label for="paypal">
+                  Paypal
+                  <input type="checkbox" id="paypal">
+                  <span class="checkmark"></span>
+                </label>
+              </div>
+              <button type="submit" class="site-btn">PLACE ORDER</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  </div>
+</section>
+</section>
+<!-- Checkout Section End -->
+
+<%- include('../../views/partials/user/footer') %>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".toggle-details").forEach((button) => {
+      button.addEventListener("click", function() {
+        const details = this.previousElementSibling;
+        if (details.style.display === "none" || details.style.display === "") {
+          details.style.display = "block";
+          this.textContent = "Show Less";
+        } else {
+          details.style.display = "none";
+          this.textContent = "Show More";
+        }
+      });
+    });
+
+    document.querySelectorAll(".select-address").forEach((radio) => {
+      radio.addEventListener("change", function() {
+        document.querySelectorAll(".card").forEach((card) => {
+          card.classList.remove("selected-address");
+        });
+
+        this.closest(".card").classList.add("selected-address");
+      });
+    });
+  });
+</script>
+
+<script>
+  $(document).ready(function() {
+    $(document).on("click", ".edit-address-btn", function() {
+      var addressId = $(this).data("address-id");
+      $("#address-modal").find('input[name="addressId"]').val(addressId);
+      $("#address-modal").find('input[name="name"]').val($(this).data("name"));
+      $("#address-modal").find('input[name="addressType"]').val($(this).data("address-type"));
+      $("#address-modal").find('input[name="houseName"]').val($(this).data("house-name"));
+      $("#address-modal").find('input[name="city"]').val($(this).data("city"));
+      $("#address-modal").find('input[name="state"]').val($(this).data("state"));
+      $("#address-modal").find('input[name="country"]').val($(this).data("country"));
+      $("#address-modal").find('input[name="pinCode"]').val($(this).data("pin-code"));
+      $("#address-modal").find('input[name="phone"]').val($(this).data("phone"));
+      $("#address-modal").find('input[name="alternatePhone"]').val($(this).data("alternate-phone"));
+      $("#address-modal").find('input[name="landmark"]').val($(this).data("landmark"));
+
+      console.log({
+        addressId: addressId,
+        name: $(this).data("name"),
+        addressType: $(this).data("address-type"),
+        houseName: $(this).data("house-name"),
+        city: $(this).data("city"),
+        state: $(this).data("state"),
+        country: $(this).data("country"),
+        pinCode: $(this).data("pin-code"),
+        phone: $(this).data("phone"),
+        alternatePhone: $(this).data("alternate-phone"),
+        landmark: $(this).data("landmark")
+      });
+
+      $("#modal-title").text("Edit Address");
+      $("#save-address-btn").text("Update Address");
+      $("#address-modal").modal("show");
+    });
+
+    $(document).on("click", "#add-address-btn", function() {
+      $("#address-modal").find("input").val("");
+
+      $("#modal-title").text("Add New Address");
+      $("#save-address-btn").text("Save Address");
+      $("#address-modal").modal("show");
+    });
+
+    $("#save-address-btn").on("click", async function(event) {
+      event.preventDefault();
+      $(".error-message").remove();
+
+      var isValid = true;
+
+      function showError(input, message) {
+        $(input).after(`<span class="error-message" style="color: red; font-size: 12px;">${message}</span>`);
+        isValid = false;
+      }
+
+      var addressId = $('#address-modal').find('input[name="addressId"]').val().trim();
+      var name = $('#address-modal').find('input[name="name"]').val().trim();
+      var addressType = $('#address-modal').find('input[name="addressType"]').val().trim();
+      var houseName = $('#address-modal').find('input[name="houseName"]').val().trim();
+      var city = $('#address-modal').find('input[name="city"]').val().trim();
+      var state = $('#address-modal').find('input[name="state"]').val().trim();
+      var country = $('#address-modal').find('input[name="country"]').val().trim();
+      var pinCode = $('#address-modal').find('input[name="pinCode"]').val().trim();
+      var phone = $('#address-modal').find('input[name="phone"]').val().trim();
+      var alternatePhone = $('#address-modal').find('input[name="alternatePhone"]').val().trim();
+      var landmark = $('#address-modal').find('input[name="landmark"]').val().trim();
+
+      if (!name) showError('input[name="name"]', 'Name is required');
+      if (!addressType) showError('input[name="addressType"]', 'Address Type is required');
+      if (!houseName) showError('input[name="houseName"]', 'House Name is required');
+      if (!city) showError('input[name="city"]', 'City is required');
+      if (!state) showError('input[name="state"]', 'State is required');
+      if (!country) showError('input[name="country"]', 'Country is required');
+      if (!pinCode) showError('input[name="pinCode"]', 'Pin Code is required');
+      else if (!/^\d{6}$/.test(pinCode)) showError('input[name="pinCode"]', 'Pin Code must be 6 digits');
+      if (!landmark) showError('input[name="landmark"]', 'landmark is required');
+
+      if (!phone) showError('input[name="phone"]', 'Phone number is required');
+      else if (!/^\d{10}$/.test(phone)) showError('input[name="phone"]', 'Phone number must be 10 digits');
+
+      if (alternatePhone && !/^\d{10}$/.test(alternatePhone))
+        showError('input[name="alternatePhone"]', 'Alternate phone must be 10 digits');
+
+      if (!isValid) return;
+
+      const data = {
+        name,
+        addressType,
+        houseName,
+        city,
+        state,
+        country,
+        pinCode,
+        phone,
+        alternatePhone,
+        landmark,
+      };
+
+      const url = addressId ? "/update-address" : "/add-address";
+      const method = addressId ? "PUT" : "POST";
+
+      if (addressId) data.addressId = addressId;
+
+      try {
+        const response = await fetch(url, {
+          method,
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
+        const responseData = await response.json();
+
+        if (responseData.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: responseData.message || (addressId ? "Address updated!" : "Address added!"),
+          }).then(() => {
+            $("#address-modal").modal("hide");
+            location.reload();
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Failed",
+            text: responseData.message,
+          });
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error saving address: " + error.message,
+        });
+      }
+    });
+  });
+</script>

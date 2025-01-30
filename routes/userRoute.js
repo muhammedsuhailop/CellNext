@@ -4,6 +4,7 @@ const userController = require('../controllers/user/userController');
 const productcontroller = require('../controllers/user/productController');
 const profileController = require('../controllers/user/profileController');
 const cartController = require('../controllers/user/cartController');
+const checkoutController = require('../controllers/user/checkoutController');
 const passport = require('passport');
 const { userAuth, adminAuth } = require('../middlewares/auth')
 
@@ -61,5 +62,8 @@ router.delete('/delete-address', userAuth, profileController.deleteAddress);
 router.post('/cart/add', userAuth, cartController.addToCart);
 router.get('/cart', userAuth, cartController.loadCartPage);
 router.delete('/cart/remove/:productId', userAuth, cartController.removeProductFromCart);
+
+//Checkout Management
+router.get('/checkout',userAuth,checkoutController.getCheckout);
 
 module.exports = router

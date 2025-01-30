@@ -215,7 +215,7 @@ const addAddress = async (req, res) => {
         const userId = req.session.user;
         const userData = await User.findById(userId);
 
-        const { firstName, lastName, city, state, houseName,
+        const { firstName, lastName, name, city, state, houseName,
             landmark, addressType, country, pinCode, phone, alternatePhone } = req.body;
 
         console.log("req", req.body);
@@ -229,25 +229,25 @@ const addAddress = async (req, res) => {
             );
 
             if (existingAddress) {
-                req.flash('error', 'This address type already exists.');
-                return res.redirect('/my-account');
+                res.json({ success: false, message: 'This address type already exists.' });
             }
         }
-        const name = `${firstName} ${lastName}`;
+
+        let fullName = name || `${firstName} ${lastName}`;
+
 
         if (!userAddress) {
             const newAddress = new Address({
                 userId: userData._id,
-                address: [{ addressType, name, city, state, houseName, landmark, country, pinCode, phone, alternatePhone }]
+                address: [{ addressType, name: fullName, city, state, houseName, landmark, country, pinCode, phone, alternatePhone }]
             })
             await newAddress.save();
         } else {
-            userAddress.address.push({ addressType, name, city, state, houseName, landmark, country, pinCode, phone, alternatePhone });
+            userAddress.address.push({ addressType, name: fullName, city, state, houseName, landmark, country, pinCode, phone, alternatePhone });
             await userAddress.save();
         }
 
-        req.flash('success', 'New Address Added Successfully.');
-        res.redirect('/my-account');
+        res.json({ success: true, message: 'Saved new address successfully' });
 
     } catch (error) {
         console.log('Error:', error);
@@ -259,9 +259,9 @@ const addAddress = async (req, res) => {
 const editAddress = async (req, res) => {
     try {
         console.log('On update address');
-        const { addressId, name, addressType, houseName, city, state, country, pinCode, phone, alternatePhone } = req.body;
+        const { addressId, name, addressType, houseName, landmark, city, state, country, pinCode, phone, alternatePhone } = req.body;
 
-        if (!addressId || !name || !addressType || !houseName || !city || !state || !country || !pinCode || !phone) {
+        if (!addressId || !name || !addressType || !houseName || !city || !state || !country || !pinCode || !phone || !landmark) {
             return res.status(400).json({ success: false, message: 'All fields are required' });
         }
 
@@ -287,6 +287,7 @@ const editAddress = async (req, res) => {
                     'address.$.country': country,
                     'address.$.pinCode': pinCode,
                     'address.$.phone': phone,
+                    'address.$.landmark': landmark,
                     'address.$.alternatePhone': alternatePhone
                 }
             },
