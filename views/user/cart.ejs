@@ -29,11 +29,11 @@
     <div class="row">
       <div class="col-lg-8">
         <div class="shopping__cart__table">
-            <% if (outOfStockMessage) { %>
-                <div class="alert alert-warning">
-                    <%= outOfStockMessage %>
-                </div>
-            <% } %>
+          <% if (typeof outOfStockMessage !== 'undefined' && outOfStockMessage) { %>
+          <div class="alert alert-warning">
+            <%= outOfStockMessage %>
+          </div>
+          <% } %>
           <table>
             <% if (cartItems.length > 0) { %>
             <thead>

@@ -27,6 +27,8 @@ const loadCartPage = async (req, res) => {
                 outOfStockMessage = "Some items in your cart are out of stock and have been set to zero.";
             }
 
+            const itemTotal = variant ? item.quantity * variant.salePrice : 0;
+
             return {
                 productId: product._id,
                 variantId: item.variantId,
@@ -36,7 +38,7 @@ const loadCartPage = async (req, res) => {
                 image: variant ? variant.images[0] : '/img/no-image.png',
                 price: variant ? variant.salePrice : 0,
                 quantity: item.quantity,
-                total: variant ? item.quantity * variant.salePrice : 0,
+                total: itemTotal,
             };
         });
 
@@ -86,6 +88,7 @@ const addToCart = async (req, res) => {
         }
 
         const existingItem = cart.items.find(item => item.productId.toString() === productId && item.variantId === variantId);
+        let cartSubTotal = 0;
 
         if (existingItem) {
             if (existingItem.quantity + quantity > 5) {
@@ -97,15 +100,25 @@ const addToCart = async (req, res) => {
             if (existingItem.quantity + quantity > variant.stock) {
                 return res.status(400).json({
                     success: false,
-                    message: `Item in cart!. Insufficient stock `
+                    message: `Item in cart!. Insufficient stock`
                 });
             }
             existingItem.quantity += quantity;
+            const itemTotal = variant.salePrice * existingItem.quantity;
+
+            cartSubTotal = cart.items.reduce((acc, item) => acc + (variant.salePrice * item.quantity), 0);
         } else {
-            cart.items.push({ productId, variantId, quantity });
+            const itemTotal = variant.salePrice * quantity;
+            cart.items.push({ productId, variantId, quantity, itemTotal });
+            cartSubTotal = cart.items.reduce((acc, item) => acc + (variant.salePrice * item.quantity), 0);
         }
 
+
+        cart.subTotal = cartSubTotal;
+        cart.total = cartSubTotal;
+
         await cart.save();
+
 
         res.json({ success: true, message: 'Successfully added to cart.', cart });
     } catch (err) {
@@ -118,11 +131,33 @@ const removeProductFromCart = async (req, res) => {
     try {
         const { productId } = req.params;
         const { variantId } = req.query;
+        const userId = req.session.user;
+
+        const cart = await Cart.findOne({ userId });
 
         await Cart.updateOne(
             { userId: req.session.user },
             { $pull: { items: { productId, variantId: parseInt(variantId) } } }
         );
+
+        let totalAmount = 0;
+        for (let item of cart.items) {
+            const product = await ProductV2.findById(item.productId);
+            const variant = product.variants[item.variantId];
+
+            if (!variant || variant.stock <= 0) {
+                item.quantity = 0;
+            }
+
+            const itemTotal = variant ? item.quantity * variant.salePrice : 0;
+            totalAmount += itemTotal;
+        }
+
+
+        cart.subTotal = totalAmount;
+        cart.total = totalAmount;
+
+        await cart.save();
 
         return res.status(200).json({ message: "Item removed successfully" });
     } catch (error) {
