@@ -38,7 +38,7 @@
           <a href="/shop" class="gen-btn">Time to Grab Your First Order</a>
           <% } %>
 
-          <% orderDetails.forEach(order => { %>
+          <% orderDetails.reverse().forEach(order => { %>
           <div class="order-card no-radius-card">
             <h6>Order ID: <%= order.orderId %></h6>
             <p><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
@@ -75,7 +75,7 @@
                 </tr>
               </thead>
               <tbody>
-                <% order.items.forEach(item => { %>
+                <% order.items.reverse().forEach(item => { %>
                 <tr>
                   <td><%= item.productName %></td>
                   <td><%= item.variantDetails.color || "N/A" %></td>

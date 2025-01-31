@@ -1,6 +1,7 @@
 const Orders = require('../../models/orderSchema');
 const ProductV2 = require('../../models/productsSchemaV2');
 const User = require('../../models/userSchema');
+const Address = require('../../models/addressSchema')
 
 const getOrders = async (req, res) => {
     try {
@@ -44,7 +45,6 @@ const getOrders = async (req, res) => {
                             return null;
                         }
 
-                        // const variants = Array.isArray(product.variants) ? product.variants : [];
                         const variant = product.variants[item.variantId] || {};
 
                         return {
@@ -77,6 +77,7 @@ const getOrders = async (req, res) => {
                     address: order.address,
                     user: order.userId,
                     items: validItems,
+                    additionalNote: order.additionalNote || 'Nil'
                 };
             })
         );
@@ -116,12 +117,13 @@ const updateStatus = async (req, res) => {
         }
 
         const allowedTransitions = {
-            "Pending": ["Placed", "Cancelled"],
+            "Pending": ["Placed", "Shipped", "Cancelled"],
             "Placed": ["Shipped", "Cancelled"],
             "Shipped": ["Delivered"],
             "Delivered": [],
             "Cancelled": [],
             "Returned": ["Delivered"],
+            "Cancel Request": ["Placed", "Cancelled", "Shipped"]
         };
 
         if (!allowedTransitions[order.status]?.includes(newStatus)) {
@@ -160,9 +162,138 @@ const updateStatus = async (req, res) => {
 
 const getOrderDetails = async (req, res) => {
     try {
+        const orderId = req.params.orderId;
+
+        const order = await Orders.findById(orderId)
+            .populate('userId', 'name email')
+            .populate('address')
+            .exec();
+
+        if (!order) {
+            return res.status(404).render('admin/order-details', {
+                order: null,
+                message: 'Order not found.',
+            });
+        }
+
+        const items = await Promise.all(
+            order.orderItems.map(async (item) => {
+                const product = await ProductV2.findById(item.productId).exec();
+
+                if (!product) {
+                    console.error(`Error: Product not found for item ${item._id}`);
+                    return null;
+                }
+
+                const variant = product.variants[item.variantId] || {};
+
+                return {
+                    productId: product._id,
+                    productName: product.productName,
+                    variantIndex: item.variantId,
+                    variantDetails: {
+                        color: variant.color || "NA",
+                        size: variant.size || "NA",
+                        price: variant.salePrice || product.price,
+                    },
+                    quantity: item.quantity,
+                    itemStatus: item.itemStatus,
+                    cancellationReason: item.cancellationReason || "NA",
+                };
+            })
+        );
+
+        const validItems = items.filter((item) => item !== null);
+
+
+        const orderDetails = {
+            orderId: order._id,
+            orderDate: order.createdOn,
+            status: order.status,
+            totalPrice: order.totalPrice,
+            discount: order.discount,
+            finalAmount: order.finalAmount,
+            couponApplied: order.couponApplied,
+            paymentMethod: order.payment.method,
+            paymentStatus: order.payment.status,
+            user: order.userId,
+            items: validItems,
+            additionalNote: order.additionalNote || 'Nil'
+        };
+
+        console.log('orderDetails====', orderDetails)
+
+        const successMessage = req.flash('success');
+        const errorMessage = req.flash('error');
+
+        res.render('order-view', {
+            order: orderDetails,
+            messages: {
+                success: successMessage.length > 0 ? successMessage[0] : null,
+                error: errorMessage.length > 0 ? errorMessage[0] : null,
+            },
+        })
+
 
     } catch (error) {
+        console.error('Error listing product:', error);
+        res.redirect('/admin/error-page');
+    }
+}
 
+const updateItemStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { productId, variantIndex, newStatus } = req.body;
+
+        console.log('On updateItemStatus ');
+
+        if (!orderId || !productId || variantIndex === undefined || !newStatus) {
+            return res.status(400).json({ success: false, error: 'Missing required fields.' });
+        }
+
+        const order = await Orders.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, error: 'Order not found.' })
+        }
+
+        console.log('Order on item staus chage', order);
+
+
+        const item = order.orderItems.find(i => i.productId.toString() === productId);
+        if (!item) {
+            return res.status(404).json({ success: false, error: 'Order item not found.' })
+        }
+
+        const allowedTransitions = {
+            "Pending": ["Placed", "Shipped", "Cancelled"],
+            "Placed": ["Shipped", "Cancelled"],
+            "Shipped": ["Delivered"],
+            "Delivered": [],
+            "Cancelled": [],
+            "Returned": ["Delivered"],
+            "Cancel Request": ["Placed", "Cancelled", "Shipped"]
+        };
+
+        if (!allowedTransitions[item.itemStatus]?.includes(newStatus)) {
+            return res.status(400).json({ success: false, error: `Cannot change status from ${item.itemStatus} to ${newStatus}.` });
+        }
+
+        if (newStatus === "Cancelled") {
+            const product = await ProductV2.findById(productId);
+            if (product && product.variants[variantIndex]) {
+                product.variants[variantIndex].stock += item.quantity;
+                await product.save();
+            }
+        }
+
+        item.itemStatus = newStatus;
+        await order.save();
+
+        res.status(200).json({ success: true, message: 'Order item status updated successfully!', updatedItem: item });
+    } catch (error) {
+        console.error('Error updating item status:', error);
+        res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 }
 
@@ -170,4 +301,5 @@ module.exports = {
     getOrders,
     updateStatus,
     getOrderDetails,
+    updateItemStatus
 }

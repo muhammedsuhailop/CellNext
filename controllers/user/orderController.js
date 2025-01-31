@@ -7,9 +7,9 @@ const placeOrder = async (req, res) => {
   try {
     const { selectedAddress, orderDetails, paymentMethod } = req.body;
 
-    const ordDetails = orderDetails || 'No additional details provided.';
+    const additionalNote = orderDetails || 'No additional details provided.';
 
-    if (!selectedAddress || !ordDetails || !paymentMethod) {
+    if (!selectedAddress || !additionalNote || !paymentMethod) {
       return res.status(400).json({ success: false, message: 'Missing required fields.' });
     }
 
@@ -72,7 +72,7 @@ const placeOrder = async (req, res) => {
       totalPrice: totalPrice,
       finalAmount: totalPrice,
       address: selectedAddress,
-      orderDetails: ordDetails,
+      additionalNote: additionalNote,
       payment: {
         amountPaid: totalPrice,
         method: paymentMethod,

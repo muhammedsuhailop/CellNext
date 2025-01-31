@@ -113,6 +113,10 @@ const orderSchema = new Schema({
     shippingDetails: {
         provider: String,
         trackingNumber: String
+    },
+    additionalNote: {
+        type: String,
+        default: 'Nil'
     }
 });
 

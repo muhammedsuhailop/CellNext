@@ -52,7 +52,8 @@ router.patch('/brand/unblock', adminAuth, brandController.unblockBrand);
 //Order Management
 router.get('/orders', adminAuth, orderController.getOrders);
 router.patch('/orders/update-status', adminAuth, orderController.updateStatus);
-router.get('/orders/order-details', adminAuth, orderController.getOrderDetails);
+router.get('/orders/order-details/:orderId', adminAuth, orderController.getOrderDetails);
+router.patch('/orders/:orderId/update-item-status', adminAuth, orderController.updateItemStatus);
 
 //Error-Page
 router.get('/error-page', adminController.loadError);
