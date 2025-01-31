@@ -156,6 +156,7 @@ const loadOrderPage = async (req, res) => {
               quantity: item.quantity,
               itemStatus: item.itemStatus,
               cancellationReason: item.cancellationReason || "N/A",
+              variantIndex: item.variantId,
             };
           })
         );
@@ -167,6 +168,7 @@ const loadOrderPage = async (req, res) => {
         }, 0);
 
         return {
+          _id: order._id,
           orderId: order.orderId,
           orderDate: order.createdOn,
           status: order.status,
@@ -194,7 +196,60 @@ const loadOrderPage = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 }
+
+const cancelOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Orders.findById(orderId);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    order.status = "Cancel Request";
+
+    order.orderItems.forEach((item) => {
+      item.itemStatus = "Cancel Request";
+    });
+
+    await order.save();
+
+    res.json({ message: "Order cancellation requested successfully." });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+const cancelItemOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { productId, variantIndex } = req.body;
+
+    const order = await Orders.findById(orderId);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    console.log(productId, variantIndex);
+    console.log(order.orderItems);
+
+    const item = order.orderItems.find(i => i.productId.toString() === productId.toString() && i.variantId === Number(variantIndex));
+    if (!item) return res.status(404).json({ message: "Item not found in order" });
+
+    item.itemStatus = "Cancel Request";
+
+    order.status = "Cancel Request";
+
+    await order.save();
+
+    res.json({ message: "Item cancellation requested successfully." });
+  } catch (error) {
+    console.error("Error updating item status:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+
 module.exports = {
   placeOrder,
   loadOrderPage,
+  cancelOrder,
+  cancelItemOrder
 }

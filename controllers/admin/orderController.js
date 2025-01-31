@@ -260,7 +260,7 @@ const updateItemStatus = async (req, res) => {
         console.log('Order on item staus chage', order);
 
 
-        const item = order.orderItems.find(i => i.productId.toString() === productId);
+        const item = order.orderItems.find(i => i.productId.toString() === productId.toString() && i.variantId === Number(variantIndex));
         if (!item) {
             return res.status(404).json({ success: false, error: 'Order item not found.' })
         }
@@ -288,6 +288,18 @@ const updateItemStatus = async (req, res) => {
         }
 
         item.itemStatus = newStatus;
+        const allItemsSameStatus = order.orderItems.every(i => i.itemStatus === newStatus);
+        if (allItemsSameStatus) {
+            order.status = newStatus;
+        } else {
+            const hasCancelRequests = order.orderItems.some(i => i.itemStatus === "Cancel Request");
+            const hasCancellations = order.orderItems.some(i => i.itemStatus === "Cancelled");
+
+            if (hasCancelRequests || hasCancellations) {
+                order.status = "Partial Cancellation";
+            }
+        }
+
         await order.save();
 
         res.status(200).json({ success: true, message: 'Order item status updated successfully!', updatedItem: item });

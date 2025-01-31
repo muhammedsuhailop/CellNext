@@ -55,9 +55,9 @@
                           <th>Discount</th>
                           <th>Final Amount</th>
                           <th>Payment Method</th>
-                          <th>Payment Status</th>
                           <th>Order Status</th>
                           <th>Actions</th>
+                          <th>Payment Status</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -70,11 +70,6 @@
                           <td>₹<%= order.discount || 0 %></td>
                           <td>₹<%= order.finalAmount %></td>
                           <td><%= order.paymentMethod %></td>
-                          <td>
-                            <span class="badge bg-<%= order.paymentStatus === 'Pending' ? 'warning' : 'success' %>">
-                              <%= order.paymentStatus %>
-                            </span>
-                          </td>
                           <td>
                             <span class="badge bg-<%= order.status === 'Pending' ? 'info' : order.status === 'Placed' ? 'info' : order.status === 'Shipped' ? 'primary' : order.status === 'Delivered' ? 'success' : 'danger' %>">
                               <%= order.status %>
@@ -100,6 +95,11 @@
                                 <% } %>
                               </ul>
                             </div>
+                          </td>
+                          <td>
+                            <span class="badge bg-<%= order.paymentStatus === 'Pending' ? 'warning' : 'success' %>">
+                              <%= order.paymentStatus %>
+                            </span>
                           </td>
                         </tr>
                         <% }) %>

@@ -40,9 +40,40 @@
 
           <% orderDetails.reverse().forEach(order => { %>
           <div class="order-card no-radius-card">
-            <h6>Order ID: <%= order.orderId %></h6>
-            <p><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
-            <p><strong>Status:</strong> <span class="badge bg-primary"><%= order.status %></span></p>
+            <div class="row align-items-center border-bottom pb-2 mb-3">
+
+              <% if (order.status === 'Pending') { %>
+              <div class="col-md-2 ">
+                <button class="btn btn-danger btn-sm btn-action" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+              </div>
+              <% } %>
+
+              <div class="col-md-6">
+                <h6 class="mb-1">Order ID: <%= order.orderId %></h6>
+                <p class="mb-0"><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
+              </div>
+
+              <div class="col-md-4 text-md-end">
+                <p class="mb-0"><strong>Status:</strong>
+                  <span class="btn-sm 
+                    <% if (order.status === 'Pending') { %> bg-info text-white
+                    <% } else if (order.status === 'Placed') { %> bg-info text-white
+                    <% } else if (order.status === 'Shipped') { %> bg-primary text-white
+                    <% } else if (order.status === 'Delivered') { %> bg-success  text-white
+                    <% } else if (order.status === 'Returned') { %> bg-secondary text-white
+                    <% } else if (order.status === 'Cancelled') { %> bg-danger text-white
+                    <% } else if (order.status === 'Cancel Request') { %> bg-danger text-white
+                    <% } %> mx-2">
+                    <% if (order.status === 'Cancel Request') { %>
+                    Canacellation Requested
+                    <%}else { %>
+                    <%= order.status %>
+                    <% } %>
+                  </span>
+                </p>
+              </div>
+            </div>
+
             <div class="row">
               <div class="col-md-6">
                 <p><strong>Total Price:</strong> ₹ <%= (order.totalPrice).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })  %></p>
@@ -71,7 +102,7 @@
                   <th>Size</th>
                   <th>Quantity</th>
                   <th>Price</th>
-                  <th>Actions</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -90,10 +121,12 @@
                   <td>₹<%= item.variantDetails.price %></td>
                   <td>
                     <% if (item.itemStatus === 'Pending') { %>
-                    <button class="btn btn-danger btn-sm btn-action" onclick="cancelOrder('<%= order.orderId %>', '<%= item.productId %>')">Cancel</button>
+                    <button class="btn btn-danger btn-sm btn-action" onclick="cancelItemOrder('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Cancel
+                    </button>
                     <% } %>
                     <% if (item.itemStatus === 'Delivered') { %>
-                    <button class="btn btn-warning btn-sm btn-action" onclick="returnOrder('<%= order.orderId %>', '<%= item.productId %>')">Return</button>
+                    <button class="btn btn-danger btn-sm btn-action" onclick="returnItem('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Cancel
+                    </button>
                     <% } %>
                   </td>
                 </tr>
@@ -125,3 +158,83 @@
   </div>
 </div>
 <!-- Search End -->
+
+<script>
+  async function cancelOrder(orderId) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to request cancellation?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, request cancel"
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`/orders/${orderId}/cancel`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json"
+            }
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            Swal.fire("Cancelled!", data.message, "success").then(() => {
+              location.reload();
+            });
+          } else {
+            Swal.fire("Error!", data.message, "error");
+          }
+        } catch (error) {
+          console.error("Error cancelling order:", error);
+          Swal.fire("Error!", "Something went wrong. Try again.", "error");
+        }
+      }
+    });
+  }
+</script>
+
+<script>
+  async function cancelItemOrder(orderId, productId, variantIndex) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to request cancellation for this item?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, request cancel"
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`/orders/${orderId}/cancel-item`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              productId,
+              variantIndex
+            })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            Swal.fire("Cancelled!", data.message, "success").then(() => {
+              location.reload();
+            });
+          } else {
+            Swal.fire("Error!", data.message, "error");
+          }
+        } catch (error) {
+          console.error("Error cancelling item:", error);
+          Swal.fire("Error!", "Something went wrong. Try again.", "error");
+        }
+      }
+    });
+  }
+</script>
