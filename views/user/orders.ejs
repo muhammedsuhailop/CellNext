@@ -1,0 +1,127 @@
+<%- include('../../views/partials/user/header') %>
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb__text">
+          <div class="breadcrumb__links">
+            <a href="/">Home</a>
+            <a href="/my-account">My Account</a>
+            <span>My Orders</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<section class="shop spad">
+  <div class="container">
+    <div class="row">
+      <%- include('../../views/partials/user/acc-sidebar') %>
+      <section class="accounts">
+        <div class="order-body mx-2">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h4 class="section-heading">My Orders</h4>
+            </div>
+            <div>
+              <a href="/shop" class="gen-btn"><i class='bx bxs-cart'></i> Shope Now</a>
+            </div>
+          </div>
+
+          <% if (orderDetails.length === 0) { %>
+          <div class="alert alert-info">You have no orders yet.</div>
+          <a href="/shop" class="gen-btn">Time to Grab Your First Order</a>
+          <% } %>
+
+          <% orderDetails.forEach(order => { %>
+          <div class="order-card no-radius-card">
+            <h6>Order ID: <%= order.orderId %></h6>
+            <p><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
+            <p><strong>Status:</strong> <span class="badge bg-primary"><%= order.status %></span></p>
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>Total Price:</strong> ₹ <%= (order.totalPrice).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })  %></p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>Discount:</strong> ₹ <%= (order.discount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>Payment Status:</strong> <span class="badge bg-<%= order.paymentStatus === 'Pending' ? 'warning' : 'success' %>"><%= order.paymentStatus %></span></p>
+              </div>
+            </div>
+
+
+            <h6 class="mt-4">Order Items</h6>
+            <table class="order-table">
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Color</th>
+                  <th>Size</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% order.items.forEach(item => { %>
+                <tr>
+                  <td><%= item.productName %></td>
+                  <td><%= item.variantDetails.color || "N/A" %></td>
+                  <td>
+                    <% if (item.variantDetails.size && item.variantDetails.size !== "NA") { %>
+                    <%= item.variantDetails.size %>
+                    <% } else { %>
+                    -
+                    <% } %>
+                  </td>
+                  <td><%= item.quantity %></td>
+                  <td>₹<%= item.variantDetails.price %></td>
+                  <td>
+                    <% if (item.itemStatus === 'Pending') { %>
+                    <button class="btn btn-danger btn-sm btn-action" onclick="cancelOrder('<%= order.orderId %>', '<%= item.productId %>')">Cancel</button>
+                    <% } %>
+                    <% if (item.itemStatus === 'Delivered') { %>
+                    <button class="btn btn-warning btn-sm btn-action" onclick="returnOrder('<%= order.orderId %>', '<%= item.productId %>')">Return</button>
+                    <% } %>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+          <% }) %>
+
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+
+
+
+<!-- Footer Section -->
+<%- include('../../views/partials/user/footer') %>
+
+<!-- Search Begin -->
+<div class="search-model">
+  <div class="h-100 d-flex align-items-center justify-content-center">
+    <div class="search-close-switch">+</div>
+    <form class="search-model-form">
+      <input type="text" id="search-input" placeholder="Search here.....">
+    </form>
+  </div>
+</div>
+<!-- Search End -->

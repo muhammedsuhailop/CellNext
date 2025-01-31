@@ -68,4 +68,7 @@ router.delete('/cart/remove/:productId', userAuth, cartController.removeProductF
 router.get('/checkout', userAuth, checkoutController.getCheckout);
 router.post('/place-order', userAuth, orderController.placeOrder);
 
+//Order Management
+router.get('/my-orders', userAuth, orderController.loadOrderPage);
+
 module.exports = router
