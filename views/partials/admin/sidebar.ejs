@@ -85,7 +85,7 @@
 
      <!-- Brands -->
      <li class="menu-item <%= currentPath.startsWith('/admin/brands') || currentPath.startsWith('/admin/addBrand') ? 'active open' : '' %>"> <a href="/admin/brands" class="menu-link menu-toggle">
-         <i class="menu-icon tf-icons bx bx-rectangle"></i> 
+         <i class="menu-icon tf-icons bx bx-rectangle"></i>
          <div data-i18n="Layouts">Brands</div>
        </a>
        <ul class="menu-sub">
@@ -97,6 +97,25 @@
          <li class="menu-item <%= currentPath === '/admin/addProduct' ? 'active' : '' %>">
            <a href="/admin/addBrand" class="menu-link">
              <div data-i18n="Without navbar">Add New Brand</div>
+           </a>
+         </li>
+       </ul>
+     </li>
+
+     <!-- Orders -->
+     <li class="menu-item <%= currentPath.startsWith('/admin/orders') || currentPath.startsWith('/admin/view-order') ? 'active open' : '' %>"> <a href="/admin/orders" class="menu-link menu-toggle">
+         <i class="menu-icon tf-icons bx bx-cart-alt"></i>
+         <div data-i18n="Layouts">Orders</div>
+       </a>
+       <ul class="menu-sub">
+         <li class="menu-item <%= currentPath === '/admin/products' ? 'active' : '' %>">
+           <a href="/admin/orders" class="menu-link">
+             <div data-i18n="Without menu">View Orders</div>
+           </a>
+         </li>
+         <li class="menu-item <%= currentPath === '/admin/addProduct' ? 'active' : '' %>">
+           <a href="/admin/orders" class="menu-link">
+             <div data-i18n="Without navbar">Edit Order</div>
            </a>
          </li>
        </ul>

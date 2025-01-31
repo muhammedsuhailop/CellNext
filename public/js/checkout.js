@@ -315,7 +315,7 @@ window.addEventListener('load', function () {
                     timerProgressBar: true,
                     showConfirmButton: false
                 }).then(() => {
-                    window.location.href = '/';
+                    window.location.href = '/my-orders';
                 });
             } else {
                 Swal.fire('Error', result.message || 'Failed to place order. Please try again.', 'error');

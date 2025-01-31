@@ -122,35 +122,18 @@
   </div>
   <!-- / Layout wrapper -->
 
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
-  <script src="/assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="/assets/vendor/libs/popper/popper.js"></script>
-  <script src="/assets/vendor/js/bootstrap.js"></script>
-  <script src="/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <%- include('../../views/partials/admin/footer') %>
 
-  <script src="/assets/vendor/js/menu.js"></script>
-  <!-- endbuild -->
-
-  <!-- Vendors JS -->
-  <script src="/assets/vendor/libs/apex-charts/apexcharts.js"></script>
-
-  <!-- Main JS -->
-  <script src="/assets/js/main.js"></script>
-
-  <!-- Page JS -->
-  <script src="/assets/js/dashboards-analytics.js"></script>
-
-  <!-- Place this tag in your head or just before your close body tag. -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
   <script>
     async function updateUserStatus(userId, action) {
       const endpoint = action === 'block' ? '/admin/users/block-user' : '/admin/users/unblock-user';
       const confirmationText = action === 'block' ? 'Do you want to block this user?' : 'Do you want to unblock this user?';
       const successText = action === 'block' ? 'User has been successfully blocked.' : 'User has been successfully unblocked.';
       const failureText = action === 'block' ? 'Failed to block the user. Please try again.' : 'Failed to unblock the user. Please try again.';
-  
-      const { isConfirmed } = await Swal.fire({
+
+      const {
+        isConfirmed
+      } = await Swal.fire({
         title: 'Are you sure?',
         text: confirmationText,
         icon: 'warning',
@@ -158,18 +141,20 @@
         confirmButtonText: action === 'block' ? 'Yes, block!' : 'Yes, unblock!',
         cancelButtonText: 'No, cancel!',
       });
-  
-      if (!isConfirmed) return; 
-  
+
+      if (!isConfirmed) return;
+
       try {
         const response = await fetch(endpoint, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ id: userId }),
+          body: JSON.stringify({
+            id: userId
+          }),
         });
-  
+
         if (response.ok) {
           Swal.fire({
             title: 'Success!',
@@ -177,7 +162,7 @@
             icon: 'success',
             confirmButtonText: 'OK',
           }).then(() => {
-            location.reload(); 
+            location.reload();
           });
         } else {
           Swal.fire({
@@ -198,7 +183,3 @@
       }
     }
   </script>
-  
-</body>
-
-</html>

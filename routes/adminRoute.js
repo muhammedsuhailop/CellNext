@@ -5,6 +5,7 @@ const customerController = require('../controllers/admin/customerController');
 const categoryController = require('../controllers/admin/categoryController');
 const productsController = require('../controllers/admin/productsController');
 const brandController = require('../controllers/admin/brandController');
+const orderController = require('../controllers/admin/orderController');
 const upload = require('../helpers/multer');
 const { userAuth, adminAuth } = require('../middlewares/auth')
 
@@ -47,6 +48,11 @@ router.get('/addBrand', adminAuth, brandController.loadAddBrandPage);
 router.post('/addBrand', adminAuth, upload, brandController.addBrand);
 router.patch('/brand/block', adminAuth, brandController.blockBrand);
 router.patch('/brand/unblock', adminAuth, brandController.unblockBrand);
+
+//Order Management
+router.get('/orders', adminAuth, orderController.getOrders);
+router.patch('/orders/update-status', adminAuth, orderController.updateStatus);
+router.get('/orders/order-details', adminAuth, orderController.getOrderDetails);
 
 //Error-Page
 router.get('/error-page', adminController.loadError);
