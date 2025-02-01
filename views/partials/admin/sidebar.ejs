@@ -65,7 +65,7 @@
      </li>
 
      <!-- Products -->
-     <li class="menu-item <%= currentPath.startsWith('/admin/products') || currentPath.startsWith('/admin/addProduct') ? 'active open' : '' %>"> <a href="/admin/products" class="menu-link menu-toggle">
+     <li class="menu-item <%= currentPath.startsWith('/admin/products') || currentPath.startsWith('/admin/addProduct') || currentPath.startsWith('/admin/variants') ? 'active open' : '' %>"> <a href="/admin/products" class="menu-link menu-toggle">
          <i class="menu-icon tf-icons bx bx-cart"></i>
          <div data-i18n="Layouts">Products</div>
        </a>
@@ -78,6 +78,11 @@
          <li class="menu-item <%= currentPath === '/admin/addProduct' ? 'active' : '' %>">
            <a href="/admin/addProduct" class="menu-link">
              <div data-i18n="Without navbar">Add New Product</div>
+           </a>
+         </li>
+         <li class="menu-item <%= currentPath === '/admin/variants' ? 'active' : '' %>">
+           <a href="/admin/variants" class="menu-link">
+             <div data-i18n="Without navbar">View & Update Variants</div>
            </a>
          </li>
        </ul>

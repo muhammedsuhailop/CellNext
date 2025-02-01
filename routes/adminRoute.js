@@ -39,6 +39,8 @@ router.patch('/product/block', adminAuth, productsController.blockProduct);
 router.patch('/product/unblock', adminAuth, productsController.unblockProduct);
 router.get('/editProduct', adminAuth, productsController.getEditProduct);
 router.post('/editProduct/:id', adminAuth, productsController.editProduct);
+router.get('/variants', adminAuth, productsController.getAllVariants);
+router.patch('/updateVariant', adminAuth, productsController.updateProductVariant);
 // router.post('/removeProductImage/:productId/:index', adminAuth, productsController.removeProductImage);
 router.put('/editProductVariant/:id/variant/:variantIndex', adminAuth, upload, productsController.editVariant);
 router.delete('/removeProductImage/:productId/:variantIndex/:index', adminAuth, productsController.remeoveVariantImage);

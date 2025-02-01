@@ -620,6 +620,93 @@ const remeoveVariantImage = async (req, res) => {
 }
 
 
+const getAllVariants = async (req, res) => {
+    try {
+        const search = req.query.search || "";
+        const page = parseInt(req.query.page) || 1; // Current page (default: 1)
+        const limit = 8; // Number of items per page
+
+        // Build the search query
+        const query = {
+            $or: [
+                { productName: { $regex: new RegExp(".*" + search + ".*", "i") } }
+            ]
+        };
+
+        // Get the total count of products matching the search query
+        const totalProducts = await ProductV2.countDocuments(query);
+
+        // Calculate total pages
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        // Fetch products with pagination
+        const products = await ProductV2.find(query)
+            .limit(limit)
+            .skip((page - 1) * limit)
+            .populate('category')
+            .sort({ createdAt: -1 })
+            .exec();
+
+        // Extract variants data
+        const ProductData = products.flatMap((product) => {
+            return product.variants.map((variant, index) => ({
+                productId: product._id,
+                productName: product.productName,
+                variantIndex: index,
+                regularPrice: variant.regularPrice,
+                salePrice: variant.salePrice,
+                stock: variant.stock,
+                color: variant.color,
+                size: variant.size
+            }));
+        });
+
+        // Flash messages
+        const successMessage = req.flash('success');
+        const errorMessage = req.flash('error');
+
+        // Render the view with pagination data
+        res.render('variants', {
+            productData: ProductData,
+            messages: {
+                success: successMessage.length > 0 ? successMessage[0] : null,
+                error: errorMessage.length > 0 ? errorMessage[0] : null,
+            },
+            currentPage: page,
+            totalPages: totalPages,
+            limit: limit,
+            search: search,
+
+        });
+    } catch (error) {
+        console.error('Error listing product:', error);
+        res.redirect('/admin/error-page');
+    }
+};
+
+const updateProductVariant = async (req, res) => {
+    try {
+        const { productId, variantIndex, salePrice, regularPrice, stock } = req.body;
+
+        const product = await ProductV2.findById(productId);
+        if (!product || variantIndex < 0 || variantIndex >= product.variants.length) {
+            return res.status(404).json({ status: false, message: 'Invalid product or variant index.' });
+        }
+
+        product.variants[variantIndex].salePrice = salePrice;
+        product.variants[variantIndex].regularPrice = regularPrice;
+        product.variants[variantIndex].stock = stock;
+        await product.save();
+
+        res.status(200).json({ status: true, message: 'Product updated successfully!' });
+    } catch (error) {
+        console.error('Error updating product:', error);
+        req.flash('error', 'Failed to update product.');
+        res.redirect('/admin/products');
+    }
+};
+
+
 module.exports = {
     getAddProduct,
     addProduct,
@@ -634,4 +721,6 @@ module.exports = {
     editVariant,
     remeoveVariantImage,
     addProductVariant,
+    getAllVariants,
+    updateProductVariant,
 }
