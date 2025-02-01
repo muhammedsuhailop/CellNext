@@ -42,18 +42,23 @@
 
             <div class="col-lg-6 col-md-6 col-sm-6">
               <div class="shop__product__option__right">
-                <p>Sort by Price:</p>
-                <select>
-                  <option value="">Low To High</option>
-                  <option value="">$0 - $55</option>
-                  <option value="">$55 - $100</option>
+                <p>Sort by:</p>
+                <select id="sortDropdown" class="no-nice-select" onchange="sortProducts()">
+                  <option value="default">Default</option>
+                  <option value="priceLowToHigh">Price: Low to High</option>
+                  <option value="priceHighToLow">Price: High to Low</option>
+                  <option value="rating">Based on Rating</option>
+                  <option value="new">New to Old</option>
+                  <option value="old">Old to New</option>
+                  <option value="aToZ">A - Z</option>
+                  <option value="zToA">Z - A</option>
                 </select>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="row">
+        <div class="row" id="productContainer">
           <% if (products.length === 0) { %>
           <div class="col-12">
             <p class="text-center text-warning">No results found</p>
@@ -165,6 +170,101 @@
   function redirectToProduct(productId, variant) {
     window.location.href = `/productDetails?id=${productId}&variant=${variant}`;
   }
+</script>
+
+<script>
+  let products = <%- JSON.stringify(products) %>;
+
+  let originalProducts = [...products];
+
+  function sortProducts() {
+    const sortType = document.getElementById('sortDropdown').value;
+    let sortedProducts = [...originalProducts];
+
+    switch (sortType) {
+      case "priceLowToHigh":
+        sortedProducts.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
+        break;
+      case "priceHighToLow":
+        sortedProducts.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
+        break;
+      case "aToZ":
+        sortedProducts.sort((a, b) => a.productName.localeCompare(b.productName));
+        break;
+      case "zToA":
+        sortedProducts.sort((a, b) => b.productName.localeCompare(a.productName));
+        break;
+      case "rating":
+        sortedProducts.sort((a, b) => a.rating.localeCompare(b.rating));
+        break;
+      case "new":
+        sortedProducts.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        break;
+      case "old":
+        sortedProducts.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+        break;
+      default:
+        sortedProducts = [...originalProducts];
+    }
+
+    renderProducts(sortedProducts);
+  }
+
+  function renderProducts(products) {
+    const productContainer = document.getElementById("productContainer");
+    productContainer.innerHTML = "";
+
+    products.forEach(product => {
+      productContainer.innerHTML += `
+          <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="product__item ${product.productOffer < product.variantRegularPrice ? '' : ''}">
+              <div onclick="redirectToProduct('${product._id}', '${product.variantNumber}')" 
+                class="product__item__pic" style="background-image: url('${product.variantImages[0]}');">
+                <span class="label">${product.productOffer > 5 ? 'Sale' : ''}</span>
+                <ul class="product__hover">
+                  <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
+                  <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
+                  <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
+                </ul>
+              </div>
+              <div class="product__item__text">
+                <h6>${product.productName} <span class="text-muted"> |</span> ${product.variantColor}
+                  ${product.variantSize !== 'NA' ? `<span class="text-muted"> |</span> ${product.variantSize}` : ''}
+                </h6>
+                ${product.variantStock <= 0 
+                  ? '<a class="text-danger font-weight-bold">Out of Stock</a>' 
+                  : '<a href="#" class="add-cart">+ Add To Cart</a>'}
+
+                <div class="rating">
+                  ${'<i class="fa fa-star"></i>'.repeat(product.rating || 0)}
+                  ${'<i class="fa fa-star-o"></i>'.repeat(5 - (product.rating || 0))}
+                </div>
+
+                <h5>₹ ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })
+                        .format(product.variantSalePrice).replace('₹', '').trim()}</h5>
+                <h6>
+                  <span class="text-muted" style="text-decoration: line-through; font-size: 0.9em;">
+                    ₹ ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })
+                          .format(product.variantRegularPrice).replace('₹', '').trim()}
+                  </span>
+                </h6>
+              </div>
+            </div>
+          </div>
+        `;
+    });
+  }
+
+  $(document).ready(function() {
+    $('select').not('.no-nice-select').niceSelect();
+  });
+
+  $(document).ready(function() {
+    $('select').not('.no-nice-select').niceSelect();
+
+    $('#sortDropdown').next('.nice-select').remove();
+    $('#sortDropdown').show();
+  });
 </script>
 
 </body>

@@ -62,9 +62,7 @@ const loadHomePage = async (req, res) => {
             console.log('No loggedin user');
             const successMessage = req.flash('success');
             const errorMessage = req.flash('error');
-            if (errorMessage.length === 0) {
-                errorMessage.push("You're not logged in");
-            }
+            errorMessage.push("You're not logged in");
             return res.render('home', {
                 products: productData,
                 categories: categories,
@@ -77,7 +75,7 @@ const loadHomePage = async (req, res) => {
         }
 
     } catch (error) {
-        console.log('Error loading Home page');
+        console.log('Error loading Home page', error);
         res.status(500).send('Server Error');
     }
 }
@@ -301,7 +299,6 @@ const logout = async (req, res) => {
                 console.error('Error destroying session:', err);
                 return res.redirect('pageNotFound');
             }
-            req.flash('error', 'You have logged out!');
             return res.redirect('/');
         });
     } catch (error) {
