@@ -45,19 +45,34 @@ const loadHomePage = async (req, res) => {
         console.log('Products :', productData);
         if (user) {
             const userData = await User.findOne({ _id: user });
-            console.log('User data', userData.name)
+            console.log('User data', userData.name);
+            const successMessage = req.flash('success');
+            const errorMessage = req.flash('error');
             res.render('home', {
                 user: userData,
                 products: productData,
                 categories: categories,
-                heroData: heroData
+                heroData: heroData,
+                messages: {
+                    success: successMessage.length > 0 ? successMessage[0] : null,
+                    error: errorMessage.length > 0 ? errorMessage[0] : null,
+                },
             })
         } else {
             console.log('No loggedin user');
+            const successMessage = req.flash('success');
+            const errorMessage = req.flash('error');
+            if (errorMessage.length === 0) {
+                errorMessage.push("You're not logged in");
+            }
             return res.render('home', {
                 products: productData,
                 categories: categories,
-                heroData: heroData
+                heroData: heroData,
+                messages: {
+                    success: successMessage.length > 0 ? successMessage[0] : null,
+                    error: errorMessage.length > 0 ? errorMessage[0] : null,
+                },
             });
         }
 
@@ -262,6 +277,7 @@ const login = async (req, res) => {
         }
 
         req.session.user = findUser._id;
+        req.flash('success', 'You have successfully logged in!');
         console.log('req.session.user', req.session.user)
         res.redirect('/');
     } catch (error) {
@@ -285,6 +301,7 @@ const logout = async (req, res) => {
                 console.error('Error destroying session:', err);
                 return res.redirect('pageNotFound');
             }
+            req.flash('error', 'You have logged out!');
             return res.redirect('/');
         });
     } catch (error) {

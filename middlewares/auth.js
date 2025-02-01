@@ -9,6 +9,8 @@ const userAuth = (req, res, next) => {
                     next();
                 } else {
                     console.log('User is blocked or does not exist.');
+                    req.session.user = null;
+                    req.flash('message', 'Your account may be temporarily or permanently disabled.');
                     res.redirect('/login');
                 }
             })
@@ -18,6 +20,7 @@ const userAuth = (req, res, next) => {
             });
     } else {
         console.log('User session not found.');
+        req.flash('message', 'Please login or signup');
         res.redirect('/login');
     }
 };
