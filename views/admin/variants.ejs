@@ -249,9 +249,49 @@
     async function submitUpdate() {
       const productId = document.getElementById('updateProductId').value;
       const variantIndex = document.getElementById('updateVariantIndex').value;
-      const salePrice = document.getElementById('updateSalePrice').value;
-      const regularPrice = document.getElementById('updateRegularPrice').value;
-      const stock = document.getElementById('updateStock').value;
+      const salePrice = document.getElementById('updateSalePrice').value.trim();
+      const regularPrice = document.getElementById('updateRegularPrice').value.trim();
+      const stock = document.getElementById('updateStock').value.trim();
+
+      const salePriceNum = parseFloat(salePrice);
+      const regularPriceNum = parseFloat(regularPrice);
+      const stockNum = parseInt(stock, 10);
+
+      if (!salePrice || !regularPrice || !stock) {
+        return Swal.fire({
+          title: 'Error!',
+          text: 'All fields are required.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+
+      if (isNaN(salePriceNum) || isNaN(regularPriceNum) || isNaN(stockNum)) {
+        return Swal.fire({
+          title: 'Error!',
+          text: 'Please enter valid numeric values.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+
+      if (salePriceNum > regularPriceNum) {
+        return Swal.fire({
+          title: 'Error!',
+          text: 'Regular price should be greater than or equal to sale price.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+
+      if (stockNum < 0) {
+        return Swal.fire({
+          title: 'Error!',
+          text: 'Stock cannot be negative.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
 
       const response = await fetch('/admin/updateVariant', {
         method: 'PATCH',
@@ -261,15 +301,17 @@
         body: JSON.stringify({
           productId,
           variantIndex,
-          salePrice,
-          regularPrice,
-          stock
+          salePrice: salePriceNum,
+          regularPrice: regularPriceNum,
+          stock: stockNum
         })
       });
 
       const result = await response.json();
+      console.log(result);
+
       closeUpdateForm();
-      console.log(result)
+
       Swal.fire({
         title: result.status ? 'Success!' : 'Error!',
         text: result.message,
