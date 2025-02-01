@@ -623,23 +623,20 @@ const remeoveVariantImage = async (req, res) => {
 const getAllVariants = async (req, res) => {
     try {
         const search = req.query.search || "";
-        const page = parseInt(req.query.page) || 1; // Current page (default: 1)
-        const limit = 8; // Number of items per page
+        const page = parseInt(req.query.page) || 1;
+        const limit = 8;
 
-        // Build the search query
+        
         const query = {
             $or: [
                 { productName: { $regex: new RegExp(".*" + search + ".*", "i") } }
             ]
         };
 
-        // Get the total count of products matching the search query
         const totalProducts = await ProductV2.countDocuments(query);
 
-        // Calculate total pages
         const totalPages = Math.ceil(totalProducts / limit);
 
-        // Fetch products with pagination
         const products = await ProductV2.find(query)
             .limit(limit)
             .skip((page - 1) * limit)
@@ -647,7 +644,6 @@ const getAllVariants = async (req, res) => {
             .sort({ createdAt: -1 })
             .exec();
 
-        // Extract variants data
         const ProductData = products.flatMap((product) => {
             return product.variants.map((variant, index) => ({
                 productId: product._id,
@@ -661,11 +657,9 @@ const getAllVariants = async (req, res) => {
             }));
         });
 
-        // Flash messages
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
 
-        // Render the view with pagination data
         res.render('variants', {
             productData: ProductData,
             messages: {
