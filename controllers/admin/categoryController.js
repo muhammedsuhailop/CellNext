@@ -1,5 +1,5 @@
 const Category = require('../../models/categorySchema');
-const Product = require('../../models/productSchema');
+const ProductV2 = require('../../models/productsSchemaV2');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
 
@@ -138,22 +138,32 @@ const addCategoryOffer = async (req, res) => {
             return res.status(400).json({ status: false, message: 'Category not found' });
         }
 
-        const products = await Product.find({ category: categoryId });
+        const products = await ProductV2.find({ category: categoryId });
 
         await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
 
         for (const product of products) {
-            let salePrice = product.regularPrice;
-
-            if (percentage > 0) {
-                salePrice -= Math.floor((product.regularPrice * percentage) / 100);
+            if (!product.variants || product.variants.length === 0) {
+                continue;
             }
 
-            if (product.productOffer > 0) {
-                salePrice -= Math.floor((product.regularPrice * product.productOffer) / 100);
-            }
+            product.variants = product.variants.map(variant => {
+                let salePrice = variant.regularPrice;
 
-            product.salePrice = salePrice;
+                if (percentage > 0) {
+                    salePrice -= Math.floor(salePrice * (percentage / 100));
+                }
+
+                if (product.productOffer > 0) {
+                    salePrice -= Math.floor(salePrice * (product.productOffer / 100));
+                }
+
+                return {
+                    ...variant,
+                    salePrice,
+                };
+            });
+
             await product.save();
         }
 
@@ -176,27 +186,37 @@ const removeCategoryOffer = async (req, res) => {
             return res.status(400).json({ status: false, message: 'Category not found' });
         }
 
-        const percentage = category.categoryOffer;
+        const products = await ProductV2.find({ category: categoryId });
 
-        const products = await Product.find({ category: categoryId });
-        if (products.length > 0) {
-            for (const product of products) {
-                if (product.productOffer === 0) {
-                    product.salePrice = product.regularPrice;
-                } else {
-                    product.salePrice = product.regularPrice - Math.floor((product.regularPrice * product.productOffer) / 100);
-                }
-                await product.save();
+        for (const product of products) {
+            if (!product.variants || product.variants.length === 0) {
+                continue;
             }
+
+            product.variants = product.variants.map(variant => {
+                let salePrice = variant.regularPrice;
+
+                if (product.productOffer > 0) {
+                    salePrice -= Math.floor(salePrice * (product.productOffer / 100));
+                }
+
+                return {
+                    ...variant,
+                    salePrice,
+                };
+            });
+
+            await product.save();
         }
 
         category.categoryOffer = 0;
         await category.save();
 
         res.json({ status: true, message: 'Category offer removed successfully' });
+
     } catch (error) {
-        res.status(500).json({ status: false, message: 'Internal server error' });
         console.error('Error in removeCategoryOffer:', error);
+        res.status(500).json({ status: false, message: 'Internal server error' });
     }
 };
 
