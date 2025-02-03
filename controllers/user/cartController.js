@@ -58,6 +58,10 @@ const loadCartPage = async (req, res) => {
 
 const addToCart = async (req, res) => {
     try {
+
+        if (!req.session.user) {
+            return res.status(400).json({ success: false, message: 'Please login to add products to cart' });
+        }
         console.log('In Add to cart...')
         const { productId, variantId, quantity } = req.body;
         const userId = req.session.user;
