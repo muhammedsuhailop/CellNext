@@ -89,7 +89,7 @@
                 <% if (products[i].variantStock <= 0) { %>
                 <a class="text-danger font-weight-bold">Out of Stock</a>
                 <% } else { %>
-                <a href="#" class="add-cart">+ Add To Cart</a>
+                <a href="#" class="add-cart" id="add-to-cart-link">+ Add To Cart</a>
                 <% } %>
 
                 <!-- Rating -->
@@ -265,6 +265,116 @@
     $('#sortDropdown').next('.nice-select').remove();
     $('#sortDropdown').show();
   });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".add-cart").forEach((button) => {
+      button.addEventListener("click", function(event) {
+        event.preventDefault();
+
+        const productContainer = this.closest(".product__item");
+
+        if (!productContainer) {
+          console.error("Product container not found");
+          return;
+        }
+
+        const productId = productContainer
+          .querySelector(".product__item__pic")
+          .getAttribute("onclick")
+          .match(/'([^']+)'/)[1];
+
+        const variantId = productContainer
+          .querySelector(".product__item__pic")
+          .getAttribute("onclick")
+          .match(/'([^']+)',\s*'([^']+)'/)[2];
+
+
+        console.log("Product ID:", productId);
+        console.log("Variant ID:", variantId);
+
+        if (!productId || !variantId) {
+          alert("Failed to retrieve product details.");
+          return;
+        }
+
+        const cartData = {
+          productId: productId,
+          variantId: variantId,
+          quantity: 1,
+        };
+
+        fetch("/cart/add", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("authToken"),
+            },
+            body: JSON.stringify(cartData),
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire({
+                icon: "success",
+                title: "Item added to cart!",
+                text: data.message || "You can view your cart or continue shopping.",
+                showCancelButton: true,
+                confirmButtonText: "Go to Cart",
+                cancelButtonText: "Continue Shopping",
+                reverseButtons: true,
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  window.location.href = "/cart";
+                } else {
+                  updateCartDisplay(data.cart);
+                }
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Failed to add item to cart",
+                text: data.message || "Please try again later.",
+                confirmButtonText: "Try Again",
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Error adding to cart:", error);
+            Swal.fire({
+              icon: "error",
+              title: "There was an error",
+              text: error.message ||
+                "There was an error processing your request. Please try again later.",
+              confirmButtonText: "OK",
+            });
+          });
+      });
+    });
+  });
+
+  function updateCartDisplay(cart) {
+    console.log('Updated cart:', cart);
+
+    let cartItemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+    const badge = document.getElementById("cart-count-badge");
+
+    if (cartItemCount > 0) {
+      badge.textContent = cartItemCount;
+      badge.classList.remove("bg-secondary", "bg-success", "bg-warning");
+      if (cartItemCount < 5) {
+        badge.classList.add("bg-secondary");
+      } else if (cartItemCount < 10) {
+        badge.classList.add("bg-success");
+      } else {
+        badge.classList.add("bg-warning");
+      }
+    } else {
+      badge.style.display = "none";
+    }
+  }
 </script>
 
 </body>

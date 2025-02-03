@@ -48,10 +48,10 @@
               <% cartItems.forEach(item => { %>
               <tr data-product-id="<%= item.productId %>" data-variant-id="<%= item.variantId %>">
                 <td class="product__cart__item">
-                  <div class="product__cart__item__pic">
+                  <div class="product__cart__item__pic" onclick="redirectToProduct('<%= item.productId %>', '<%= item.variantId %>')">
                     <img src="<%= item.image %>" alt="<%= item.name %>">
                   </div>
-                  <div class="product__cart__item__text">
+                  <div class="product__cart__item__text" onclick="redirectToProduct('<%= item.productId %>', '<%= item.variantId %>')">
                     <h6><%= item.name %></h6>
                     <h6>₹ <%= new Intl.NumberFormat('en-IN', { 
                         style: 'currency', 
@@ -175,7 +175,7 @@
                 text: 'The product has been removed from your cart.',
                 icon: 'success',
                 confirmButtonText: 'Okay'
-              }).then(()=>{
+              }).then(() => {
                 window.location.reload();
               });
             } else {
@@ -272,4 +272,8 @@
         });
     }
   });
+
+  function redirectToProduct(productId, variantId) {
+    window.location.href = `/productDetails?id=${productId}&variant=${variantId}`;
+  }
 </script>
