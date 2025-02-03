@@ -150,153 +150,152 @@
             </div>
             <div class="product__details__cart__option">
               <% if (quantity <= 0) { %>
-                <span class="text-danger font-weight-bold">Out of Stock</span>
+              <span class="text-danger font-weight-bold">Out of Stock</span>
               <% } else { %>
-                <div class="quantity">
-                  <div class="pro-qty">
-                    <input type="text" value="1" id="cart-quantity">
-                  </div>
+              <div class="quantity">
+                <div class="pro-qty">
+                  <input type="text" value="1" id="cart-quantity">
                 </div>
-                <button class="primary-btn" id="add-to-cart-btn">Add to Cart</button>
               </div>
-              
-              <% if (quantity < 10) { %>
-                <p class="text-warning">
-                  <strong>Hurry up!</strong> Only <%= quantity %> left in stock.
-                </p>
-              <% } %>
+              <button class="primary-btn" id="add-to-cart-btn">Add to Cart</button>
+            </div>
+
+            <% if (quantity < 10) { %>
+            <p class="text-warning">
+              <strong>Hurry up!</strong> Only <%= quantity %> left in stock.
+            </p>
+            <% } %>
             <% } %>
           </div>
 
-            <div class="product__details__btns__option">
-              <a href="#"><i class="fa fa-heart"></i> add to wishlist</a>
-              <a href="#"><i class="fa fa-exchange"></i> Add To Compare</a>
-            </div>
-            <div class="product__details__last__option">
-              <h5><span>Guaranteed Safe Checkout</span></h5>
-              <img src="img/shop-details/details-payment.png" alt="">
-              <ul>
-                <li><span>Brand:</span> <%= product.brand %></li>
-                <li><span>Categories:</span> <%= category.name %></li>
-                <li><span>Tag:</span> Smartphones, Stylish, 5G</li>
-              </ul>
-            </div>
+          <div class="product__details__btns__option">
+            <a href="#"><i class="fa fa-heart"></i> add to wishlist</a>
+            <a href="#"><i class="fa fa-exchange"></i> Add To Compare</a>
+          </div>
+          <div class="product__details__last__option">
+            <h5><span>Guaranteed Safe Checkout</span></h5>
+            <img src="img/shop-details/details-payment.png" alt="">
+            <ul>
+              <li><span>Brand:</span> <%= product.brand %></li>
+              <li><span>Categories:</span> <%= category.name %></li>
+              <li><span>Tag:</span> Smartphones, Stylish, 5G</li>
+            </ul>
           </div>
         </div>
       </div>
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="product__details__tab">
-            <ul class="nav nav-tabs" role="tablist">
-              <li class="nav-item">
-                <a class="nav-link active" data-toggle="tab" href="#tabs-5" role="tab">Description</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#tabs-6" role="tab">Customer
-                  Previews(5)</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#tabs-7" role="tab">Additional
-                  information</a>
-              </li>
-            </ul>
-            <div class="tab-content">
-              <div class="tab-pane active" id="tabs-5" role="tabpanel">
-                <div class="product__details__tab__content">
-                  <p class="note">Nam tempus turpis at metus scelerisque placerat nulla deumantos
-                    solicitud felis. Pellentesque diam dolor, elementum etos lobortis des mollis
-                    ut risus. Sedcus faucibus an sullamcorper mattis drostique des commodo
-                    pharetras loremos.</p>
-                  <div class="product__details__tab__content__item">
-                    <h5>Products Infomation</h5>
-                    <p>A Pocket PC is a handheld computer, which features many of the same
-                      capabilities as a modern PC. These handy little devices allow
-                      individuals to retrieve and store e-mail messages, create a contact
-                      file, coordinate appointments, surf the internet, exchange text messages
-                      and more. Every product that is labeled as a Pocket PC must be
-                      accompanied with specific software to operate the unit and must feature
-                      a touchscreen and touchpad.</p>
-                    <p>As is the case with any new technology product, the cost of a Pocket PC
-                      was substantial during it’s early release. For approximately $700.00,
-                      consumers could purchase one of top-of-the-line Pocket PCs in 2003.
-                      These days, customers are finding that prices have become much more
-                      reasonable now that the newness is wearing off. For approximately
-                      $350.00, a new Pocket PC can now be purchased.</p>
-                  </div>
-                  <div class="product__details__tab__content__item">
-                    <h5>Material used</h5>
-                    <p>Polyester is deemed lower quality due to its none natural quality’s. Made
-                      from synthetic materials, not natural like wool. Polyester suits become
-                      creased easily and are known for not being breathable. Polyester suits
-                      tend to have a shine to them compared to wool and cotton suits, this can
-                      make the suit look cheap. The texture of velvet is luxurious and
-                      breathable. Velvet is a great choice for dinner party jacket and can be
-                      worn all year round.</p>
-                  </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="product__details__tab">
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" data-toggle="tab" href="#tabs-5" role="tab">Description</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#tabs-6" role="tab">Customer
+                Previews(5)</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#tabs-7" role="tab">Additional
+                information</a>
+            </li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tabs-5" role="tabpanel">
+              <div class="product__details__tab__content">
+                <p class="note">Nam tempus turpis at metus scelerisque placerat nulla deumantos
+                  solicitud felis. Pellentesque diam dolor, elementum etos lobortis des mollis
+                  ut risus. Sedcus faucibus an sullamcorper mattis drostique des commodo
+                  pharetras loremos.</p>
+                <div class="product__details__tab__content__item">
+                  <h5>Products Infomation</h5>
+                  <p>A Pocket PC is a handheld computer, which features many of the same
+                    capabilities as a modern PC. These handy little devices allow
+                    individuals to retrieve and store e-mail messages, create a contact
+                    file, coordinate appointments, surf the internet, exchange text messages
+                    and more. Every product that is labeled as a Pocket PC must be
+                    accompanied with specific software to operate the unit and must feature
+                    a touchscreen and touchpad.</p>
+                  <p>As is the case with any new technology product, the cost of a Pocket PC
+                    was substantial during it’s early release. For approximately $700.00,
+                    consumers could purchase one of top-of-the-line Pocket PCs in 2003.
+                    These days, customers are finding that prices have become much more
+                    reasonable now that the newness is wearing off. For approximately
+                    $350.00, a new Pocket PC can now be purchased.</p>
+                </div>
+                <div class="product__details__tab__content__item">
+                  <h5>Material used</h5>
+                  <p>Polyester is deemed lower quality due to its none natural quality’s. Made
+                    from synthetic materials, not natural like wool. Polyester suits become
+                    creased easily and are known for not being breathable. Polyester suits
+                    tend to have a shine to them compared to wool and cotton suits, this can
+                    make the suit look cheap. The texture of velvet is luxurious and
+                    breathable. Velvet is a great choice for dinner party jacket and can be
+                    worn all year round.</p>
                 </div>
               </div>
-              <div class="tab-pane" id="tabs-6" role="tabpanel">
-                <div class="product__details__tab__content">
-                  <div class="product__details__tab__content__item">
-                    <h5>Products Infomation</h5>
-                    <p>A Pocket PC is a handheld computer, which features many of the same
-                      capabilities as a modern PC. These handy little devices allow
-                      individuals to retrieve and store e-mail messages, create a contact
-                      file, coordinate appointments, surf the internet, exchange text messages
-                      and more. Every product that is labeled as a Pocket PC must be
-                      accompanied with specific software to operate the unit and must feature
-                      a touchscreen and touchpad.</p>
-                    <p>As is the case with any new technology product, the cost of a Pocket PC
-                      was substantial during it’s early release. For approximately $700.00,
-                      consumers could purchase one of top-of-the-line Pocket PCs in 2003.
-                      These days, customers are finding that prices have become much more
-                      reasonable now that the newness is wearing off. For approximately
-                      $350.00, a new Pocket PC can now be purchased.</p>
-                  </div>
-                  <div class="product__details__tab__content__item">
-                    <h5>Material used</h5>
-                    <p>Polyester is deemed lower quality due to its none natural quality’s. Made
-                      from synthetic materials, not natural like wool. Polyester suits become
-                      creased easily and are known for not being breathable. Polyester suits
-                      tend to have a shine to them compared to wool and cotton suits, this can
-                      make the suit look cheap. The texture of velvet is luxurious and
-                      breathable. Velvet is a great choice for dinner party jacket and can be
-                      worn all year round.</p>
-                  </div>
+            </div>
+            <div class="tab-pane" id="tabs-6" role="tabpanel">
+              <div class="product__details__tab__content">
+                <div class="product__details__tab__content__item">
+                  <h5>Products Infomation</h5>
+                  <p>A Pocket PC is a handheld computer, which features many of the same
+                    capabilities as a modern PC. These handy little devices allow
+                    individuals to retrieve and store e-mail messages, create a contact
+                    file, coordinate appointments, surf the internet, exchange text messages
+                    and more. Every product that is labeled as a Pocket PC must be
+                    accompanied with specific software to operate the unit and must feature
+                    a touchscreen and touchpad.</p>
+                  <p>As is the case with any new technology product, the cost of a Pocket PC
+                    was substantial during it’s early release. For approximately $700.00,
+                    consumers could purchase one of top-of-the-line Pocket PCs in 2003.
+                    These days, customers are finding that prices have become much more
+                    reasonable now that the newness is wearing off. For approximately
+                    $350.00, a new Pocket PC can now be purchased.</p>
+                </div>
+                <div class="product__details__tab__content__item">
+                  <h5>Material used</h5>
+                  <p>Polyester is deemed lower quality due to its none natural quality’s. Made
+                    from synthetic materials, not natural like wool. Polyester suits become
+                    creased easily and are known for not being breathable. Polyester suits
+                    tend to have a shine to them compared to wool and cotton suits, this can
+                    make the suit look cheap. The texture of velvet is luxurious and
+                    breathable. Velvet is a great choice for dinner party jacket and can be
+                    worn all year round.</p>
                 </div>
               </div>
-              <div class="tab-pane" id="tabs-7" role="tabpanel">
-                <div class="product__details__tab__content">
-                  <p class="note">Nam tempus turpis at metus scelerisque placerat nulla deumantos
-                    solicitud felis. Pellentesque diam dolor, elementum etos lobortis des mollis
-                    ut risus. Sedcus faucibus an sullamcorper mattis drostique des commodo
-                    pharetras loremos.</p>
-                  <div class="product__details__tab__content__item">
-                    <h5>Products Infomation</h5>
-                    <p>A Pocket PC is a handheld computer, which features many of the same
-                      capabilities as a modern PC. These handy little devices allow
-                      individuals to retrieve and store e-mail messages, create a contact
-                      file, coordinate appointments, surf the internet, exchange text messages
-                      and more. Every product that is labeled as a Pocket PC must be
-                      accompanied with specific software to operate the unit and must feature
-                      a touchscreen and touchpad.</p>
-                    <p>As is the case with any new technology product, the cost of a Pocket PC
-                      was substantial during it’s early release. For approximately $700.00,
-                      consumers could purchase one of top-of-the-line Pocket PCs in 2003.
-                      These days, customers are finding that prices have become much more
-                      reasonable now that the newness is wearing off. For approximately
-                      $350.00, a new Pocket PC can now be purchased.</p>
-                  </div>
-                  <div class="product__details__tab__content__item">
-                    <h5>Material used</h5>
-                    <p>Polyester is deemed lower quality due to its none natural quality’s. Made
-                      from synthetic materials, not natural like wool. Polyester suits become
-                      creased easily and are known for not being breathable. Polyester suits
-                      tend to have a shine to them compared to wool and cotton suits, this can
-                      make the suit look cheap. The texture of velvet is luxurious and
-                      breathable. Velvet is a great choice for dinner party jacket and can be
-                      worn all year round.</p>
-                  </div>
+            </div>
+            <div class="tab-pane" id="tabs-7" role="tabpanel">
+              <div class="product__details__tab__content">
+                <p class="note">Nam tempus turpis at metus scelerisque placerat nulla deumantos
+                  solicitud felis. Pellentesque diam dolor, elementum etos lobortis des mollis
+                  ut risus. Sedcus faucibus an sullamcorper mattis drostique des commodo
+                  pharetras loremos.</p>
+                <div class="product__details__tab__content__item">
+                  <h5>Products Infomation</h5>
+                  <p>A Pocket PC is a handheld computer, which features many of the same
+                    capabilities as a modern PC. These handy little devices allow
+                    individuals to retrieve and store e-mail messages, create a contact
+                    file, coordinate appointments, surf the internet, exchange text messages
+                    and more. Every product that is labeled as a Pocket PC must be
+                    accompanied with specific software to operate the unit and must feature
+                    a touchscreen and touchpad.</p>
+                  <p>As is the case with any new technology product, the cost of a Pocket PC
+                    was substantial during it’s early release. For approximately $700.00,
+                    consumers could purchase one of top-of-the-line Pocket PCs in 2003.
+                    These days, customers are finding that prices have become much more
+                    reasonable now that the newness is wearing off. For approximately
+                    $350.00, a new Pocket PC can now be purchased.</p>
+                </div>
+                <div class="product__details__tab__content__item">
+                  <h5>Material used</h5>
+                  <p>Polyester is deemed lower quality due to its none natural quality’s. Made
+                    from synthetic materials, not natural like wool. Polyester suits become
+                    creased easily and are known for not being breathable. Polyester suits
+                    tend to have a shine to them compared to wool and cotton suits, this can
+                    make the suit look cheap. The texture of velvet is luxurious and
+                    breathable. Velvet is a great choice for dinner party jacket and can be
+                    worn all year round.</p>
                 </div>
               </div>
             </div>
@@ -305,10 +304,12 @@
       </div>
     </div>
   </div>
+  </div>
 </section>
 <!-- Shop Details Section End -->
 
 <!-- Related Section Begin -->
+<% if (relatedProducts.length > 0) { %>
 <section class="related spad">
   <div class="container">
     <div class="row">
@@ -317,169 +318,196 @@
       </div>
     </div>
     <div class="row">
-      <% for(let i = 0; i < relatedProducts.length; i++) { %>
+      <% let count=0; %>
+      <% for(let i = 0; i < Math.min(4, relatedProducts.length) && count<4; i++) { %>
+      <% 
+          const product = relatedProducts[i];
+          const variants = product.variants.slice(0, 2)
+        %>
+      <% for(let j = 0; j < variants.length; j++) { %>
+      <% 
+          count++;
+            const variant = variants[j];
+            const isOutOfStock = variant.stock <= 0;
+            const isOnSale = product.productOffer > 5;
+          %>
       <div class="col-lg-3 col-md-6 col-sm-6">
-        <div class="product__item <%= relatedProducts[i].onSale ? 'sale' : '' %>">
-          <div onclick="redirectToProduct('<%= relatedProducts[i]._id %>')" class="product__item__pic" style="background-image: url('<%= relatedProducts[i].variants[0].images[0] %>');">
-            <span class="label"><%= relatedProducts[i].productOffer > 5 ? 'Sale' : '' %></span>
+        <div class="product__item <%= isOnSale ? 'sale' : '' %>">
+          <!-- Product Image -->
+          <div onclick="redirectToProduct('<%= product._id %>')" class="product__item__pic" style="background-image: url('<%= variant.images[0] %>');">
+            <% if (isOnSale) { %>
+            <span class="label">Sale</span>
+            <% } %>
             <ul class="product__hover">
               <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
               <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
               <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
             </ul>
           </div>
+
+          <!-- Product Details -->
           <div class="product__item__text">
-            <h6><%= relatedProducts[i].productName %></h6>
-            <% if (relatedProducts[i].quantity <= 0) { %>
+            <h6><%= product.productName %> - <%= variant.name %> <span class="text-muted"> |</span> <%= variant.color %>
+              <% if (variant.size !== 'NA') { %>
+              <span class="text-muted"> |</span> <%= variant.size %>
+              <% } %>
+            </h6>
+            <% if (isOutOfStock) { %>
             <a class="text-danger font-weight-bold">Out of Stock</a>
             <% } else { %>
             <a href="#" class="add-cart">+ Add To Cart</a>
             <% } %>
+
+            <!-- Rating -->
             <div class="rating">
-              <% for(let j = 0; j < relatedProducts[i].rating; j++) { %>
+              <% for(let k = 0; k < product.rating; k++) { %>
               <i class="fa fa-star"></i>
               <% } %>
-              <% for(let j = relatedProducts[i].rating; j < 5; j++) { %>
+              <% for(let k = product.rating; k < 5; k++) { %>
               <i class="fa fa-star-o"></i>
               <% } %>
             </div>
+
+            <!-- Prices -->
             <h5>
-              ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(relatedProducts[i].salePrice).replace('₹', '').trim() %>
+              ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(variant.salePrice).replace('₹', '').trim() %>
             </h5>
-            <h6><span class="text-muted" style="text-decoration: line-through; font-size: 0.9em;">
-                ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(relatedProducts[i].regularPrice).replace('₹', '').trim() %>
-              </span></h6>
+            <h6>
+              <span class="text-muted" style="text-decoration: line-through; font-size: 0.9em;">
+                ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(variant.regularPrice).replace('₹', '').trim() %>
+              </span>
+            </h6>
           </div>
         </div>
       </div>
       <% } %>
+      <% } %>
     </div>
   </div>
 </section>
+<% } %>
 
 <!-- Related Section End -->
 
 <script>
   document.getElementById('add-to-cart-btn').addEventListener('click', function() {
-   console.log('add to cart button clicked');
- 
-   const productId = '<%= product._id %>';  
-   const variantId = getSelectedVariantId(); 
-   const quantity = parseInt(document.getElementById('cart-quantity').value, 10); 
-   if(quantity > 5 ){
-    Swal.fire({
+    console.log('add to cart button clicked');
+
+    const productId = '<%= product._id %>';
+    const variantId = getSelectedVariantId();
+    const quantity = parseInt(document.getElementById('cart-quantity').value, 10);
+    if (quantity > 5) {
+      Swal.fire({
         icon: 'error',
         title: 'Exceeded Quantity Limit',
-        text:'Select qunatity maximum upto 5.',
+        text: 'Select qunatity maximum upto 5.',
         confirmButtonText: 'Go to Cart',
       })
       return;
-   }
- 
-   if (variantId == null || isNaN(quantity) || quantity <= 0) {
-     alert('Please select a valid variant and quantity.');
-     return;
-   }
- 
-   const cartData = {
-     productId: productId,
-     variantId: variantId,
-     quantity: quantity
-   };
- 
-   fetch('/cart/add', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + localStorage.getItem('authToken')
-  },
-  body: JSON.stringify(cartData),
-})
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Item added to cart!',
-        text: data.message || 'You can view your cart or continue shopping.',
-        confirmButtonText: 'Go to Cart',
-      }).then(() => {
-        updateCartDisplay(data.cart);  
-      });
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Failed to add item to cart',
-        text: data.message ||'Please try again later.',
-        confirmButtonText: 'Try Again'
-      });
     }
-  })
-  .catch(error => {
-    console.error('Error adding to cart:', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'There was an error',
-      text: error.message || 'There was an error processing your request. Please try again later.',
-      confirmButtonText: 'OK'
-    });
+
+    if (variantId == null || isNaN(quantity) || quantity <= 0) {
+      alert('Please select a valid variant and quantity.');
+      return;
+    }
+
+    const cartData = {
+      productId: productId,
+      variantId: variantId,
+      quantity: quantity
+    };
+
+    fetch('/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+        },
+        body: JSON.stringify(cartData),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Item added to cart!',
+            text: data.message || 'You can view your cart or continue shopping.',
+            confirmButtonText: 'Go to Cart',
+          }).then(() => {
+            updateCartDisplay(data.cart);
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Failed to add item to cart',
+            text: data.message || 'Please try again later.',
+            confirmButtonText: 'Try Again'
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error adding to cart:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'There was an error',
+          text: error.message || 'There was an error processing your request. Please try again later.',
+          confirmButtonText: 'OK'
+        });
+      });
+
   });
 
- });
- 
- function getSelectedVariantId() {
-  const selectedSize = document.querySelector('input[name="size"]:checked');
-  const selectedColor = document.querySelector('input[name="color"]:checked');
-  
-  if (selectedColor) {
-    const color = selectedColor.value;
-    let variantIndex = null;
+  function getSelectedVariantId() {
+    const selectedSize = document.querySelector('input[name="size"]:checked');
+    const selectedColor = document.querySelector('input[name="color"]:checked');
 
-    if (selectedSize) {
-      const size = selectedSize.value;
-      variantIndex = findVariantIndex(size, color);
+    if (selectedColor) {
+      const color = selectedColor.value;
+      let variantIndex = null;
+
+      if (selectedSize) {
+        const size = selectedSize.value;
+        variantIndex = findVariantIndex(size, color);
+      }
+
+      if (variantIndex === null) {
+        variantIndex = findVariantIndexByColorOnly(color);
+      }
+
+      return variantIndex;
     }
 
-    if (variantIndex === null) {
-      variantIndex = findVariantIndexByColorOnly(color);
-    }
-
-    return variantIndex;
+    return null;
   }
 
-  return null;  
-}
+  function findVariantIndexByColorOnly(color) {
+    const variants = <%- JSON.stringify(product.variants) %>;
 
-function findVariantIndexByColorOnly(color) {
-  const variants = <%- JSON.stringify(product.variants) %>;
-
-  for (let i = 0; i < variants.length; i++) {
-    if (variants[i].color === color) {
-      return i;  
+    for (let i = 0; i < variants.length; i++) {
+      if (variants[i].color === color) {
+        return i;
+      }
     }
+    return null;
   }
-  return null;  
-}
 
- 
- function findVariantIndex(size, color) {
-  const variants = <%- JSON.stringify(product.variants) %>;  
-   for (let i = 0; i < variants.length; i++) {
-     if (variants[i].size === size && variants[i].color === color) {
-       return i; 
-     }
-   }
-   return null;  
- }
- 
- function updateCartDisplay(cart) {
-   console.log('Updated cart:', cart);
- }
- 
- </script>
+
+  function findVariantIndex(size, color) {
+    const variants = <%- JSON.stringify(product.variants) %>;
+    for (let i = 0; i < variants.length; i++) {
+      if (variants[i].size === size && variants[i].color === color) {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  function updateCartDisplay(cart) {
+    console.log('Updated cart:', cart);
+  }
+</script>
 
 
 <%- include('../../views/partials/user/footer') %>
- 
- <script src="js/products-page.js"></script>
 
+<script src="js/products-page.js"></script>
