@@ -23,7 +23,7 @@
     <div class="row">
       <%- include('../../views/partials/user/acc-sidebar') %>
 
-      <section class="accounts">
+      <section class="accounts" style="max-width: 75%;">
         <div class="container-fluid">
           <div class="edit-prof">
             <form id="updateProfileForm">
@@ -158,6 +158,15 @@
       });
     });
   });
+
+  window.onload = function() {
+      if (window.performance && window.performance.navigation.type == window.performance.navigation.TYPE_BACK_FORWARD
+        || window.performance && window.performance.navigation.type == window.performance.navigation.TYPE_NAVIGATE
+      ) {
+        document.getElementById('updateProfileForm').reset();
+        // window.location.reload();
+      }
+    }
 </script>
 
 </body>

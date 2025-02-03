@@ -42,7 +42,7 @@
                 <button id="add-address-btn" class="btn btn-secondary"> Add New Address <i class='bx bxs-plus-square'></i></button>
               </div>
 
-              <form id="orderForm" >
+              <form id="orderForm">
                 <% if (addressData && addressData.address && addressData.address.length > 0) { %>
                 <% addressData.address.forEach((adrs, index) => { %>
                 <div class="card mb-3">
@@ -65,7 +65,7 @@
                       <% if (adrs.alternatePhone) { %>
                       <p><strong>Alternate Phone:</strong> <%= adrs.alternatePhone %></p>
                       <% } %>
-                      <button type="button" class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>">
+                      <button type="button" class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>" data-name="<%= adrs.name %>" data-address-type="<%= adrs.addressType %>" data-house-name="<%= adrs.houseName %>" data-city="<%= adrs.city %>" data-state="<%= adrs.state %>" data-country="<%= adrs.country %>" data-pin-code="<%= adrs.pinCode %>" data-phone="<%= adrs.phone %>" data-alternate-phone="<%= adrs.alternatePhone %>" data-landmark="<%= adrs.landmark %>">
                         Edit Address
                       </button>
                       <button class="btn btn-sm btn-danger delete-address-btn" data-address-id="<%= adrs._id %>">
@@ -123,7 +123,7 @@
                     <!-- Right Column for Place Order Button -->
                     <div class="col-md-4 d-flex justify-content-center align-items-center">
                       <div class="text-center">
-                        <button type="button "  class="btn btn-dark place-order-btn">Place Order</button>
+                        <button type="button " class="btn btn-dark place-order-btn">Place Order</button>
                       </div>
                     </div>
                   </div>
@@ -235,9 +235,9 @@
                     <span class="checkout__order__quantity">X Qty <%= item.quantity %></span>
                   </div>
                   <div class="checkout__order__total-price">
-                    <span >
-                    ₹ <%= item.total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                </span>
+                    <span>
+                      ₹ <%= item.total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                    </span>
                   </div>
                 </div>
               </li>
@@ -295,4 +295,3 @@
 <%- include('../../views/partials/user/footer') %>
 
 <script src="/js/checkout.js"></script>
-

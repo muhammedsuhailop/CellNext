@@ -113,7 +113,7 @@
                         <% } %>
                       </div>
                     </div>
-                    <button class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>" data-name="<%= adrs.name %>" data-address-type="<%= adrs.addressType %>" data-house-name="<%= adrs.houseName %>" data-city="<%= adrs.city %>" data-state="<%= adrs.state %>" data-country="<%= adrs.country %>" data-pin-code="<%= adrs.pinCode %>" data-phone="<%= adrs.phone %>" data-alternate-phone="<%= adrs.alternatePhone %>">
+                    <button class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>" data-name="<%= adrs.name %>" data-address-type="<%= adrs.addressType %>" data-house-name="<%= adrs.houseName %>" data-city="<%= adrs.city %>" data-state="<%= adrs.state %>" data-country="<%= adrs.country %>" data-pin-code="<%= adrs.pinCode %>" data-phone="<%= adrs.phone %>" data-alternate-phone="<%= adrs.alternatePhone %>" data-landmark="<%= adrs.landmark %>">
                       Edit Address
                     </button>
                     <button class="btn btn-sm btn-danger delete-address-btn" data-address-id="<%= adrs._id %>">
@@ -163,6 +163,11 @@
                     <div class="mb-3">
                       <label for="houseName" class="form-label">House No., Building Name</label>
                       <input type="text" class="form-control" name="houseName" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="landmark" class="form-label">Landmark</label>
+                      <input type="text" class="form-control" name="landmark" required>
                     </div>
 
                     <div class="mb-3">
@@ -259,6 +264,7 @@
     $('#address-modal').find('input[name="pinCode"]').val(pinCode);
     $('#address-modal').find('input[name="phone"]').val(phone);
     $('#address-modal').find('input[name="alternatePhone"]').val(alternatePhone);
+    $("#address-modal").find('input[name="landmark"]').val($(this).data("landmark"));
 
     $('#address-modal').modal('show');
   });
@@ -280,6 +286,7 @@
     var pinCode = $('#address-modal').find('input[name="pinCode"]').val().trim();
     var phone = $('#address-modal').find('input[name="phone"]').val().trim();
     var alternatePhone = $('#address-modal').find('input[name="alternatePhone"]').val().trim();
+    var landmark = $('#address-modal').find('input[name="landmark"]').val().trim();
 
     function showError(input, message) {
       $(input).after(`<span class="error-message" style="color: red; font-size: 12px;">${message}</span>`);
@@ -292,6 +299,7 @@
     if (!city) showError('input[name="city"]', 'City is required');
     if (!state) showError('input[name="state"]', 'State is required');
     if (!country) showError('input[name="country"]', 'Country is required');
+    if (!landmark) showError('input[name="landmark"]', 'landmark is required');
     if (!pinCode) showError('input[name="pinCode"]', 'Pin Code is required');
     else if (!/^\d{6}$/.test(pinCode)) showError('input[name="pinCode"]', 'Pin Code must be 6 digits');
 
@@ -313,8 +321,11 @@
       country,
       pinCode,
       phone,
-      alternatePhone
+      alternatePhone,
+      landmark
     };
+
+    console.log(data);
 
     try {
       const response = await fetch('/update-address', {
