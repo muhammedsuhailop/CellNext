@@ -100,6 +100,7 @@ const placeOrder = async (req, res) => {
     cart.subTotal = 0;
     cart.total = 0;
     await cart.save();
+    req.session.cartItemCount = 0;
 
     res.json({ success: true, message: 'Order placed successfully!', orderId });
   } catch (error) {
@@ -186,10 +187,13 @@ const loadOrderPage = async (req, res) => {
       })
     );
 
+    const cartItemCount = req.session.cartItemCount || 0;
+
     console.log('orderDetails...', orderDetails);
     res.render('orders', {
       user: userData,
-      orderDetails
+      orderDetails,
+      cartItemCount,
     });
   } catch (error) {
     console.error('Error fetching order details:', error);

@@ -2,6 +2,7 @@ const User = require('../../models/userSchema');
 const Category = require('../../models/categorySchema');
 const ProductV2 = require('../../models/productsSchemaV2');
 const Brand = require('../../models/brandSchema');
+const Cart = require('../../models/cartSchema');
 const nodemailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
@@ -42,6 +43,8 @@ const loadHomePage = async (req, res) => {
             }
         ];
 
+        const cartItemCount = req.session.cartItemCount || 0;
+
         console.log('Products :', productData);
         if (user) {
             const userData = await User.findOne({ _id: user });
@@ -57,6 +60,7 @@ const loadHomePage = async (req, res) => {
                     success: successMessage.length > 0 ? successMessage[0] : null,
                     error: errorMessage.length > 0 ? errorMessage[0] : null,
                 },
+                cartItemCount
             })
         } else {
             console.log('No loggedin user');
@@ -71,6 +75,7 @@ const loadHomePage = async (req, res) => {
                     success: successMessage.length > 0 ? successMessage[0] : null,
                     error: errorMessage.length > 0 ? errorMessage[0] : null,
                 },
+                cartItemCount
             });
         }
 
@@ -274,7 +279,16 @@ const login = async (req, res) => {
             return res.redirect('/login');
         }
 
+        let cartItemCount = 0;
+        if (findUser.cart && findUser.cart.length > 0) {
+            const cart = await Cart.findOne({ _id: findUser.cart[0] }).lean();
+            if (cart && cart.items && cart.items.length > 0) {
+                cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+            }
+        }
+
         req.session.user = findUser._id;
+        req.session.cartItemCount = cartItemCount;
         req.flash('success', 'You have successfully logged in!');
         console.log('req.session.user', req.session.user)
         res.redirect('/');
@@ -355,6 +369,7 @@ const loadShopePage = async (req, res) => {
 
         const brands = await Brand.find({ isBlocked: false });
         const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+        const cartItemCount = req.session.cartItemCount || 0;
 
 
         res.render('shop', {
@@ -364,7 +379,8 @@ const loadShopePage = async (req, res) => {
             totalProducts: productVariants.length,
             currentPage: page,
             totalPages: totalPages,
-            categoriesWithIds: categoriesWithIds
+            categoriesWithIds: categoriesWithIds,
+            cartItemCount
         });
     } catch (error) {
         console.error('Shope page error:', error);
@@ -455,6 +471,7 @@ const filterProduct = async (req, res) => {
         }
 
         req.session.filteredProducts = allVariants;
+        const cartItemCount = req.session.cartItemCount || 0;
 
         res.render('shop', {
             user: userData,
@@ -467,6 +484,7 @@ const filterProduct = async (req, res) => {
             categoriesWithIds: categoriesWithIds,
             selectedBrand: brand || null,
             totalProducts: totalProducts,
+            cartItemCount,
         });
 
     } catch (error) {
@@ -524,6 +542,7 @@ const filterByPrice = async (req, res) => {
         const currentVariants = allVariants.slice(startIndex, endIndex);
 
         req.session.filteredProducts = allVariants;
+        const cartItemCount = req.session.cartItemCount || 0;
 
         res.render('shop', {
             user: userData,
@@ -533,7 +552,8 @@ const filterByPrice = async (req, res) => {
             totalPages,
             currentPage,
             categoriesWithIds: categoriesWithIds,
-            totalProducts: totalProducts
+            totalProducts: totalProducts,
+            cartItemCount
         });
 
     } catch (error) {
@@ -599,6 +619,7 @@ const searchProducts = async (req, res) => {
         const endIndex = startIndex + itemsPerPage;
         const totalPages = Math.ceil(totalProducts / itemsPerPage);
         const currentProduct = searchResult.slice(startIndex, endIndex);
+        const cartItemCount = req.session.cartItemCount || 0;
 
         res.render('shop', {
             user: userData,
@@ -608,7 +629,8 @@ const searchProducts = async (req, res) => {
             totalPages,
             currentPage,
             categoriesWithIds: categoriesWithIds,
-            totalProducts: totalProducts
+            totalProducts: totalProducts,
+            cartItemCount,
         });
     } catch (error) {
         console.error('Search error:', error);

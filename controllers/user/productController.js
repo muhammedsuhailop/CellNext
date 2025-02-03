@@ -61,7 +61,7 @@ const productDetails = async (req, res) => {
         }
 
         const finalRelatedProducts = [...otherVariants, ...relatedProducts];
-        console.log('finalRelatedProducts', finalRelatedProducts);
+        const cartItemCount = req.session.cartItemCount || 0;
 
         res.render('product-details', {
             user: userData,
@@ -71,7 +71,8 @@ const productDetails = async (req, res) => {
             totalDiscountPercentage,
             categoryOffer,
             category: findCategory,
-            relatedProducts: finalRelatedProducts
+            relatedProducts: finalRelatedProducts,
+            cartItemCount,
 
         });
     } catch (error) {

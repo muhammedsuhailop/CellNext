@@ -153,10 +153,14 @@
               </a>
               <a href="/cart" class="d-flex justify-content-center align-items-center position-relative">
                 <i class="bx bx-cart bx-sm text-black"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info" style="font-size: 10px;">
-                  0
+                <% if (cartItemCount > 0) { %>
+                <span id="cart-count-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-white
+                        <%= cartItemCount < 5 ? 'bg-secondary' : cartItemCount < 10 ? 'bg-success' : 'bg-warning' %>" style="font-size: 10px;">
+                  <%= cartItemCount %>
                 </span>
+                <% } %>
               </a>
+
             </div>
           </div>
         </div>

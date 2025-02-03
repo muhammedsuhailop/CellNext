@@ -8,15 +8,16 @@ const loadCartPage = async (req, res) => {
         const userData = await User.findById(userId);
         const cart = await Cart.findOne({ userId: userId }).populate('items.productId');
         let outOfStockMessage = null;
+        const cartItemCount = req.session.cartItemCount || 0;
 
         if (!cart || cart.items.length === 0) {
             return res.render('cart', {
                 user: userData,
                 cartItems: [],
-                totalAmount: 0
+                totalAmount: 0,
+                cartItemCount,
             });
         }
-
         const cartItems = cart.items.map((item) => {
             const product = item.productId;
             const variant = product.variants[item.variantId];
@@ -48,7 +49,8 @@ const loadCartPage = async (req, res) => {
             cartItems,
             totalAmount,
             user: userData,
-            outOfStockMessage
+            outOfStockMessage,
+            cartItemCount
         });
     } catch (error) {
         console.error(error);
@@ -128,7 +130,9 @@ const addToCart = async (req, res) => {
 
         await cart.save();
 
-
+        const cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+        req.session.cartItemCount = cartItemCount;
+        console.log('cart::', cart)
         res.json({ success: true, message: 'Successfully added to cart.', cart });
     } catch (err) {
         console.error('Error adding to cart:', err);
@@ -149,10 +153,12 @@ const removeProductFromCart = async (req, res) => {
             { $pull: { items: { productId, variantId: parseInt(variantId) } } }
         );
 
+        const updatedCart = await Cart.findOne({ userId });
+
         let totalAmount = 0;
-        for (let item of cart.items) {
+        for (let item of updatedCart.items) {
             const product = await ProductV2.findById(item.productId);
-            const variant = product.variants[item.variantId];
+            const variant = product?.variants[item.variantId];
 
             if (!variant || variant.stock <= 0) {
                 item.quantity = 0;
@@ -162,11 +168,13 @@ const removeProductFromCart = async (req, res) => {
             totalAmount += itemTotal;
         }
 
+        updatedCart.subTotal = totalAmount;
+        updatedCart.total = totalAmount;
 
-        cart.subTotal = totalAmount;
-        cart.total = totalAmount;
+        await updatedCart.save();
 
-        await cart.save();
+        const cartItemCount = updatedCart.items.reduce((total, item) => total + item.quantity, 0);
+        req.session.cartItemCount = cartItemCount;
 
         return res.status(200).json({ message: "Item removed successfully" });
     } catch (error) {

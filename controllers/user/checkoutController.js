@@ -52,14 +52,15 @@ const getCheckout = async (req, res) => {
         const subtotal = cartItems.reduce((sum, item) => sum + item.total, 0);
 
         console.log('Cart Items:', cartItems);
-
+        const cartItemCount = req.session.cartItemCount || 0;
 
         res.render('checkout', {
             user: userData,
             addressData: addressData,
             cartItems,
             subtotal,
-            total: subtotal
+            total: subtotal,
+            cartItemCount
         })
     } catch (error) {
         console.error(error);

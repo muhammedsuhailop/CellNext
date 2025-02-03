@@ -152,11 +152,12 @@ const loadMyAccounts = async (req, res) => {
         const userData = await User.findById(user);
         console.log('On load my accounts User:', user);
         const addressData = await Address.findOne({ userId: userData._id });
+        const cartItemCount = req.session.cartItemCount || 0;
 
         res.render('my-account', {
             user: userData,
             addressData: addressData,
-
+            cartItemCount,
         });
 
     } catch (error) {
@@ -169,7 +170,8 @@ const loadeditProfile = async (req, res) => {
     try {
         const user = req.session.user;
         const userData = await User.findById(user);
-        res.render('edit-profile', { user: userData });
+        const cartItemCount = req.session.cartItemCount || 0;
+        res.render('edit-profile', { user: userData, cartItemCount });
     } catch (error) {
         console.log('error'.error);
         res.redirect('/pageNotFound');

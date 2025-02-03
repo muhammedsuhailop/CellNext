@@ -175,6 +175,8 @@
                 text: 'The product has been removed from your cart.',
                 icon: 'success',
                 confirmButtonText: 'Okay'
+              }).then(()=>{
+                window.location.reload();
               });
             } else {
               console.error("Failed to remove product from cart");

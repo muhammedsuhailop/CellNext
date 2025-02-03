@@ -432,9 +432,16 @@
             icon: 'success',
             title: 'Item added to cart!',
             text: data.message || 'You can view your cart or continue shopping.',
+            showCancelButton: true,
             confirmButtonText: 'Go to Cart',
-          }).then(() => {
-            updateCartDisplay(data.cart);
+            cancelButtonText: 'Continue Shopping',
+            reverseButtons: true,
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = '/cart';
+            } else {
+              updateCartDisplay(data.cart);
+            }
           });
         } else {
           Swal.fire({
@@ -504,6 +511,24 @@
 
   function updateCartDisplay(cart) {
     console.log('Updated cart:', cart);
+
+    let cartItemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+    const badge = document.getElementById("cart-count-badge");
+
+    if (cartItemCount > 0) {
+      badge.textContent = cartItemCount;
+      badge.classList.remove("bg-secondary", "bg-success", "bg-warning");
+      if (cartItemCount < 5) {
+        badge.classList.add("bg-secondary");
+      } else if (cartItemCount < 10) {
+        badge.classList.add("bg-success");
+      } else {
+        badge.classList.add("bg-warning");
+      }
+    } else {
+      badge.style.display = "none";
+    }
   }
 </script>
 
