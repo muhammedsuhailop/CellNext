@@ -1,0 +1,175 @@
+<%- include('../../views/partials/admin/header') %>
+
+<body>
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        <!-- Navbar - Sidebar-->
+        <%- include('../../views/partials/admin/sidebar') %>
+        <%- include('../../views/partials/admin/navbar') %>
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Brands</span> </h4>
+            <% if (messages && messages.error) { %>
+            <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+              <strong>Error:</strong> <%= messages.error %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <% } %>
+            <% if (messages && messages.success) { %>
+            <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+              <strong>Success:</strong> <%= messages.success %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <% } %>
+            <!-- Basic Bootstrap Table -->
+            <div class="card" id="view-coupons-section">
+              <h5 class="card-header">View Coupons</h5>
+              <div class="table-responsive text-nowrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Coupon <br>
+                        Name</th>
+                      <th>Start <br> Date</th>
+                      <th>Expire <br> Date</th>
+                      <th>Discount <br>Type</th>
+                      <th>Discount <br>Value</th>
+                      <th>Min <br>Purchase</th>
+                      <th>Max <br>Discount</th>
+                      <th>Status</th>
+                      <th>Edit</th>
+                      <th>Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody class="table-border-bottom-0">
+                    <% data.forEach((coupon) => { %>
+                    <tr>
+                      <td><%= coupon.name %></td>
+
+                      <td><%= coupon.formattedStartOn  %></td>
+
+                      <td><%= coupon.formattedExpireOn %></td>
+
+                      <td><%= coupon.discountType %></td>
+
+                      <td><%= coupon.discountValue %></td>
+
+                      <td><%= coupon.minimumOrderAmount %></td>
+
+                      <td><%= coupon.maxDiscount %></td>
+
+                      <!-- Status -->
+                      <td>
+                        <span class="badge <%= coupon.isActive ? 'alert-success' : 'alert-danger' %>">
+                          <%= coupon.isActive ? 'Active' : 'Expired' %>
+                        </span>
+                      </td>
+
+                      <!-- Edit Button -->
+                      <td>
+                        <a href="/admin/coupon/edit?id=<%= coupon._id %>" class="btn btn-sm btn-info" style="width: 65px;">Edit</a>
+                      </td>
+
+                      <!-- Delete Button -->
+                      <td>
+                        <button class="btn btn-sm btn-danger text-white" onclick="confirmDelete('<%= coupon._id %>')">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- / Content -->
+          </div>
+          <div class="container-xxl flex-grow-1 container-p-y d-flex justify-content-center align-items-center">
+            <nav aria-label="User Pagination">
+              <ul class="pagination justify-content-center">
+                <!-- Previous Button -->
+                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                  <a class="page-link" href="<%= currentPage > 1 ? '?search=' + searchQuery + '&page=' + (Number(currentPage)  - 1) : '#' %>" tabindex="-1">
+                    Previous
+                  </a>
+                </li>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                  <a class="page-link" href="<%= i === currentPage ? '#' : '?search=' + searchQuery + '&page=' + i %>">
+                    <%= i %>
+                  </a>
+                </li>
+                <% } %>
+                <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                  <a class="page-link" href="<%= currentPage < totalPages ? '?search=' + searchQuery + '&page=' + (Number(currentPage)  + 1) : '#' %>">
+                    Next
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <!-- Content wrapper -->
+      </div>
+      <!-- / Layout page -->
+
+    </div>
+  </div>
+  <!-- Overlay -->
+  <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- / Layout wrapper -->
+
+  <%- include('../../views/partials/admin/footer') %>
+
+  <script>
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = String(date.getFullYear()).slice(-2);
+      return `${day} ${month} ${year}`;
+    }
+
+
+    async function confirmDelete(couponId) {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`/admin/coupons/delete-coupon?id=${couponId}`, {
+            method: "DELETE"
+          });
+
+          if (response.ok) {
+            Swal.fire("Deleted!", "Coupon has been deleted.", "success").then(() => {
+              location.reload();
+            });
+          } else {
+            Swal.fire("Error!", "Failed to delete the coupon.", "error");
+          }
+        } catch (error) {
+          console.error("Error deleting coupon:", error);
+          Swal.fire("Error!", "Something went wrong.", "error");
+        }
+      }
+    }
+  </script>

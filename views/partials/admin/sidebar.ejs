@@ -126,6 +126,26 @@
        </ul>
      </li>
 
+
+     <!-- Coupons -->
+     <li class="menu-item <%= currentPath.startsWith('/admin/coupons')  ? 'active open' : '' %>"> <a href="/admin/orders" class="menu-link menu-toggle">
+         <i class="menu-icon tf-icons bx bxs-coupon"></i>
+         <div data-i18n="Layouts">Coupons</div>
+       </a>
+       <ul class="menu-sub">
+         <li class="menu-item <%= currentPath === '/admin/coupons/view-coupons' ? 'active' : '' %>">
+           <a href="/admin/coupons/view-coupons" class="menu-link">
+             <div data-i18n="Without menu">View Coupons</div>
+           </a>
+         </li>
+         <li class="menu-item <%= currentPath === '/admin/coupons/add-coupon' ? 'active' : '' %>">
+           <a href="/admin/coupons/add-coupon" class="menu-link">
+             <div data-i18n="Without navbar">Add New Coupon</div>
+           </a>
+         </li>
+       </ul>
+     </li>
+
      <!-- Layouts -->
      <li class="menu-item">
        <a href="javascript:void(0);" class="menu-link menu-toggle">
