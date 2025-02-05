@@ -4691,3 +4691,7 @@ ol {
 	color: #868b8e;
 	border-bottom-color: #585c5e;
 }
+
+#removeCouponBtn {
+	cursor: pointer;
+}
