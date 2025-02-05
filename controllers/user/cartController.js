@@ -6,27 +6,51 @@ const Coupon = require('../../models/couponSchema');
 const loadCartPage = async (req, res) => {
     try {
         const userId = req.session.user;
-        const userData = await User.findById(userId);
-        const cart = await Cart.findOne({ userId: userId }).populate('items.productId');
+        const [userData, cart] = await Promise.all([
+            User.findById(userId),
+            Cart.findOne({ userId }).populate('items.productId')
+        ]);
+        const coupon = await Coupon.findById(cart.coupon);
         let outOfStockMessage = null;
         const cartItemCount = req.session.cartItemCount || 0;
 
         if (!cart || cart.items.length === 0) {
+            if (cart.coupon) {
+                cart.coupon = null;
+                coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+                coupon.totalUsed -= 1;
+                await coupon.save();
+                await cart.save();
+            }
             return res.render('cart', {
                 user: userData,
                 cartItems: [],
-                totalAmount: 0,
+                subTotal: 0,
+                total: 0,
                 cartItemCount,
+                couponDiscount: 0,
+                couponName: 'NA',
+                outOfStockMessage
             });
         }
 
-        let couponName = null;
+        let newSubTotal = 0;
+        let eligibleAmount = 0;
         let couponDiscount = 0;
+        let couponName = 'NA';
+        let validCoupon = null;
+
         if (cart.coupon) {
-            const coupon = await Coupon.findById(cart.coupon);
-            if (coupon) {
-                couponName = coupon.name;
-                couponDiscount = cart.subTotal - cart.total;
+            validCoupon = await Coupon.findById(cart.coupon);
+            if (!validCoupon || !validCoupon.isActive) {
+                cart.coupon = null;
+                coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+                coupon.totalUsed -= 1;
+                await coupon.save();
+                await cart.save();
+                couponName = null;
+            } else {
+                couponName = validCoupon.name;
             }
         }
 
@@ -36,11 +60,11 @@ const loadCartPage = async (req, res) => {
 
             if (!variant || variant.stock <= 0) {
                 item.quantity = 0;
-                total = 0;
                 outOfStockMessage = "Some items in your cart are out of stock and have been set to zero.";
             }
 
-            const itemTotal = item.quantity * variant.salePrice
+            const itemTotal = item.quantity * variant.salePrice;
+            newSubTotal += itemTotal;
 
             return {
                 productId: product._id,
@@ -55,24 +79,69 @@ const loadCartPage = async (req, res) => {
             };
         });
 
-        const subTotal = cartItems.reduce((acc, item) => acc + item.total, 0);
-        const couponId = cart.coupon;
+        cart.subTotal = newSubTotal;
+
+        if (validCoupon) {
+            let applicableCategories = validCoupon.applicableCategories.map(id => id.toString());
+            let applicableProducts = validCoupon.applicableProducts.map(id => id.toString());
+
+            cartItems.forEach(item => {
+                const productCategory = item.productId.categoryId ? item.productId.categoryId.toString() : null;
+                let isEligible = false;
+
+                if (applicableCategories.includes('all')) {
+                    isEligible = applicableProducts.includes(item.productId._id.toString()) || applicableProducts.includes('all');
+                } else if (applicableProducts.includes('all')) {
+                    isEligible = applicableCategories.includes(productCategory);
+                } else {
+                    isEligible = applicableProducts.includes(item.productId._id.toString()) || applicableCategories.includes(productCategory);
+                }
+
+                if (isEligible) {
+                    eligibleAmount += item.total;
+                    couponName = validCoupon.name;
+                }
+            });
+
+            if (eligibleAmount >= validCoupon.minimumOrderAmount) {
+                if (validCoupon.discountType === 'percentage') {
+                    couponDiscount = (eligibleAmount * validCoupon.discountValue) / 100;
+                } else {
+                    couponDiscount = validCoupon.discountValue;
+                }
+
+                if (validCoupon.maxDiscount && couponDiscount > validCoupon.maxDiscount) {
+                    couponDiscount = validCoupon.maxDiscount;
+                }
+            } else {
+                cart.coupon = null;
+                coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+                coupon.totalUsed -= 1;
+                await coupon.save();
+                await cart.save();
+                couponName = null;
+            }
+        }
+
+        cart.total = Math.max(cart.subTotal - couponDiscount, 0);
+        await cart.save();
 
         res.render('cart', {
             cartItems,
-            subTotal,
+            subTotal: cart.subTotal,
             total: cart.total,
             user: userData,
             couponDiscount,
             outOfStockMessage,
             cartItemCount,
-            couponName: couponName || 'NA',
+            couponName
         });
     } catch (error) {
-        console.error(error);
+        console.error("Error loading cart:", error);
         res.status(500).send('Error fetching cart data');
     }
-}
+};
+
 
 const addToCart = async (req, res) => {
     try {
