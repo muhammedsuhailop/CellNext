@@ -76,7 +76,7 @@
 
             <div class="row">
               <div class="col-md-6">
-                <p><strong>Total Price:</strong> ₹ <%= (order.totalPrice).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })  %></p>
+                <p><strong>Final Price:</strong> ₹ <%= (order.finalAmount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })  %></p>
               </div>
               <div class="col-md-6">
                 <p><strong>Discount:</strong> ₹ <%= (order.discount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></p>

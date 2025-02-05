@@ -2,6 +2,7 @@ const ProductV2 = require('../../models/productsSchemaV2');
 const Cart = require('../../models/cartSchema');
 const User = require('../../models/userSchema');
 const Address = require('../../models/addressSchema');
+const Coupon = require('../../models/couponSchema');
 
 const getCheckout = async (req, res) => {
     try {
@@ -11,6 +12,12 @@ const getCheckout = async (req, res) => {
         const cart = await Cart.findOne({ userId: userId });
         if (!cart) {
             return res.status(404).send('Cart not found');
+        }
+
+        const coupon = await Coupon.findById(cart.coupon);
+        let couponName = null;
+        if (coupon) {
+            couponName = coupon.name;
         }
 
         console.log('cart:', cart);
@@ -50,6 +57,8 @@ const getCheckout = async (req, res) => {
         }).filter(item => item !== null);
 
         const subtotal = cartItems.reduce((sum, item) => sum + item.total, 0);
+        const total = cart.total;
+        couponDiscount = subtotal - total;
 
         console.log('Cart Items:', cartItems);
         const cartItemCount = req.session.cartItemCount || 0;
@@ -59,8 +68,10 @@ const getCheckout = async (req, res) => {
             addressData: addressData,
             cartItems,
             subtotal,
-            total: subtotal,
-            cartItemCount
+            total,
+            cartItemCount,
+            couponName: couponName || 'NA',
+            couponDiscount,
         })
     } catch (error) {
         console.error(error);

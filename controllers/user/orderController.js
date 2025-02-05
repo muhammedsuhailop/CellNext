@@ -2,19 +2,18 @@ const ProductV2 = require('../../models/productsSchemaV2');
 const Cart = require('../../models/cartSchema');
 const User = require('../../models/userSchema');
 const Orders = require('../../models/orderSchema');
+const Coupon = require('../../models/couponSchema');
 
 const placeOrder = async (req, res) => {
   try {
     const { selectedAddress, orderDetails, paymentMethod } = req.body;
-
     const additionalNote = orderDetails || 'No additional details provided.';
 
-    if (!selectedAddress || !additionalNote || !paymentMethod) {
+    if (!selectedAddress || !paymentMethod) {
       return res.status(400).json({ success: false, message: 'Missing required fields.' });
     }
 
     const userId = req.session.user;
-
     const user = await User.findById(userId).populate('cart');
 
     if (!user || !user.cart || user.cart.length === 0 || user.cart[0].items.length === 0) {
@@ -23,31 +22,25 @@ const placeOrder = async (req, res) => {
 
     const cart = user.cart[0];
     const cartItems = cart.items;
-
     let totalPrice = 0;
+    const coupon = await Coupon.findById(cart.coupon);
 
     const products = await ProductV2.find({
       '_id': { $in: cartItems.map(item => item.productId) }
     });
 
+    let subTotal = 0;
+
     for (const item of cartItems) {
       const productIdStr = item.productId.toString().trim();
       const product = products.find(p => p._id.toString().trim() === productIdStr);
-      console.log('product in for loop', product);
 
       if (!product) {
-        console.error(`Product not found for ID: ${productIdStr}`);
-        console.error('Fetched Products:', products.map(p => p._id.toString().trim()));
-        console.error('Cart Items:', cartItems.map(item => item._id.toString().trim()));
         return res.status(400).json({ success: false, message: "One or more products not found." });
       }
 
-      let variant;
-      variant = product.variants[item.variantId];
-      console.log('variant in for loop', variant, "id", item.variantId)
-
+      let variant = product.variants[item.variantId];
       if (!variant) {
-        console.error(`Variant not found for ID: ${item.variantId} in product: ${product.name}`);
         return res.status(400).json({ success: false, message: `Selected variant not found for ${product.name}.` });
       }
 
@@ -59,7 +52,79 @@ const placeOrder = async (req, res) => {
         return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name}` });
       }
 
-      totalPrice += item.quantity * (variant.salePrice || variant.regularPrice);
+      totalPrice += item.quantity * variant.salePrice;
+      subTotal += item.quantity * variant.regularPrice;
+    }
+
+    let discountAmount = 0;
+    let finalAmount = subTotal;
+    let validCoupon = false;
+
+    if (cart.coupon) {
+      const coupon = await Coupon.findById(cart.coupon);
+
+      if (!coupon || !coupon.isActive) {
+        cart.coupon = null;
+        coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+        coupon.totalUsed -= 1;
+        await coupon.save();
+        await cart.save();
+        return res.status(400).json({ success: false, message: 'Coupon is no longer valid and has been removed.' });
+      }
+
+      const now = new Date();
+      if (now < coupon.startOn || now > coupon.expireOn) {
+        cart.coupon = null;
+        coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+        coupon.totalUsed -= 1;
+        await coupon.save();
+        await cart.save();
+        return res.status(400).json({ success: false, message: 'Coupon has expired and has been removed.' });
+      }
+
+      if (coupon.totalUsageLimit !== null && coupon.totalUsed >= coupon.totalUsageLimit) {
+        cart.coupon = null;
+        coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+        coupon.totalUsed -= 1;
+        await coupon.save();
+        await cart.save();
+        return res.status(400).json({ success: false, message: 'Coupon usage limit exceeded and has been removed.' });
+      }
+
+      const userUsage = coupon.usedCount.get(userId.toString()) || 0;
+      if (userUsage >= coupon.usageLimitPerUser) {
+        cart.coupon = null;
+        coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+        coupon.totalUsed -= 1;
+        await coupon.save();
+        await cart.save();
+        return res.status(400).json({ success: false, message: 'You have already used this coupon the maximum number of times. It has been removed.' });
+      }
+
+      if (totalPrice < coupon.minimumOrderAmount) {
+        cart.coupon = null;
+        coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+        coupon.totalUsed -= 1;
+        await coupon.save();
+        await cart.save();
+        return res.status(400).json({ success: false, message: `Your cart does not meet the minimum order amount of ₹${coupon.minimumOrderAmount}. Coupon removed.` });
+      }
+
+      validCoupon = true;
+
+      if (coupon.discountType === 'percentage') {
+        discountAmount = (totalPrice * coupon.discountValue) / 100;
+      } else {
+        discountAmount = coupon.discountValue;
+      }
+
+      if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+        discountAmount = coupon.maxDiscount;
+      }
+
+      finalAmount = totalPrice - discountAmount;
+      discountAmount = subTotal - finalAmount;
+
     }
 
     const newOrder = new Orders({
@@ -70,11 +135,12 @@ const placeOrder = async (req, res) => {
         quantity: item.quantity,
       })),
       totalPrice: totalPrice,
-      finalAmount: totalPrice,
+      discount: discountAmount,
+      finalAmount: finalAmount,
       address: selectedAddress,
       additionalNote: additionalNote,
       payment: {
-        amountPaid: totalPrice,
+        amountPaid: finalAmount,
         method: paymentMethod,
         status: 'Pending',
       },
@@ -83,10 +149,8 @@ const placeOrder = async (req, res) => {
 
     await newOrder.save();
 
-    const order_id = newOrder._id;
-    const orderId = newOrder.orderId;
     await User.findByIdAndUpdate(userId, {
-      $push: { orderHistory: order_id }
+      $push: { orderHistory: newOrder._id }
     });
 
     for (const item of cartItems) {
@@ -99,10 +163,18 @@ const placeOrder = async (req, res) => {
     cart.items = [];
     cart.subTotal = 0;
     cart.total = 0;
+    cart.coupon = null;
     await cart.save();
+
     req.session.cartItemCount = 0;
 
-    res.json({ success: true, message: 'Order placed successfully!', orderId });
+    res.json({
+      success: true,
+      message: 'Order placed successfully!',
+      orderId: newOrder.orderId,
+      discount: discountAmount,
+      finalAmount: finalAmount,
+    });
   } catch (error) {
     console.log('Error:', error);
     res.status(500).json({ success: false, message: 'Internal server error.' });
@@ -128,7 +200,7 @@ const loadOrderPage = async (req, res) => {
       .populate('userId', 'name email')
       .exec();
 
-    console.log('orders ..', orders)
+    console.log('orders ..', orders);
 
     const orderDetails = await Promise.all(
       orders.map(async (order) => {
@@ -151,8 +223,6 @@ const loadOrderPage = async (req, res) => {
                 color: variant.color || "N/A",
                 size: variant.size || "N/A",
                 price: variant.salePrice,
-                regularPrice: variant.regularPrice,
-                productDiscount: variant.regularPrice - variant.salePrice
               },
               quantity: item.quantity,
               itemStatus: item.itemStatus,
@@ -164,18 +234,13 @@ const loadOrderPage = async (req, res) => {
 
         const validItems = items.filter((item) => item !== null);
 
-        const totalDiscount = validItems.reduce((sum, item) => {
-          return sum + (item.variantDetails.productDiscount * item.quantity);
-        }, 0);
-
         return {
           _id: order._id,
           orderId: order.orderId,
           orderDate: order.createdOn,
           status: order.status,
           totalPrice: order.totalPrice,
-          specialDiscount: order.discount,
-          discount: totalDiscount,
+          discount: order.discount,
           finalAmount: order.finalAmount,
           couponApplied: order.couponApplied,
           paymentMethod: order.payment.method,
@@ -199,7 +264,8 @@ const loadOrderPage = async (req, res) => {
     console.error('Error fetching order details:', error);
     res.redirect('/pageNotFound');
   }
-}
+};
+
 
 const cancelOrder = async (req, res) => {
   try {
