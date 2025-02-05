@@ -216,6 +216,10 @@
       updatePlaceholder('product');
     });
 
+    document.getElementById("coupon-name").addEventListener("input", function() {
+      this.value = this.value.toUpperCase();
+    });
+
     async function handleFormSubmit(event) {
       event.preventDefault();
       const form = event.target;
@@ -256,6 +260,9 @@
 
       if (!name) {
         showError("name-error", "Coupon name is required.");
+        isValid = false;
+      } else if (name.length > 20) {
+        showError("name-error", "Coupon name cannot exceed 20 characters.");
         isValid = false;
       } else {
         const capitalizedName = name.toUpperCase();

@@ -63,6 +63,8 @@ router.delete('/delete-address', userAuth, profileController.deleteAddress);
 router.post('/cart/add', cartController.addToCart);
 router.get('/cart', userAuth, cartController.loadCartPage);
 router.delete('/cart/remove/:productId', userAuth, cartController.removeProductFromCart);
+router.post('/cart/apply-coupon', userAuth, cartController.applyCoupon);
+router.delete('/cart/remove-coupon', userAuth, cartController.removeCoupon);
 
 //Checkout Management
 router.get('/checkout', userAuth, checkoutController.getCheckout);

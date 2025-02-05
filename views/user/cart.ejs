@@ -111,20 +111,31 @@
         </div>
       </div>
       <div class="col-lg-4">
-        <!-- <div class="cart__discount">
+        <div class="cart__discount">
           <h6>Discount codes</h6>
-          <form action="#">
-            <input type="text" placeholder="Coupon code">
+          <form id="couponForm">
+            <input type="text" id="couponCode" placeholder="Coupon code" required>
             <button type="submit">Apply</button>
           </form>
-        </div> -->
+          <p id="couponMessage"></p>
+          <% if (couponName && couponName !== 'NA') { %>
+          <div class="alert alert-success d-flex justify-content-between align-items-center">
+            <span>You've applied <strong><%= couponName %></strong> coupon</span>
+            <i id="removeCouponBtn" class='bx bx-x lead'></i>
+          </div>
+          <% } %>
+        </div>
         <div class="cart__total">
           <h6>Cart total</h6>
           <ul>
-            <li>Subtotal <span>₹ <%= (totalAmount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></span></li>
+            <li>Subtotal <span class="subtotal">₹ <%= subTotal.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></span></li>
+            <% if (couponDiscount > 0) { %>
+            <li>Coupon Discount <span class="coupon-discount">₹ <%= couponDiscount.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></span></li>
+            <% } %>
 
-            <li>Total <span>₹ <%= (totalAmount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></span></li>
+            <li>Total <span class="total">₹ <%= total.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></span></li>
           </ul>
+
           <% if (cartItems.length > 0) { %>
           <a href="/checkout" class="primary-btn">Proceed to checkout</a>
           <% } else { %>
@@ -139,6 +150,113 @@
 <!-- Shopping Cart Section End -->
 
 <%- include('../../views/partials/user/footer') %>
+<script>
+  document.getElementById("removeCouponBtn")?.addEventListener("click", async function(event) {
+    try {
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to remove the applied coupon?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, remove it!',
+        cancelButtonText: 'No, keep it'
+      });
+
+      if (result.isConfirmed) {
+        const response = await fetch("/cart/remove-coupon", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          await Swal.fire({
+            title: 'Coupon Removed',
+            text: 'The coupon has been removed successfully.',
+            icon: 'success',
+            confirmButtonText: 'Okay'
+          });
+
+          location.reload();
+        } else {
+          await Swal.fire({
+            title: 'Error',
+            text: data.message,
+            icon: 'error',
+            confirmButtonText: 'Okay'
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error removing coupon:", error);
+      await Swal.fire({
+        title: 'Something went wrong',
+        text: "Unable to remove the coupon. Please try again.",
+        icon: 'error',
+        confirmButtonText: 'Okay'
+      });
+    }
+  });
+</script>
+<script>
+  document.getElementById("couponForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const couponCode = document.getElementById("couponCode").value.trim();
+    if (!couponCode) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Oops...',
+        text: 'Please enter a coupon code!'
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch("/cart/apply-coupon", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          couponCode
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Coupon Applied!',
+          text: `You saved ₹${data.discount.toFixed(2)}`,
+          confirmButtonText: 'Okay'
+        }).then(() => {
+          location.reload();
+        });
+
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Coupon Failed',
+          text: data.message
+        });
+      }
+    } catch (error) {
+      console.error("Error applying coupon:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Something went wrong. Try again.'
+      });
+    }
+  });
+</script>
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".remove-from-cart").forEach(button => {
