@@ -49,6 +49,15 @@ const addCoupon = async (req, res) => {
             return res.status(400).json({ error: 'Maximum discount must be a positive value.' });
         }
 
+        if (applicableCategories.includes("all")) {
+            applicableCategories[0] = "all";
+        }
+
+        if (applicableProducts.includes("all")) {
+            applicableProducts[0] = "all";
+        }
+
+
         const coupon = new Coupon({
             name,
             startOn,

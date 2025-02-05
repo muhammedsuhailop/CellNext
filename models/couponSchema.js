@@ -56,14 +56,16 @@ const couponSchema = new Schema({
     },
     applicableCategories: [
         {
-            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.Mixed,
             ref: 'Category',
+            default: ['all']
         },
     ],
     applicableProducts: [
         {
-            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.Mixed,
             ref: 'ProductV2',
+            default: ['all']
         },
     ],
 },

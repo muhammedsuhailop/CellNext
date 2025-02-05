@@ -244,6 +244,13 @@
       let selectedCategories = [...document.querySelectorAll(".categoryCheckbox:checked")].map(cb => cb.value);
       let selectedProducts = [...document.querySelectorAll(".productCheckbox:checked")].map(cb => cb.value);
 
+      if (document.getElementById("allCategories").checked) {
+        selectedCategories = ["all"];
+      }
+
+      if (document.getElementById("allProducts").checked) {
+        selectedProducts = ["all"];
+      }
 
       document.querySelectorAll(".error-message").forEach(el => el.style.display = "none");
 
