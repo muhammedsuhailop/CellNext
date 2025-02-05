@@ -16,7 +16,7 @@
           <!-- Content -->
 
           <div class="container-xxl flex-grow-1 container-p-y">
-            <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Brands</span> </h4>
+            <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Coupons</span> </h4>
             <% if (messages && messages.error) { %>
             <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
               <strong>Error:</strong> <%= messages.error %>
@@ -32,7 +32,7 @@
             <!-- Basic Bootstrap Table -->
             <div class="card" id="view-coupons-section">
               <h5 class="card-header">View Coupons</h5>
-              <div class="table-responsive text-nowrap">
+              <div class="table-responsive">
                 <table class="table">
                   <thead>
                     <tr>
@@ -45,8 +45,9 @@
                       <th>Min <br>Purchase</th>
                       <th>Max <br>Discount</th>
                       <th>Status</th>
-                      <th>Edit</th>
-                      <th>Delete</th>
+                      <th>Applicabele <br>Categorties</th>
+                      <th>Applicable <br>Products</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody class="table-border-bottom-0">
@@ -66,23 +67,56 @@
 
                       <td><%= coupon.maxDiscount %></td>
 
-                      <!-- Status -->
                       <td>
                         <span class="badge <%= coupon.isActive ? 'alert-success' : 'alert-danger' %>">
                           <%= coupon.isActive ? 'Active' : 'Expired' %>
                         </span>
                       </td>
 
-                      <!-- Edit Button -->
                       <td>
-                        <a href="/admin/coupon/edit?id=<%= coupon._id %>" class="btn btn-sm btn-info" style="width: 65px;">Edit</a>
+                        <% if (Array.isArray(coupon.applicableProducts) && coupon.applicableProducts.length > 0) { %>
+                        <span class="applicable-count" onclick="toggleApplicableList('products_<%= coupon._id %>')">
+                          <%= coupon.applicableProducts.length %> item(s)
+                        </span>
+                        <ul id="products_<%= coupon._id %>" class="applicable-list" style="display: none;">
+                          <% coupon.applicableProducts.forEach(function(product) { %>
+                          <li><%= product %></li>
+                          <% }) %>
+                        </ul>
+                        <% } else { %>
+                        <span>All</span>
+                        <% } %>
                       </td>
 
-                      <!-- Delete Button -->
                       <td>
-                        <button class="btn btn-sm btn-danger text-white" onclick="confirmDelete('<%= coupon._id %>')">
-                          Delete
-                        </button>
+                        <% if (Array.isArray(coupon.applicableCategories) && coupon.applicableCategories.length > 0) { %>
+                        <span class="applicable-count" onclick="toggleApplicableList('categories_<%= coupon._id %>')">
+                          <%= coupon.applicableCategories.length %> item(s)
+                        </span>
+                        <ul id="categories_<%= coupon._id %>" class="applicable-list" style="display: none;">
+                          <% coupon.applicableCategories.forEach(function(cat) { %>
+                          <li><%= cat %></li>
+                          <% }) %>
+                        </ul>
+                        <% } else { %>
+                        <span>All</span>
+                        <% } %>
+                      </td>
+
+                      <td>
+                        <div class="dropdown">
+                          <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                            <i class="bx bx-dots-vertical-rounded"></i>
+                          </button>
+                          <div class="dropdown-menu">
+                            <a href="/admin/coupon/edit?id=<%= coupon._id %>" class="dropdown-item">
+                              <i class='bx bx-edit-alt me-1'></i> Edit
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="confirmDelete('<%= coupon._id %>')">
+                              <i class="bx bx-trash me-1"></i> Delete
+                            </a>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                     <% }) %>
@@ -132,13 +166,13 @@
   <%- include('../../views/partials/admin/footer') %>
 
   <script>
-    function formatDate(dateString) {
-      const date = new Date(dateString);
-
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = String(date.getFullYear()).slice(-2);
-      return `${day} ${month} ${year}`;
+    function toggleApplicableList(listId) {
+      var list = document.getElementById(listId);
+      if (list.style.display === 'none') {
+        list.style.display = 'block';
+      } else {
+        list.style.display = 'none';
+      }
     }
 
 

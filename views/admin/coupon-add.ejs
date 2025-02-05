@@ -30,19 +30,19 @@
                     <div class="row mb-3">
                       <div class="col-md-6">
                         <div class="text-danger error-message" id="name-error" style="display: none;"></div>
-                        <label class="form-label" for="coupon-name">Name</label>
+                        <label class="form-label" for="coupon-name">Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="coupon-name" placeholder="Enter coupon name" name="name" />
                       </div>
 
                       <div class="col-md-3">
                         <div class="text-danger error-message" id="startOn-error" style="display: none;"></div>
-                        <label class="form-label" for="startOn">Start On</label>
+                        <label class="form-label" for="startOn">Start On <span class="text-danger">*</span></label>
                         <input type="date" class="form-control" id="startOn" name="startOn" />
                       </div>
 
                       <div class="col-md-3">
                         <div class="text-danger error-message" id="expireOn-error" style="display: none;"></div>
-                        <label class="form-label" for="expireOn">Expire On</label>
+                        <label class="form-label" for="expireOn">Expire On <span class="text-danger">*</span></label>
                         <input type="date" class="form-control" id="expireOn" name="expireOn" />
                       </div>
                     </div>
@@ -50,7 +50,7 @@
                     <div class="row mb-3">
                       <div class="col-md-3">
                         <div class="text-danger error-message" id="discountType-error" style="display: none;"></div>
-                        <label class="form-label" for="discountType">Discount Type</label>
+                        <label class="form-label" for="discountType">Discount Type <span class="text-danger">*</span></label>
                         <select class="form-control" id="discountType" name="discountType">
                           <option value="">Select discount type</option>
                           <option value="percentage">Percentage</option>
@@ -60,13 +60,13 @@
 
                       <div class="col-md-6">
                         <div class="text-danger error-message" id="discountValue-error" style="display: none;"></div>
-                        <label class="form-label" for="discountValue">Discount Value</label>
+                        <label class="form-label" for="discountValue">Discount Value <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="discountValue" placeholder="Enter discount value" name="discountValue" />
                       </div>
 
                       <div class="col-md-3">
                         <div class="text-danger error-message" id="isActive-error" style="display: none;"></div>
-                        <label class="form-label" for="isActive">Is Active</label>
+                        <label class="form-label" for="isActive">Is Active <span class="text-danger">*</span></label>
                         <select class="form-control" id="isActive" name="isActive">
                           <option value="true">Active</option>
                           <option value="false">Inactive</option>
@@ -75,193 +75,300 @@
                     </div>
 
                     <div class="row mb-3">
-                      <div class="col-md-6">
+                      <div class="col-md-4">
                         <div class="text-danger error-message" id="maxDiscount-error" style="display: none;"></div>
                         <label class="form-label" for="maxDiscount">Maximum Discount</label>
                         <input type="number" class="form-control" id="maxDiscount" placeholder="Enter maximum discount (optional)" name="maxDiscount" />
                       </div>
 
-                      <div class="col-md-6">
+                      <div class="col-md-4">
                         <div class="text-danger error-message" id="minimumOrderAmount-error" style="display: none;"></div>
-                        <label class="form-label" for="minimumOrderAmount">Minimum Order Amount</label>
+                        <label class="form-label" for="minimumOrderAmount">Minimum Order Amount <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="minimumOrderAmount" placeholder="Enter minimum order amount" name="minimumOrderAmount" />
+                      </div>
+
+                      <div class="col-md-4">
+                        <div class="text-danger error-message" id="usageLimitPerUser-error" style="display: none;"></div>
+                        <label class="form-label" for="usageLimitPerUser">Usage Limit Per User <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="usageLimitPerUser" placeholder="Enter usage limit per user" name="usageLimitPerUser" />
                       </div>
                     </div>
 
                     <div class="row mb-3">
-                      <div class="col-md-3">
-                        <div class="text-danger error-message" id="usageLimitPerUser-error" style="display: none;"></div>
-                        <label class="form-label" for="usageLimitPerUser">Usage Limit Per User</label>
-                        <input type="number" class="form-control" id="usageLimitPerUser" placeholder="Enter usage limit per user" name="usageLimitPerUser" />
-                      </div>
 
-                      <div class="col-md-3">
+
+                      <div class="col-md-2">
                         <div class="text-danger error-message" id="totalUsageLimit-error" style="display: none;"></div>
                         <label class="form-label" for="totalUsageLimit">Total Usage Limit</label>
                         <input type="number" class="form-control" id="totalUsageLimit" placeholder="Enter total usage limit (optional)" name="totalUsageLimit" />
                       </div>
-                      <div class="row mb-3">
-                        <div class="col-md-12 d-flex justify-content-end align-items-center mt-3">
-                          <button type="submit" class="btn btn-primary">Create New Coupon</button>
+
+                      <div class="col-md-5">
+                        <div class="text-danger error-message" id="categoryDropdown-error" style="display: none;"></div>
+                        <label class="form-label">Applicable Categories <span class="text-danger">*</span></label>
+                        <div class="dropdown">
+                          <button class="form-control text-start" type="button" id="categoryDropdown" onclick="toggleDropdown('categoryList')">
+                            All Categories
+                          </button>
+                          <div id="categoryList" class="dropdown-menu show p-3" style="display: none; max-height: 200px; overflow-y: auto;">
+                            <div>
+                              <input type="checkbox" id="allCategories" value="all" checked onclick="toggleAll('category', this)">
+                              <label for="allCategories"><strong>All Categories</strong></label>
+                            </div>
+                            <hr>
+                            <% categories.forEach(category => { %>
+                            <div>
+                              <input type="checkbox" class="categoryCheckbox" id="category_<%= category._id %>" name="applicableCategories" value="<%= category._id %>" checked onclick="updatePlaceholder('category')">
+                              <label for="category_<%= category._id %>"><%= category.name %></label>
+                            </div>
+                            <% }) %>
+                          </div>
                         </div>
                       </div>
+
+                      <div class="col-md-5">
+                        <div class="text-danger error-message" id="productDropdown-error" style="display: none;"></div>
+                        <label class="form-label">Applicable Products <span class="text-danger">*</span></label>
+                        <div class="dropdown">
+                          <button class="form-control text-start" type="button" id="productDropdown" onclick="toggleDropdown('productList')">
+                            All Products
+                          </button>
+                          <div id="productList" class="dropdown-menu show p-3" style="display: none; max-height: 200px; overflow-y: auto;">
+                            <div>
+                              <input type="checkbox" id="allProducts" value="all" checked onclick="toggleAll('product', this)">
+                              <label for="allProducts"><strong>All Products</strong></label>
+                            </div>
+                            <hr>
+                            <% products.forEach(product => { %>
+                            <div>
+                              <input type="checkbox" class="productCheckbox" id="product_<%= product._id %>" name="applicableProducts" value="<%= product._id %>" checked onclick="updatePlaceholder('product')">
+                              <label for="product_<%= product._id %>"><%= product.productName %></label>
+                            </div>
+                            <% }) %>
+                          </div>
+                        </div>
+                      </div>
+
                     </div>
-                  </form>
+                    <div class="row mb-3">
+                      <div class="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                        <button type="submit" class="btn btn-primary">Create New Coupon</button>
+                      </div>
+                    </div>
                 </div>
+                </form>
               </div>
             </div>
-
-
-            <!-- Content wrapper -->
           </div>
-          <!-- / Layout page -->
 
+
+          <!-- Content wrapper -->
         </div>
+        <!-- / Layout page -->
+
       </div>
-      <!-- Overlay -->
-      <div class="layout-overlay layout-menu-toggle"></div>
     </div>
-    <!-- / Layout wrapper -->
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- / Layout wrapper -->
 
-    <script>
-      async function handleFormSubmit(event) {
-        event.preventDefault();
-        const form = event.target;
-        let isValid = true;
+  <script>
+    function toggleDropdown(id) {
+      let dropdown = document.getElementById(id);
+      dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+    }
 
-        function showError(id, message) {
-          const errorElement = document.getElementById(id);
-          errorElement.textContent = message;
-          errorElement.style.display = "block";
-        }
+    function toggleAll(type, checkbox) {
+      let checkboxes = document.querySelectorAll(`.${type}Checkbox`);
+      checkboxes.forEach(cb => cb.checked = checkbox.checked);
+      updatePlaceholder(type);
+    }
 
-        function clearError(id) {
-          document.getElementById(id).style.display = "none";
-        }
+    function updatePlaceholder(type) {
+      let checkboxes = document.querySelectorAll(`.${type}Checkbox:checked`);
+      let button = document.getElementById(type + "Dropdown");
 
-        const name = document.getElementById("coupon-name").value.trim();
-        const startOn = document.getElementById("startOn").value;
-        const expireOn = document.getElementById("expireOn").value;
-        const discountType = document.getElementById("discountType").value;
-        const discountValue = parseFloat(document.getElementById("discountValue").value);
-        const isActive = document.getElementById("isActive").value;
-        const maxDiscount = document.getElementById("maxDiscount").value ? parseFloat(document.getElementById("maxDiscount").value) : null;
-        const minimumOrderAmount = parseFloat(document.getElementById("minimumOrderAmount").value);
-        const usageLimitPerUser = parseInt(document.getElementById("usageLimitPerUser").value);
-        const totalUsageLimit = document.getElementById("totalUsageLimit").value ? parseInt(document.getElementById("totalUsageLimit").value) : null;
+      if (checkboxes.length === 0) {
+        button.innerText = `Select ${type.charAt(0).toUpperCase() + type.slice(1)}s`;
+      } else if (checkboxes.length === document.querySelectorAll(`.${type}Checkbox`).length) {
+        button.innerText = `All ${type.charAt(0).toUpperCase() + type.slice(1)}s`;
+      } else {
+        button.innerText = `${checkboxes.length} Selected`;
+      }
+    }
 
-        document.querySelectorAll(".error-message").forEach(el => el.style.display = "none");
+    document.addEventListener("click", function(event) {
+      if (!event.target.closest(".dropdown")) {
+        document.getElementById("categoryList").style.display = "none";
+        document.getElementById("productList").style.display = "none";
+      }
+    });
 
-        if (!name) {
-          showError("name-error", "Coupon name is required.");
+    document.querySelectorAll(".dropdown-menu").forEach(dropdown => {
+      dropdown.addEventListener("click", function(event) {
+        event.stopPropagation();
+      });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+      updatePlaceholder('category');
+      updatePlaceholder('product');
+    });
+
+    async function handleFormSubmit(event) {
+      event.preventDefault();
+      const form = event.target;
+      let isValid = true;
+
+      function showError(id, message) {
+        const errorElement = document.getElementById(id);
+        errorElement.textContent = message;
+        errorElement.style.display = "block";
+      }
+
+      function clearError(id) {
+        document.getElementById(id).style.display = "none";
+      }
+
+      const name = document.getElementById("coupon-name").value.trim();
+      const startOn = document.getElementById("startOn").value;
+      const expireOn = document.getElementById("expireOn").value;
+      const discountType = document.getElementById("discountType").value;
+      const discountValue = parseFloat(document.getElementById("discountValue").value);
+      const isActive = document.getElementById("isActive").value;
+      const maxDiscount = document.getElementById("maxDiscount").value ? parseFloat(document.getElementById("maxDiscount").value) : null;
+      const minimumOrderAmount = parseFloat(document.getElementById("minimumOrderAmount").value);
+      const usageLimitPerUser = parseInt(document.getElementById("usageLimitPerUser").value);
+      const totalUsageLimit = document.getElementById("totalUsageLimit").value ? parseInt(document.getElementById("totalUsageLimit").value) : null;
+      let selectedCategories = [...document.querySelectorAll(".categoryCheckbox:checked")].map(cb => cb.value);
+      let selectedProducts = [...document.querySelectorAll(".productCheckbox:checked")].map(cb => cb.value);
+
+
+      document.querySelectorAll(".error-message").forEach(el => el.style.display = "none");
+
+      if (!name) {
+        showError("name-error", "Coupon name is required.");
+        isValid = false;
+      } else {
+        const capitalizedName = name.toUpperCase();
+        const namePattern = /^[A-Z0-9-]+$/;
+        if (!namePattern.test(capitalizedName)) {
+          showError("name-error", "Coupon name can only contain alphabets, numbers, and hyphens (-).");
           isValid = false;
         } else {
-          const capitalizedName = name.toUpperCase();
-          const namePattern = /^[A-Z0-9-]+$/;
-          if (!namePattern.test(capitalizedName)) {
-            showError("name-error", "Coupon name can only contain alphabets, numbers, and hyphens (-).");
-            isValid = false;
-          } else {
-            document.getElementById("coupon-name").value = capitalizedName;
-          }
-        }
-
-        if (!startOn) {
-          showError("startOn-error", "Start date is required.");
-          isValid = false;
-        }
-
-        if (!expireOn) {
-          showError("expireOn-error", "Expire date is required.");
-          isValid = false;
-        } else if (new Date(startOn) >= new Date(expireOn)) {
-          showError("expireOn-error", "Expiration date must be after the start date.");
-          isValid = false;
-        }
-
-        if (!discountType) {
-          showError("discountType-error", "Please select a discount type.");
-          isValid = false;
-        }
-
-        if (isNaN(discountValue) || discountValue <= 0) {
-          showError("discountValue-error", "Discount value must be a positive number.");
-          isValid = false;
-        }
-
-        if (maxDiscount !== null && (isNaN(maxDiscount) || maxDiscount <= 0)) {
-          showError("maxDiscount-error", "Maximum discount must be a positive number.");
-          isValid = false;
-        }
-
-        if (isNaN(minimumOrderAmount) || minimumOrderAmount < 0) {
-          showError("minimumOrderAmount-error", "Minimum order amount must be a non-negative number.");
-          isValid = false;
-        }
-
-        if (isNaN(usageLimitPerUser) || usageLimitPerUser <= 0) {
-          showError("usageLimitPerUser-error", "Usage limit per user must be a positive integer.");
-          isValid = false;
-        }
-
-        if (totalUsageLimit !== null && (isNaN(totalUsageLimit) || totalUsageLimit <= 0)) {
-          showError("totalUsageLimit-error", "Total usage limit must be a positive integer.");
-          isValid = false;
-        }
-
-        if (isValid) {
-          const data = {
-            name,
-            startOn,
-            expireOn,
-            discountType,
-            discountValue,
-            isActive,
-            maxDiscount,
-            minimumOrderAmount,
-            usageLimitPerUser,
-            totalUsageLimit,
-          };
-
-          console.log(data);
-
-          try {
-            const response = await fetch('/admin/coupons/add-coupon', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(data),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-              Swal.fire({
-                title: 'Success!',
-                text: 'Coupon created successfully!',
-                icon: 'success',
-                confirmButtonText: 'OK'
-              }).then(() => {
-                form.reset();
-              });
-            } else {
-              Swal.fire({
-                title: 'Error!',
-                text: result.error || 'Failed to create coupon.',
-                icon: 'error',
-                confirmButtonText: 'Try Again'
-              });
-            }
-          } catch (error) {
-            console.error('Error during fetch:', error);
-            Swal.fire({
-              title: 'Oops!',
-              text: 'An error occurred. Please try again.',
-              icon: 'error',
-              confirmButtonText: 'OK'
-            });
-          }
+          document.getElementById("coupon-name").value = capitalizedName;
         }
       }
-    </script>
+
+      if (!startOn) {
+        showError("startOn-error", "Start date is required.");
+        isValid = false;
+      }
+
+      if (!expireOn) {
+        showError("expireOn-error", "Expire date is required.");
+        isValid = false;
+      } else if (new Date(startOn) >= new Date(expireOn)) {
+        showError("expireOn-error", "Expiration date must be after the start date.");
+        isValid = false;
+      }
+
+      if (!discountType) {
+        showError("discountType-error", "Please select a discount type.");
+        isValid = false;
+      }
+
+      if (isNaN(discountValue) || discountValue <= 0) {
+        showError("discountValue-error", "Discount value must be a positive number.");
+        isValid = false;
+      }
+
+      if (maxDiscount !== null && (isNaN(maxDiscount) || maxDiscount <= 0)) {
+        showError("maxDiscount-error", "Maximum discount must be a positive number.");
+        isValid = false;
+      }
+
+      if (isNaN(minimumOrderAmount) || minimumOrderAmount < 0) {
+        showError("minimumOrderAmount-error", "Minimum order amount must be a non-negative number.");
+        isValid = false;
+      }
+
+      if (isNaN(usageLimitPerUser) || usageLimitPerUser <= 0) {
+        showError("usageLimitPerUser-error", "Usage limit per user must be a positive integer.");
+        isValid = false;
+      }
+
+      if (totalUsageLimit !== null && (isNaN(totalUsageLimit) || totalUsageLimit <= 0)) {
+        showError("totalUsageLimit-error", "Total usage limit must be a positive integer.");
+        isValid = false;
+      }
+
+      if (!selectedCategories || selectedCategories.length <= 0) {
+        showError("categoryDropdown-error", "Please select applicable Categories");
+        isValid = false;
+      }
+
+      if (!selectedProducts || selectedProducts.length <= 0) {
+        showError("productDropdown-error", "Please select applicable Products");
+        isValid = false;
+      }
+
+      if (isValid) {
+        const data = {
+          name,
+          startOn,
+          expireOn,
+          discountType,
+          discountValue,
+          isActive,
+          maxDiscount,
+          minimumOrderAmount,
+          usageLimitPerUser,
+          totalUsageLimit,
+          applicableCategories: selectedCategories,
+          applicableProducts: selectedProducts,
+        };
+
+        console.log(data);
+
+        try {
+          const response = await fetch('/admin/coupons/add-coupon', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            Swal.fire({
+              title: 'Success!',
+              text: 'Coupon created successfully!',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            }).then(() => {
+              location.href = '/admin/coupons/view-coupons'
+            });
+          } else {
+            Swal.fire({
+              title: 'Error!',
+              text: result.error || 'Failed to create coupon.',
+              icon: 'error',
+              confirmButtonText: 'Try Again'
+            });
+          }
+        } catch (error) {
+          console.error('Error during fetch:', error);
+          Swal.fire({
+            title: 'Oops!',
+            text: 'An error occurred. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
+      }
+    }
+  </script>

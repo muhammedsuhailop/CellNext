@@ -54,11 +54,21 @@ const couponSchema = new Schema({
         type: Number,
         default: 0
     },
-    createdOn: {
-        type: Date,
-        default: Date.now,
-    },
-});
+    applicableCategories: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Category',
+        },
+    ],
+    applicableProducts: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'ProductV2',
+        },
+    ],
+},
+    { timestamps: true }
+);
 
 const Coupon = mongoose.model('Coupon', couponSchema);
 module.exports = Coupon;

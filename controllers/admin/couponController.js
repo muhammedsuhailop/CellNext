@@ -7,8 +7,12 @@ const loadAddCoupon = async (req, res) => {
     try {
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
+        const products = await ProductV2.find({}).select('_id productName');
+        const categories = await Category.find({}).select('_id name');
 
         res.render('coupon-add', {
+            products,
+            categories,
             messages: {
                 success: successMessage.length > 0 ? successMessage[0] : null,
                 error: errorMessage.length > 0 ? errorMessage[0] : null,
@@ -22,9 +26,9 @@ const loadAddCoupon = async (req, res) => {
 
 const addCoupon = async (req, res) => {
     try {
-        const { name, startOn, expireOn, discountType, discountValue, isActive, maxDiscount, minimumOrderAmount, usageLimitPerUser, totalUsageLimit } = req.body;
+        const { name, startOn, expireOn, discountType, discountValue, isActive, maxDiscount, minimumOrderAmount, usageLimitPerUser, totalUsageLimit, applicableCategories, applicableProducts } = req.body;
 
-        if (!name || !startOn || !expireOn || !discountType || !discountValue || isActive === undefined || !minimumOrderAmount || !usageLimitPerUser) {
+        if (!name || !startOn || !expireOn || !discountType || !discountValue || isActive === undefined || !minimumOrderAmount || !usageLimitPerUser || !applicableProducts || !applicableCategories) {
             return res.status(400).json({ error: 'All required fields must be provided.' });
         }
 
@@ -56,6 +60,8 @@ const addCoupon = async (req, res) => {
             minimumOrderAmount,
             usageLimitPerUser,
             totalUsageLimit,
+            applicableCategories,
+            applicableProducts
         });
 
         await coupon.save();
@@ -99,11 +105,37 @@ const getAllCoupons = async (req, res) => {
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
 
-        const formattedCoupons = couponData.map(coupon => ({
-            ...coupon.toObject(),
-            formattedStartOn: formatDate.formatddmmyy(coupon.startOn),
-            formattedExpireOn: formatDate.formatddmmyy(coupon.expireOn),
-        }));
+        const allProducts = await ProductV2.find({});
+        const allCategories = await Category.find({});
+
+        const formattedCoupons = couponData.map(coupon => {
+            let applicableProducts = coupon.applicableProducts;
+            if (applicableProducts.length === allProducts.length) {
+                applicableProducts = 'All';
+            } else {
+                applicableProducts = allProducts.filter(product =>
+                    applicableProducts.includes(product._id.toString())
+                ).map(product => product.productName);
+            }
+
+            let applicableCategories = coupon.applicableCategories;
+            if (applicableCategories.length === allCategories.length) {
+                applicableCategories = 'All';
+            } else {
+                applicableCategories = allCategories.filter(category =>
+                    applicableCategories.includes(category._id.toString())
+                ).map(category => category.name);
+            }
+
+            return {
+                ...coupon.toObject(),
+                formattedStartOn: formatDate.formatddmmyy(coupon.startOn),
+                formattedExpireOn: formatDate.formatddmmyy(coupon.expireOn),
+                applicableProducts,
+                applicableCategories
+            };
+        });
+
 
         res.render('coupons', {
             data: formattedCoupons,
