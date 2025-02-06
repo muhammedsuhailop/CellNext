@@ -3,6 +3,7 @@ const Category = require('../../models/categorySchema');
 const ProductV2 = require('../../models/productsSchemaV2');
 const Brand = require('../../models/brandSchema');
 const Cart = require('../../models/cartSchema');
+const Wallet = require('../../models/walletSchema');
 const nodemailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
@@ -45,9 +46,18 @@ const loadHomePage = async (req, res) => {
 
         const cartItemCount = req.session.cartItemCount || 0;
 
-        console.log('Products :', productData);
         if (user) {
             const userData = await User.findOne({ _id: user });
+
+            let wallet = await Wallet.findOne({ userId: userData._id });
+            if (!wallet) {
+                console.log("No wallet found, creating new wallet...");
+                wallet = new Wallet({ userId: userData._id, transactions: [] });
+                await wallet.save();
+                userData.wallet = wallet._id;
+                await userData.save();
+                console.log("Wallet created successfully.");
+            }
             console.log('User data', userData.name);
             const successMessage = req.flash('success');
             const errorMessage = req.flash('error');
@@ -230,6 +240,13 @@ const verifyOtp = async (req, res) => {
             });
 
             await saveUserData.save();
+
+            const wallet = new Wallet({ userId: saveUserData._id });
+            await wallet.save();
+
+            saveUserData.wallet = wallet._id;
+            await saveUserData.save();
+
             req.session.user = saveUserData._id;
 
             res.json({ success: true, redirectUrl: '/' });
