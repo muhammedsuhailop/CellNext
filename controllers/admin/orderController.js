@@ -152,6 +152,12 @@ const updateStatus = async (req, res) => {
             }
         }
 
+        if (newStatus === "Delivered" && order.payment.method === "cod") {
+            order.payment.status = "Completed";
+            order.payment.paymentDate = new Date(); 
+            order.payment.transactionId = `COD-${orderId}-${Date.now()}`; 
+        }
+
         order.status = newStatus;
         await order.save();
 
@@ -301,6 +307,12 @@ const updateItemStatus = async (req, res) => {
             if (hasCancelRequests || hasCancellations) {
                 order.status = "Partial Cancellation";
             }
+        }
+
+        if (newStatus === "Delivered" && order.payment.method === "cod" && order.payment.status !== 'Completed') {
+            order.payment.status = "Completed";
+            order.payment.paymentDate = new Date(); 
+            order.payment.transactionId = `COD-${orderId}-${Date.now()}`; 
         }
 
         await order.save();

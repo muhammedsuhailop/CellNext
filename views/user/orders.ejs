@@ -88,7 +88,7 @@
                 <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
               </div>
               <div class="col-md-6">
-                <p><strong>Payment Status:</strong> <span class="badge bg-<%= order.paymentStatus === 'Pending' ? 'warning' : 'success' %>"><%= order.paymentStatus %></span></p>
+                <p><strong>Payment Status:</strong> <span class="badge text-white bg-<%= order.paymentStatus === 'Pending' ? 'warning' : 'success' %>"><%= order.paymentStatus %></span></p>
               </div>
             </div>
 
@@ -125,7 +125,7 @@
                     </button>
                     <% } %>
                     <% if (item.itemStatus === 'Delivered') { %>
-                    <button class="btn btn-danger btn-sm btn-action" onclick="returnItem('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Cancel
+                    <button class="btn btn-warning btn-sm btn-action text-white" onclick="returnItem('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Return
                     </button>
                     <% } %>
                   </td>
