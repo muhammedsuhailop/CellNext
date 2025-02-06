@@ -24,13 +24,18 @@ const getOrders = async (req, res) => {
         const totalPages = Math.ceil(totalOrders / limit);
 
         if (!orders || orders.length === 0) {
-            return res.status(404).render('orders', {
+            const successMessage = req.flash('success');
+            const errorMessage = req.flash('error');
+            return res.status(404).render('admin-orders', {
                 orders: [],
                 totalPages: 0,
                 currentPage: page,
                 searchQuery: search,
                 searchAction: '/admin/orders',
-                message: 'No orders found.',
+                messages: {
+                    success: successMessage.length > 0 ? successMessage[0] : null,
+                    error: errorMessage.length > 0 ? errorMessage[0] : null,
+                },
             });
         }
 
