@@ -129,11 +129,18 @@ const placeOrder = async (req, res) => {
 
     const newOrder = new Orders({
       userId: userId,
-      orderItems: cartItems.map(item => ({
-        productId: item.productId,
-        variantId: item.variantId,
-        quantity: item.quantity,
-      })),
+      orderItems: cartItems.map(item => {
+        const product = products.find(p => p._id.toString().trim() === item.productId.toString().trim());
+        const variant = product.variants[item.variantId];
+
+        return {
+          productId: item.productId,
+          variantId: item.variantId,
+          quantity: item.quantity,
+          salePrice: variant.salePrice,
+          regularPrice: variant.regularPrice,
+        };
+      }),
       subTotal: subTotal,
       totalPrice: totalPrice,
       discount: discountAmount,
@@ -214,16 +221,16 @@ const loadOrderPage = async (req, res) => {
               return null;
             }
 
-            const variants = Array.isArray(product.variants) ? product.variants : [];
-            const variant = variants[item.variantId] || {};
+            const variant = product.variants[item.variantId] || {};
 
             return {
-              productId: product._id,
-              productName: product.productName,
+              productId: item.productId,
+              productName: product.productName || "N/A",
               variantDetails: {
                 color: variant.color || "N/A",
                 size: variant.size || "N/A",
-                price: variant.salePrice,
+                salePrice: item.salePrice,
+                regularPrice: item.regularPrice,
               },
               quantity: item.quantity,
               itemStatus: item.itemStatus,
@@ -266,6 +273,7 @@ const loadOrderPage = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
+
 
 
 const cancelOrder = async (req, res) => {

@@ -23,6 +23,14 @@ const orderSchema = new Schema({
             default: 1,
             min: 1,
         },
+        salePrice: {
+            type: Number,
+            required: true,
+        },
+        regularPrice: {
+            type: Number,
+            required: true,
+        },
         itemStatus: {
             type: String,
             enum: ['Pending', 'Processing', 'Placed', 'Shipped', 'Delivered', 'Cancelled', 'Cancel Request'],

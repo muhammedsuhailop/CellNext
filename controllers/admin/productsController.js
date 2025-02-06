@@ -626,7 +626,7 @@ const getAllVariants = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
 
-        
+
         const query = {
             $or: [
                 { productName: { $regex: new RegExp(".*" + search + ".*", "i") } }
@@ -669,7 +669,7 @@ const getAllVariants = async (req, res) => {
             currentPage: page,
             totalPages: totalPages,
             limit: limit,
-            search: search,
+            searchQuery: search,
 
         });
     } catch (error) {
