@@ -62,7 +62,40 @@
                     <td><%= item.variantDetails.color %>, <%= item.variantDetails.size %></td>
                     <td><%= item.quantity %></td>
                     <td>₹<%= item.variantDetails.price %></td>
-                    <td><span class="badge bg-<%= item.itemStatus === 'Pending' ? 'warning' : 'success' %>"><%= item.itemStatus %></span></td>
+                    <td>
+                      <% 
+                        let badgeClass;
+                        switch(item.itemStatus) {
+                          case 'Pending':
+                          case 'Processing':
+                            badgeClass = 'info';
+                            break;
+                          case 'Placed':
+                            badgeClass = 'primary';
+                            break;
+                          case 'Shipped':
+                            badgeClass = 'secondary';
+                            break;
+                          case 'Delivered':
+                            badgeClass = 'success';
+                            break;
+                          case 'Cancelled':
+                          case 'Cancel Request':
+                          case 'Partial Cancellation':
+                            badgeClass = 'danger';
+                            break;
+                          case 'Return Request':
+                          case 'Returned':
+                          case 'Partial Return':
+                            badgeClass = 'warning';
+                            break;
+                          default:
+                            badgeClass = 'light';
+                        }
+                      %>
+                      <span class="badge bg-<%= badgeClass %>"><%= item.itemStatus %></span>
+                    </td>
+
                     <td>
                       <!-- Dropdown to update status -->
                       <select class="form-select form-select-sm" onchange="updateItemStatus('<%= order.orderId %>', '<%= item.productId %>', <%= item.variantIndex %>, this.value)">
@@ -70,6 +103,7 @@
                         <option value="Shipped" <%= item.itemStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
                         <option value="Delivered" <%= item.itemStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
                         <option value="Cancelled" <%= item.itemStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                        <option value="Returned" <%= item.itemStatus === 'Returned' ? 'selected' : '' %>>Retured</option>
                       </select>
                     </td>
                   </tr>

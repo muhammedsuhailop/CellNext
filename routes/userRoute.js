@@ -74,5 +74,6 @@ router.post('/place-order', userAuth, orderController.placeOrder);
 router.get('/my-orders', userAuth, orderController.loadOrderPage);
 router.patch('/orders/:orderId/cancel', userAuth, orderController.cancelOrder);
 router.patch('/orders/:orderId/cancel-item', userAuth, orderController.cancelItemOrder);
+router.patch('/orders/request-return', userAuth, orderController.returnRequest)
 
 module.exports = router

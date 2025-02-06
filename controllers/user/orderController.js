@@ -325,10 +325,67 @@ const cancelItemOrder = async (req, res) => {
   }
 }
 
+const returnRequest = async (req, res) => {
+  try {
+    const { orderId, productId, variantIndex, returnReason } = req.body;
+
+    const order = await Orders.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found." });
+    }
+
+    const item = order.orderItems.find(
+      (i) =>
+        i.productId.toString() === productId.toString() &&
+        i.variantId === Number(variantIndex)
+    );
+
+    if (!item) {
+      return res.status(404).json({ success: false, message: "Item not found in order." });
+    }
+
+    if (item.itemStatus !== "Delivered") {
+      return res.status(400).json({
+        success: false,
+        message: "Return request can only be made for delivered items.",
+      });
+    }
+
+    const deliveredOnDate = new Date(item.deliveredOn);
+    const currentDate = new Date();
+    const daysDifference = Math.floor(
+      (currentDate - deliveredOnDate) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysDifference > 14) {
+      return res.status(400).json({
+        success: false,
+        message: "Return request must be made within 14 days of delivery.",
+      });
+    }
+
+    item.itemStatus = "Return Request";
+    item.returnReason = returnReason;
+    order.status = 'Partial Return';
+
+    await order.save();
+
+    res.json({
+      success: true,
+      message: "Return request submitted successfully.",
+    });
+  } catch (error) {
+    console.error("Error processing return request:", error);
+    res.status(500).json({ success: false, message: "Internal server error." });
+  }
+}
+
+
 
 module.exports = {
   placeOrder,
   loadOrderPage,
   cancelOrder,
-  cancelItemOrder
+  cancelItemOrder,
+  returnRequest
 }

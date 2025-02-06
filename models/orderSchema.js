@@ -33,12 +33,18 @@ const orderSchema = new Schema({
         },
         itemStatus: {
             type: String,
-            enum: ['Pending', 'Processing', 'Placed', 'Shipped', 'Delivered', 'Cancelled', 'Cancel Request'],
+            enum: ['Pending', 'Processing', 'Placed', 'Shipped', 'Delivered', 'Cancelled', 'Cancel Request', 'Return Request', 'Returned'],
             default: 'Pending'
         },
         cancellationReason: {
             type: String,
             default: ''
+        },
+        returnReason: {
+            type: String,
+        },
+        deliveredOn: {
+            type: Date
         }
     }],
     totalPrice: {
@@ -69,7 +75,7 @@ const orderSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['Pending', 'Processing', 'Placed', 'Shipped', 'Delivered', 'Cancelled', 'Cancel Request', 'Partial Cancellation', 'Return Request', 'Returned', 'Partially Returned']
+        enum: ['Pending', 'Processing', 'Placed', 'Shipped', 'Delivered', 'Cancelled', 'Cancel Request', 'Partial Cancellation', 'Return Request', 'Returned', 'Partial Return']
     },
     createdOn: {
         type: Date,
@@ -91,7 +97,7 @@ const orderSchema = new Schema({
         },
         status: {
             type: String,
-            enum: ['Pending', 'Completed', 'Failed', 'Refunded'],
+            enum: ['Pending', 'Completed', 'Failed', 'Refunded', 'Partially Refunded'],
             default: 'Pending'
         },
         transactionId: {
@@ -113,9 +119,6 @@ const orderSchema = new Schema({
         required: true
     },
     cancellationReason: {
-        type: String
-    },
-    returnReason: {
         type: String
     },
     shippingDetails: {

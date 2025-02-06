@@ -125,7 +125,8 @@ const updateStatus = async (req, res) => {
             "Delivered": [],
             "Cancelled": [],
             "Returned": ["Delivered"],
-            "Cancel Request": ["Placed", "Cancelled", "Shipped"]
+            "Cancel Request": ["Placed", "Cancelled", "Shipped"],
+            "Return Request": ['Returned', 'Delivered']
         };
 
         if (!allowedTransitions[order.status]?.includes(newStatus)) {
@@ -149,13 +150,18 @@ const updateStatus = async (req, res) => {
         } else {
             for (const item of order.orderItems) {
                 item.itemStatus = newStatus;
+                if (newStatus === 'Delivered') {
+                    if (!item.deliveredOn) {
+                        item.deliveredOn = new Date();
+                    }
+                }
             }
         }
 
         if (newStatus === "Delivered" && order.payment.method === "cod") {
             order.payment.status = "Completed";
-            order.payment.paymentDate = new Date(); 
-            order.payment.transactionId = `COD-${orderId}-${Date.now()}`; 
+            order.payment.paymentDate = new Date();
+            order.payment.transactionId = `COD-${orderId}-${Date.now()}`;
         }
 
         order.status = newStatus;
@@ -281,7 +287,8 @@ const updateItemStatus = async (req, res) => {
             "Delivered": [],
             "Cancelled": [],
             "Returned": ["Delivered"],
-            "Cancel Request": ["Placed", "Cancelled", "Shipped"]
+            "Cancel Request": ["Placed", "Cancelled", "Shipped"],
+            "Return Request": ['Returned', 'Delivered']
         };
 
         if (!allowedTransitions[item.itemStatus]?.includes(newStatus)) {
@@ -308,11 +315,17 @@ const updateItemStatus = async (req, res) => {
                 order.status = "Partial Cancellation";
             }
         }
-
+        if (newStatus === 'Delivered') {
+            item.deliveredOn = new Date();
+        }
         if (newStatus === "Delivered" && order.payment.method === "cod" && order.payment.status !== 'Completed') {
             order.payment.status = "Completed";
-            order.payment.paymentDate = new Date(); 
-            order.payment.transactionId = `COD-${orderId}-${Date.now()}`; 
+            order.payment.paymentDate = new Date();
+            order.payment.transactionId = `COD-${orderId}-${Date.now()}`;
+        } else if (newStatus === "Returned" && allItemsSameStatus) {
+            order.payment.status = "Refunded";
+        } else if (newStatus === "Returned") {
+            order.payment.status = "Partially Refunded";
         }
 
         await order.save();

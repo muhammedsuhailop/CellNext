@@ -60,9 +60,10 @@
                     <% } else if (order.status === 'Placed') { %> bg-info text-white
                     <% } else if (order.status === 'Shipped') { %> bg-primary text-white
                     <% } else if (order.status === 'Delivered') { %> bg-success  text-white
-                    <% } else if (order.status === 'Returned') { %> bg-secondary text-white
+                    <% } else if (order.status === 'Returned') { %> bg-warning text-white
                     <% } else if (order.status === 'Cancelled') { %> bg-danger text-white
                     <% } else if (order.status === 'Cancel Request') { %> bg-danger text-white
+                      <% } else if (order.status === 'Partial Return') { %> bg-warning text-white
                     <% } %> mx-2">
                     <% if (order.status === 'Cancel Request') { %>
                     Canacellation Requested
@@ -102,6 +103,7 @@
                   <th>Size</th>
                   <th>Quantity</th>
                   <th>Price</th>
+                  <th>Status</th>
                   <th></th>
                 </tr>
               </thead>
@@ -120,14 +122,16 @@
                   <td><%= item.quantity %></td>
                   <td>₹<%= item.variantDetails.salePrice %></td>
                   <td>
+                    <span class="badge badge-secondary "><%= item.itemStatus %></span>
+                  </td>
+                  <td>
                     <% if (item.itemStatus === 'Pending') { %>
                     <button class="btn btn-danger btn-sm btn-action" onclick="cancelItemOrder('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Cancel
                     </button>
                     <% } %>
                     <% if (item.itemStatus === 'Delivered') { %>
-                    <button class="btn btn-warning btn-sm btn-action text-white" onclick="returnItem('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Return
-                    </button>
-                    <% } %>
+                    <button class="btn btn-warning btn-sm btn-action text-white" onclick="openReturnModal('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Return</button>
+                    <% }  %>
                   </td>
                 </tr>
                 <% }) %>
@@ -135,6 +139,46 @@
             </table>
           </div>
           <% }) %>
+
+          <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header bg-secondary text-white">
+                  <h5 class="modal-title" id="returnModalLabel">Return Item</h5>
+                  <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                  <form id="returnForm">
+                    <input type="hidden" id="orderId">
+                    <input type="hidden" id="productId">
+                    <input type="hidden" id="variantIndex">
+
+                    <!-- Return Reason -->
+                    <div class="form-group d-flex align-items-center">
+                      <label for="returnReason" class="mx-2 me-3"><strong>Reason for Return</strong></label>
+                      <input type="text" class="form-control" id="returnReason" name="reason" list="reason-options" placeholder="Enter or select a reason" pattern="[A-Za-z0-9\s]+" />
+                      <datalist id="reason-options">
+                        <option value="Damaged product"></option>
+                        <option value="Wrong item received"></option>
+                        <option value="Quality issue"></option>
+                      </datalist>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="button" class="btn btn-dark" onclick="submitReturnRequest()">Submit Request</button>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div>
       </section>
@@ -158,6 +202,94 @@
   </div>
 </div>
 <!-- Search End -->
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    function openReturnModal(orderId, productId, variantIndex) {
+      document.getElementById('orderId').value = orderId;
+      document.getElementById('productId').value = productId;
+      document.getElementById('variantIndex').value = variantIndex;
+
+      document.getElementById('returnReason').value = '';
+
+      $('#returnModal').modal('show');
+    }
+
+    async function submitReturnRequest() {
+      const orderId = document.getElementById('orderId').value;
+      const productId = document.getElementById('productId').value;
+      const variantIndex = document.getElementById('variantIndex').value;
+      const returnReason = document.getElementById('returnReason').value.trim();
+
+      if (!returnReason) {
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Missing Information',
+          text: 'Please select or enter a return reason.'
+        });
+      }
+
+      if (returnReason.length < 8) {
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Invalid Reason',
+          text: 'Please provide at least 8 characters for the reason.'
+        });
+      }
+
+      const requestBody = {
+        orderId,
+        productId,
+        variantIndex,
+        returnReason: returnReason
+      };
+
+      console.log('requestBody', requestBody);
+
+      try {
+        const response = await fetch('/orders/request-return', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Return request submitted successfully!'
+          }).then(() => {
+            location.reload();
+          });
+        } else {
+          const error = await response.json();
+          console.error("Error:", error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'An error occurred while submitting the return request.'
+          });
+        }
+      } catch (error) {
+        console.error("Error submitting return request:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred. Please try again.'
+        });
+      }
+    }
+
+
+    // Expose functions globally to be called in the modal
+    window.openReturnModal = openReturnModal;
+    window.submitReturnRequest = submitReturnRequest;
+  });
+</script>
+
 
 <script>
   async function cancelOrder(orderId) {

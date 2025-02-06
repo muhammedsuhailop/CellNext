@@ -45,7 +45,7 @@
                     <% if (orders.length === 0) { %>
                     <div class="alert alert-warning">No orders found.</div>
                     <% } else { %>
-                    <table class="table ">
+                    <table class="table">
                       <thead class="table">
                         <tr>
                           <th>Order ID</th>
@@ -65,7 +65,17 @@
                         <tr>
                           <td><%= order.refId %></td>
                           <td><%= order.user.name %></td>
-                          <td><%= new Date(order.orderDate).toLocaleString() %></td>
+                          <td>
+                            <%= new Date(order.orderDate).toLocaleString('en-GB', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: '2-digit',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  hour12: true
+                                }) %>
+                          </td>
+
                           <td>₹<%= order.totalPrice %></td>
                           <td>₹<%= order.discount || 0 %></td>
                           <td>₹<%= order.finalAmount %></td>
@@ -77,13 +87,16 @@
                           </td>
                           <td>
                             <div class="dropdown">
-                              <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class='bx bx-dots-vertical'></i>
+                              <!-- <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class='bx bx-dots-vertical'></i> -->
+                              <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
                               </button>
                               <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/admin/orders/order-details/<%= order.orderId %>">View</a></li>
-                                <% if (order.status !== 'Cancelled' && order.status !== 'Delivered') { %>
-                                <li><a class="dropdown-item text-danger" onclick="updateOrderStatus('<%= order.orderId %>', 'Cancelled')">Cancel</a></li>
+                                <li><a class="dropdown-item" href="/admin/orders/order-details/<%= order.orderId %>">View & Update</a></li>
+                                <% if (order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== 'Returned') { %>
+                                <li><a class="dropdown-item text-danger" onclick="updateOrderStatus('<%= order.orderId %>', 'Cancelled')">Cancel Order</a></li>
                                 <% } %>
                                 <% if (order.status === 'Pending') { %>
                                 <li><a class="dropdown-item text-success" onclick="updateOrderStatus('<%= order.orderId %>', 'Placed')">Mark as Placed</a></li>
