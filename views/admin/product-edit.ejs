@@ -106,7 +106,7 @@
               <% product.variants.forEach((variant, index) => { %>
               <div class="card mb-4" id="variant-section-<%= index %>" style="<%= index === 0 ? '' : 'display: none;' %>">
                 <div class="card-header">
-                  <h5>Variant : <%= variant.color %> - <%= variant.storage %></h5>
+                  <h5>Variant : <%= variant.color %> - <%= variant.size %></h5>
                 </div>
                 <div class="card-body">
                   <form id="edit-variant-form<%= index %>" data-index="<%= index %>" action="/admin/editProductVariant/<%= product._id %>/variant/<%= index %>" method="POST" enctype="multipart/form-data">
@@ -280,7 +280,7 @@
                 <div class="modal-content">
                   <div class="modal-header">
                     <h5 class="modal-title">Crop Image</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
@@ -291,7 +291,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" id="cropImage" class="btn btn-primary">Crop</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                   </div>
                 </div>
               </div>

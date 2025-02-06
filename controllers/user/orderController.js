@@ -3,6 +3,7 @@ const Cart = require('../../models/cartSchema');
 const User = require('../../models/userSchema');
 const Orders = require('../../models/orderSchema');
 const Coupon = require('../../models/couponSchema');
+const formatDate = require('../../helpers/formatDate');
 
 const placeOrder = async (req, res) => {
   try {
@@ -22,14 +23,13 @@ const placeOrder = async (req, res) => {
 
     const cart = user.cart[0];
     const cartItems = cart.items;
+    let subTotal = 0;
     let totalPrice = 0;
-    const coupon = await Coupon.findById(cart.coupon);
+    let saleTotal = 0;
 
     const products = await ProductV2.find({
       '_id': { $in: cartItems.map(item => item.productId) }
     });
-
-    let subTotal = 0;
 
     for (const item of cartItems) {
       const productIdStr = item.productId.toString().trim();
@@ -52,12 +52,13 @@ const placeOrder = async (req, res) => {
         return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name}` });
       }
 
-      totalPrice += item.quantity * variant.salePrice;
+      totalPrice += item.quantity * variant.regularPrice;
+      saleTotal += item.quantity * variant.salePrice;
       subTotal += item.quantity * variant.regularPrice;
     }
 
-    let discountAmount = 0;
-    let finalAmount = subTotal;
+    let discountAmount = totalPrice - saleTotal;
+    let finalAmount = saleTotal;
     let validCoupon = false;
 
     if (cart.coupon) {
@@ -92,7 +93,7 @@ const placeOrder = async (req, res) => {
       }
 
       const userUsage = coupon.usedCount.get(userId.toString()) || 0;
-      if (userUsage >= coupon.usageLimitPerUser) {
+      if (userUsage > coupon.usageLimitPerUser) {
         cart.coupon = null;
         coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
         coupon.totalUsed -= 1;
@@ -113,7 +114,7 @@ const placeOrder = async (req, res) => {
       validCoupon = true;
 
       if (coupon.discountType === 'percentage') {
-        discountAmount = (totalPrice * coupon.discountValue) / 100;
+        discountAmount = (saleTotal * coupon.discountValue) / 100;
       } else {
         discountAmount = coupon.discountValue;
       }
@@ -122,9 +123,8 @@ const placeOrder = async (req, res) => {
         discountAmount = coupon.maxDiscount;
       }
 
-      finalAmount = totalPrice - discountAmount;
-      discountAmount = subTotal - finalAmount;
-
+      finalAmount = saleTotal - discountAmount;
+      discountAmount = totalPrice - finalAmount;
     }
 
     const newOrder = new Orders({
@@ -134,6 +134,7 @@ const placeOrder = async (req, res) => {
         variantId: item.variantId,
         quantity: item.quantity,
       })),
+      subTotal: subTotal,
       totalPrice: totalPrice,
       discount: discountAmount,
       finalAmount: finalAmount,

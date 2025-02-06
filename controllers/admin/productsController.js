@@ -123,7 +123,7 @@ const addProductVariant = async (req, res) => {
 
         const existingVariant = product.variants.find(variant =>
             variant.color === variantData.color &&
-            variant.storage === variantData.storage
+            variant.size === variantData.size
         );
 
         if (existingVariant) {

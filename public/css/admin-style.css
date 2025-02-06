@@ -22,7 +22,8 @@
     text-align: center;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     position: fixed;
-    top: 50%;
+    /* top: 50%; */
+    top: 19rem;
     left: 50%;
     transform: translate(-50%, -50%);
     /* Ensures perfect centering */
@@ -50,9 +51,9 @@
 }
 
 .modal-content button {
-    width: 100%;
+    /* width: 100%;
     padding: 10px;
-    background: #007bff;
+    background: #007bff; */
     color: white;
     border: none;
     border-radius: 4px;
@@ -62,4 +63,9 @@
 
 .modal-content button:hover {
     background: #0056b3;
+}
+
+#variant-update-submit {
+    padding: 10px;
+    background: #007bff;
 }
