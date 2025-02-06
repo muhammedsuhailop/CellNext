@@ -31,7 +31,7 @@
               <!-- General Order Information -->
               <div class="card mb-4">
                 <div class="card-body">
-                  <h5 class="card-title">Order ID: <%= order.orderId %></h5>
+                  <h5 class="card-title">Order ID: <%= order.refId %></h5>
                   <p><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
                   <p><strong>Status:</strong> <span class="badge bg-primary"><%= order.status %></span></p>
                   <p><strong>Total Price:</strong> ₹<%= order.totalPrice %></p>

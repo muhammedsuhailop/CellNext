@@ -113,12 +113,12 @@
          <div data-i18n="Layouts">Orders</div>
        </a>
        <ul class="menu-sub">
-         <li class="menu-item <%= currentPath === '/admin/products' ? 'active' : '' %>">
+         <li class="menu-item <%= currentPath === '/admin/orders' ? 'active' : '' %>">
            <a href="/admin/orders" class="menu-link">
              <div data-i18n="Without menu">View Orders</div>
            </a>
          </li>
-         <li class="menu-item <%= currentPath === '/admin/addProduct' ? 'active' : '' %>">
+         <li class="menu-item <%= currentPath.startsWith('/admin/orders/order-details') ? 'active' : '' %>">
            <a href="/admin/orders" class="menu-link">
              <div data-i18n="Without navbar">Edit Order</div>
            </a>

@@ -48,16 +48,17 @@ const getOrders = async (req, res) => {
                         const variant = product.variants[item.variantId] || {};
 
                         return {
-                            productId: product._id,
-                            productName: product.name,
+                            productId: item.productId,
+                            productName: product.productName || "NA",
                             variantDetails: {
-                                color: variant.color || "N/A",
-                                size: variant.size || "N/A",
-                                price: variant.salePrice
+                                color: variant.color || "NA",
+                                size: variant.size || "NA",
+                                salePrice: item.salePrice,
+                                regularPrice: item.regularPrice,
                             },
                             quantity: item.quantity,
                             itemStatus: item.itemStatus,
-                            cancellationReason: item.cancellationReason || "N/A",
+                            cancellationReason: item.cancellationReason || "NA",
                         };
                     })
                 );
@@ -66,6 +67,7 @@ const getOrders = async (req, res) => {
 
                 return {
                     orderId: order._id,
+                    refId: order.orderId,
                     orderDate: order.createdOn,
                     status: order.status,
                     totalPrice: order.totalPrice,
@@ -82,7 +84,6 @@ const getOrders = async (req, res) => {
             })
         );
 
-
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
 
@@ -98,10 +99,11 @@ const getOrders = async (req, res) => {
             },
         });
     } catch (error) {
-        console.error('Error listing product:', error);
+        console.error('Error listing orders:', error);
         res.redirect('/admin/error-page');
     }
-}
+};
+
 
 const updateStatus = async (req, res) => {
     try {
@@ -208,6 +210,7 @@ const getOrderDetails = async (req, res) => {
 
         const orderDetails = {
             orderId: order._id,
+            refId: order.orderId,
             orderDate: order.createdOn,
             status: order.status,
             totalPrice: order.totalPrice,
