@@ -6,6 +6,7 @@ const profileController = require('../controllers/user/profileController');
 const cartController = require('../controllers/user/cartController');
 const checkoutController = require('../controllers/user/checkoutController');
 const orderController = require('../controllers/user/orderController');
+const walletController = require('../controllers/user/walletController');
 const passport = require('passport');
 const { userAuth, adminAuth } = require('../middlewares/auth')
 
@@ -74,6 +75,9 @@ router.post('/place-order', userAuth, orderController.placeOrder);
 router.get('/my-orders', userAuth, orderController.loadOrderPage);
 router.patch('/orders/:orderId/cancel', userAuth, orderController.cancelOrder);
 router.patch('/orders/:orderId/cancel-item', userAuth, orderController.cancelItemOrder);
-router.patch('/orders/request-return', userAuth, orderController.returnRequest)
+router.patch('/orders/request-return', userAuth, orderController.returnRequest);
+
+//Wallet
+router.get('/wallet',userAuth,walletController.loadWalletPage);
 
 module.exports = router

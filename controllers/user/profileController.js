@@ -206,7 +206,8 @@ const loadAddAddress = async (req, res) => {
     try {
         const userId = req.session.user;
         const userData = await User.findById(userId);
-        res.render('add-address', { user: userData })
+        const cartItemCount = req.session.cartItemCount || 0;
+        res.render('add-address', { user: userData,cartItemCount })
     } catch (error) {
         console.log('error'.error);
         res.redirect('/pageNotFound');
