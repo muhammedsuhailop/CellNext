@@ -1,7 +1,9 @@
 const Orders = require('../../models/orderSchema');
 const ProductV2 = require('../../models/productsSchemaV2');
 const User = require('../../models/userSchema');
-const Address = require('../../models/addressSchema')
+const Address = require('../../models/addressSchema');
+const Wallet = require('../../models/walletSchema');
+const { v4: uuidv4 } = require('uuid');
 
 const getOrders = async (req, res) => {
     try {
@@ -118,7 +120,7 @@ const updateStatus = async (req, res) => {
             return res.status(400).json({ error: 'Order ID and new status are required.' });
         }
 
-        const order = await Orders.findById(orderId);
+        const order = await Orders.findById(orderId).populate('userId');
         if (!order) {
             return res.status(404).json({ error: 'Order not found.' });
         }
@@ -138,27 +140,50 @@ const updateStatus = async (req, res) => {
             return res.status(400).json({ error: `Cannot change status from ${order.status} to ${newStatus}.` });
         }
 
-        if (newStatus === "Cancelled") {
+        if (newStatus === "Cancelled" || newStatus === "Returned") {
             for (const item of order.orderItems) {
                 const product = await ProductV2.findById(item.productId);
                 if (!product) continue;
 
-                const variant = product.variants[item.variantId];
+                if (newStatus === "Cancelled") {
+                    const variant = product.variants[item.variantId];
+                    if (variant) {
+                        variant.stock += item.quantity;
+                        item.itemStatus = newStatus;
+                    }
 
-                if (variant) {
-                    variant.stock += item.quantity;
-                    item.itemStatus = "Cancelled";
+                    await product.save();
                 }
 
-                await product.save();
+            }
+
+            if (order.payment.status === "Completed" || order.payment.status === "Partially Refunded") {
+                const userWallet = await Wallet.findOne({ userId: order.userId._id });
+
+                if (userWallet) {
+                    const refundAmount = order.payment.finalAmount;
+
+                    const newTransaction = {
+                        transactionId: uuidv4(),
+                        type: 'credit',
+                        amount: refundAmount,
+                        description: `Refund for ${newStatus.toLowerCase()} order ${order.orderId}`,
+                        orderId: order._id,
+                        transactionCategory: 'refund',
+                        balanceAfterTransaction: userWallet.balance + refundAmount
+                    };
+
+                    userWallet.transactions.push(newTransaction);
+                    userWallet.balance += refundAmount;
+                    await userWallet.save();
+                    order.payment.status = "Refunded";
+                }
             }
         } else {
             for (const item of order.orderItems) {
                 item.itemStatus = newStatus;
-                if (newStatus === 'Delivered') {
-                    if (!item.deliveredOn) {
-                        item.deliveredOn = new Date();
-                    }
+                if (newStatus === 'Delivered' && !item.deliveredOn) {
+                    item.deliveredOn = new Date();
                 }
             }
         }
@@ -178,6 +203,7 @@ const updateStatus = async (req, res) => {
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
+
 
 const getOrderDetails = async (req, res) => {
     try {
@@ -266,23 +292,22 @@ const updateItemStatus = async (req, res) => {
         const { orderId } = req.params;
         const { productId, variantIndex, newStatus } = req.body;
 
-        console.log('On updateItemStatus ');
+        console.log('On updateItemStatus');
 
         if (!orderId || !productId || variantIndex === undefined || !newStatus) {
             return res.status(400).json({ success: false, error: 'Missing required fields.' });
         }
 
-        const order = await Orders.findById(orderId);
+        const order = await Orders.findById(orderId).populate('userId');
         if (!order) {
-            return res.status(404).json({ success: false, error: 'Order not found.' })
+            return res.status(404).json({ success: false, error: 'Order not found.' });
         }
 
-        console.log('Order on item staus chage', order);
-
+        console.log('Order on item status change', order);
 
         const item = order.orderItems.find(i => i.productId.toString() === productId.toString() && i.variantId === Number(variantIndex));
         if (!item) {
-            return res.status(404).json({ success: false, error: 'Order item not found.' })
+            return res.status(404).json({ success: false, error: 'Order item not found.' });
         }
 
         const allowedTransitions = {
@@ -300,15 +325,42 @@ const updateItemStatus = async (req, res) => {
             return res.status(400).json({ success: false, error: `Cannot change status from ${item.itemStatus} to ${newStatus}.` });
         }
 
-        if (newStatus === "Cancelled") {
-            const product = await ProductV2.findById(productId);
-            if (product && product.variants[variantIndex]) {
-                product.variants[variantIndex].stock += item.quantity;
-                await product.save();
+        if (newStatus === "Cancelled" || newStatus === "Returned") {
+            if (newStatus === "Cancelled") {
+                const product = await ProductV2.findById(productId);
+                if (product && product.variants[variantIndex]) {
+                    product.variants[variantIndex].stock += item.quantity;
+                    await product.save();
+                }
+            }
+
+            if (order.payment.status === "Completed" || order.payment.status === "Partially Refunded") {
+                const userWallet = await Wallet.findOne({ userId: order.userId._id });
+
+                if (userWallet) {
+                    const refundAmount = item.salePrice * item.quantity;
+                    console.log('refundAmount', refundAmount)
+
+                    const newTransaction = {
+                        transactionId: uuidv4(),
+                        type: 'credit',
+                        amount: refundAmount,
+                        description: `Refund for ${newStatus.toLowerCase()} item in order ${order.orderId}`,
+                        orderId: order._id,
+                        transactionCategory: 'refund',
+                        balanceAfterTransaction: userWallet.balance + refundAmount
+                    };
+
+                    userWallet.transactions.push(newTransaction);
+                    userWallet.balance += refundAmount;
+                    await userWallet.save();
+                    console.log(`Refund of ${refundAmount} added to user ${order.userId.name}'s wallet`);
+                }
             }
         }
 
         item.itemStatus = newStatus;
+
         const allItemsSameStatus = order.orderItems.every(i => i.itemStatus === newStatus);
         if (allItemsSameStatus) {
             order.status = newStatus;
@@ -320,9 +372,11 @@ const updateItemStatus = async (req, res) => {
                 order.status = "Partial Cancellation";
             }
         }
+
         if (newStatus === 'Delivered') {
             item.deliveredOn = new Date();
         }
+
         if (newStatus === "Delivered" && order.payment.method === "cod" && order.payment.status !== 'Completed') {
             order.payment.status = "Completed";
             order.payment.paymentDate = new Date();
@@ -340,7 +394,8 @@ const updateItemStatus = async (req, res) => {
         console.error('Error updating item status:', error);
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
-}
+};
+
 
 module.exports = {
     getOrders,
