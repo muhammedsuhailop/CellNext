@@ -232,52 +232,37 @@ window.addEventListener('load', function () {
         console.error('Order form not found');
         return;
     }
-    // place-order-btn
-    const placeOrderButton = document.querySelector('.place-order-btn');
-    console.log('Place Order Button:', placeOrderButton);
 
+    const placeOrderButton = document.querySelector('.place-order-btn');
     if (!placeOrderButton) {
         console.error('Place Order button not found');
         return;
     }
 
-    // Prevent form submission via default behavior
     orderForm.addEventListener('submit', function (event) {
-        event.preventDefault(); // Prevent the default form submission
-        console.log('Form submission prevented');
+        event.preventDefault();
     });
 
     placeOrderButton.addEventListener('click', async function () {
         const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
-        const orderDetails = document.getElementById('orderDetails').value;
+        const orderDetails = document.getElementById('orderDetails')?.value.trim();
         const paymentMethodRadios = document.querySelectorAll('input[name="paymentMethod"]');
-        const totalAmount = document.getElementById('checkout-total-amount')?.innerText.trim(); // Get total price
+        const totalAmount = document.getElementById('checkout-total-amount')?.innerText.trim();
         const selectedPaymentMethod = [...paymentMethodRadios].find(radio => radio.checked);
 
-        console.log('Selected Address:', selectedAddress);
-        console.log('Order Details:', orderDetails);
-        console.log('Payment Method:', selectedPaymentMethod);
-        console.log('Total Amount:', totalAmount);
+        console.log('selectedPaymentMethod',selectedPaymentMethod)
 
         if (!selectedAddress || !selectedPaymentMethod) {
             Swal.fire('Error', 'Please select an address and a payment method.', 'error');
-            console.log('Missing address or payment method');
-            return;
-        }
-
-        if (selectedPaymentMethod.id !== 'cod') {
-            Swal.fire('Error', 'Currently, only Cash on Delivery (COD) is supported.', 'error');
-            console.log('Payment method is not COD');
             return;
         }
 
         const orderData = {
             selectedAddress: selectedAddress.value,
-            orderDetails: orderDetails,
+            orderDetails: orderDetails || 'No additional details provided.',
             paymentMethod: selectedPaymentMethod.id,
         };
 
-        console.log('Order Data:', orderData);
         const confirmation = await Swal.fire({
             title: 'Confirm Order',
             html: `<b>Amount to Pay:</b> ${totalAmount}<br><br>Are you sure you want to place this order?`,
@@ -287,26 +272,25 @@ window.addEventListener('load', function () {
             cancelButtonText: 'Cancel'
         });
 
-        console.log('Confirmation response:', confirmation);
         if (!confirmation.isConfirmed) {
-            console.log('Order canceled');
             return;
         }
 
         try {
-            console.log('Sending POST request...');
             const response = await fetch('/place-order', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData),
             });
 
             const result = await response.json();
-            console.log('Server Response:', result);
 
-            if (result.success) {
+            if (!result.success) {
+                Swal.fire('Error', result.message || 'Failed to place order.', 'error');
+                return;
+            }
+
+            if (selectedPaymentMethod.id === 'cod' || selectedPaymentMethod.id === 'wallet') {
                 Swal.fire({
                     title: 'Success',
                     text: `Order placed successfully! Order ID: ${result.orderId}`,
@@ -317,12 +301,64 @@ window.addEventListener('load', function () {
                 }).then(() => {
                     window.location.href = '/my-orders';
                 });
-            } else {
-                Swal.fire('Error', result.message || 'Failed to place order. Please try again.', 'error');
+            } else if (selectedPaymentMethod.id === 'razorpay') {
+                console.log('result.razorpayOrderId',result.razorpayOrderId);
+                console.log('result.orderId',result.orderId)
+                initiateRazorpayPayment(result.razorpayOrderId, result.orderId, totalAmount);
             }
+
         } catch (error) {
             console.error('Error placing order:', error);
             Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
         }
     });
+
+    async function initiateRazorpayPayment(razorpayOrderId, orderId, totalAmount) {
+        const options = {
+          key: "rzp_test_4HLPmXxSQOOb8K",
+          amount: totalAmount , 
+          currency: "INR",
+          name: "CellNext",
+          description: "Order Payment",
+          order_id: razorpayOrderId,
+          image:'/img/CellNext.png',
+          handler: async function (response) {
+            try {
+              const verifyResponse = await fetch('/orders/verify-razorpay-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  orderId,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature,
+                }),
+              });
+      
+              const verifyResult = await verifyResponse.json();
+              if (verifyResult.success) {
+                Swal.fire({
+                  title: 'Success',
+                  text: 'Payment successful! Your order is confirmed.',
+                  icon: 'success',
+                  timer: 3500,
+                  timerProgressBar: true,
+                  showConfirmButton: false,
+                }).then(() => {
+                  window.location.href = '/my-orders';
+                });
+              } else {
+                Swal.fire('Error', 'Payment verification failed. Please contact support.', 'error');
+              }
+            } catch (error) {
+              Swal.fire('Error', 'Payment verification error. Try again.', 'error');
+            }
+          },
+          theme: {
+            color: "#3399cc",
+          },
+        };
+      
+        const razorpay = new Razorpay(options);
+        razorpay.open();
+      }
 });

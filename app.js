@@ -13,7 +13,15 @@ const adminRouter = require('./routes/adminRoute');
 const { Session } = require('inspector/promises');
 const noCache = require('./middlewares/noCache');
 const morgan = require('morgan');
+const Razorpay = require('razorpay')
 db();
+// var instance = new Razorpay({
+//     key_id: process.env.RAZORPAY_KEY,
+//     key_secret: process.env.RAZORPAY_SECRET,
+//     headers: {
+//       "X-Razorpay-Account": "<merchant_account_id>"
+//     }
+//   });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

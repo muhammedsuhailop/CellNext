@@ -76,6 +76,7 @@ router.get('/my-orders', userAuth, orderController.loadOrderPage);
 router.patch('/orders/:orderId/cancel', userAuth, orderController.cancelOrder);
 router.patch('/orders/:orderId/cancel-item', userAuth, orderController.cancelItemOrder);
 router.patch('/orders/request-return', userAuth, orderController.returnRequest);
+router.post('/orders/verify-razorpay-payment',userAuth,orderController.verifyRazorpayPayment);
 
 //Wallet
 router.get('/wallet',userAuth,walletController.loadWalletPage);

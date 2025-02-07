@@ -1,4 +1,6 @@
 <link rel="stylesheet" href="css/product-page.css" type="text/css">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 
 <%- include('../../views/partials/user/header') %>
 <!-- Header Section End -->
@@ -101,9 +103,9 @@
                         <h5 class="mb-2">Select Preffered Payment Method</h5>
 
                         <div class="checkout__input__checkbox">
-                          <label for="paypal">
+                          <label for="razorpay">
                             <input type="radio" name="paymentMethod" id="paypal" value="PayPal">
-                            PayPal
+                            Paypal
                             <span class="checkmark"></span>
                           </label>
                         </div>
@@ -112,6 +114,14 @@
                           <label for="wallet">
                             <input type="radio" name="paymentMethod" id="wallet" value="CellNext Wallet">
                             CellNext Wallet
+                            <span class="checkmark"></span>
+                          </label>
+                        </div>
+
+                        <div class="checkout__input__checkbox">
+                          <label for="razorpay">
+                            <input type="radio" name="paymentMethod" id="razorpay" value="razorpay">
+                            Razorpay
                             <span class="checkmark"></span>
                           </label>
                         </div>
@@ -267,8 +277,8 @@
             <p>We accept various payment methods: Credit/Debit cards, UPI, CellNext Wallet, and Cash on Delivery.</p>
             <div class="checkout__input__checkbox">
               <label for="paypal">
-                Paypal
-                <input type="radio" id="paypal" name="payment_method">
+                Razorpay
+                <input type="radio" id="razorpay" name="payment_method">
                 <span class="checkmark"></span>
               </label>
             </div>

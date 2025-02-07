@@ -4,6 +4,13 @@ const User = require('../../models/userSchema');
 const Orders = require('../../models/orderSchema');
 const Coupon = require('../../models/couponSchema');
 const formatDate = require('../../helpers/formatDate');
+const env = require('dotenv').config();
+const crypto = require("crypto");
+const Razorpay = require('razorpay');
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY,
+  key_secret: process.env.RAZORPAY_SECRET,
+});
 
 const placeOrder = async (req, res) => {
   try {
@@ -155,36 +162,123 @@ const placeOrder = async (req, res) => {
       status: 'Pending',
     });
 
-    await newOrder.save();
+    if (paymentMethod === 'cod') {
+      newOrder.payment.status = 'Pending';
+      newOrder.status = 'Placed';
+      await newOrder.save();
 
-    await User.findByIdAndUpdate(userId, {
-      $push: { orderHistory: newOrder._id }
-    });
+      await User.findByIdAndUpdate(userId, {
+        $push: { orderHistory: newOrder._id }
+      });
 
-    for (const item of cartItems) {
-      await ProductV2.findOneAndUpdate(
-        { _id: item.productId },
-        { $inc: { [`variants.${item.variantId}.stock`]: -item.quantity } }
-      );
+      cart.items = [];
+      cart.subTotal = 0;
+      cart.total = 0;
+      cart.coupon = null;
+      await cart.save();
+
+      return res.json({
+        success: true,
+        message: 'Order placed successfully with Cash on Delivery.',
+        orderId: newOrder._id
+      });
+    } else if (paymentMethod === 'Wallet') {
+      const wallet = await Wallet.findOne({ userId });
+
+      if (!wallet || wallet.balance < finalAmount) {
+        return res.status(400).json({ success: false, message: 'Insufficient wallet balance.' });
+      }
+
+      wallet.balance -= finalAmount;
+      await wallet.save();
+
+      newOrder.payment.status = 'Completed';
+      newOrder.status = 'Placed';
+      await newOrder.save();
+      
+      await User.findByIdAndUpdate(userId, {
+        $push: { orderHistory: newOrder._id }
+      });
+      cart.items = [];
+      cart.subTotal = 0;
+      cart.total = 0;
+      cart.coupon = null;
+      await cart.save();
+
+      return res.json({
+        success: true,
+        message: 'Order placed successfully using Wallet.',
+        orderId: newOrder._id
+      });
+    } else if (paymentMethod === 'razorpay') {
+      try {
+        const razorpayOrder = await razorpay.orders.create({
+          amount: finalAmount *100, 
+          currency: 'INR',
+          receipt: `order_${newOrder._id}`,
+          payment_capture: 1
+        });
+
+        console.log('razorpayOrder :',razorpayOrder);
+
+        newOrder.payment.transactionId = razorpayOrder.id;
+        await newOrder.save();
+
+        await User.findByIdAndUpdate(userId, {
+          $push: { orderHistory: newOrder._id }
+        });
+
+        return res.json({
+          success: true,
+          message: 'Razorpay order created successfully.',
+          razorpayOrderId: razorpayOrder.id,
+          orderId: newOrder._id
+        });
+      } catch (error) {
+        console.error('Razorpay error:', error);
+        return res.status(500).json({ success: false, message: 'Failed to create Razorpay order.' });
+      }
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid payment method.' });
     }
-
-    cart.items = [];
-    cart.subTotal = 0;
-    cart.total = 0;
-    cart.coupon = null;
-    await cart.save();
-
-    req.session.cartItemCount = 0;
-
-    res.json({
-      success: true,
-      message: 'Order placed successfully!',
-      orderId: newOrder.orderId,
-      discount: discountAmount,
-      finalAmount: finalAmount,
-    });
   } catch (error) {
     console.log('Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
+
+const verifyRazorpayPayment = async (req, res) => {
+  try {
+    const { orderId, razorpayPaymentId, razorpaySignature } = req.body;
+    console.log('Request Body:', req.body);
+
+    const order = await Orders.findById(orderId);
+    if (!order || order.payment.status !== 'Pending') {
+      return res.status(400).json({ success: false, message: 'Invalid or already processed order.' });
+    }
+
+    const razorpayOrderId = order.payment.transactionId; 
+    
+    const secret = process.env.RAZORPAY_SECRET;
+    const data = razorpayOrderId + '|' + razorpayPaymentId;
+    const generatedSignature = crypto.createHmac('sha256', secret)
+                                    .update(data)
+                                    .digest('hex');
+
+    console.log('Generated Signature:', generatedSignature);
+    console.log('Received Signature:', razorpaySignature);
+
+    if (generatedSignature !== razorpaySignature) {
+      return res.status(400).json({ success: false, message: 'Payment verification failed. Signature mismatch.' });
+    }
+
+    order.payment.status = 'Completed';
+    order.status = 'Placed';
+    await order.save();
+
+    res.json({ success: true, message: 'Payment verified and order confirmed.' });
+  } catch (error) {
+    console.error('Razorpay Payment Verification Error:', error);
     res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 };
@@ -387,5 +481,6 @@ module.exports = {
   loadOrderPage,
   cancelOrder,
   cancelItemOrder,
-  returnRequest
+  returnRequest,
+  verifyRazorpayPayment
 }
