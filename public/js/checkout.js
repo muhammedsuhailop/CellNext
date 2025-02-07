@@ -304,7 +304,7 @@ window.addEventListener('load', function () {
             } else if (selectedPaymentMethod.id === 'razorpay') {
                 console.log('result.razorpayOrderId',result.razorpayOrderId);
                 console.log('result.orderId',result.orderId)
-                initiateRazorpayPayment(result.razorpayOrderId, result.orderId, totalAmount);
+                initiateRazorpayPayment(result.razorpayOrderId, result.orderId, totalAmount,result.key);
             }
 
         } catch (error) {
@@ -313,9 +313,9 @@ window.addEventListener('load', function () {
         }
     });
 
-    async function initiateRazorpayPayment(razorpayOrderId, orderId, totalAmount) {
+    async function initiateRazorpayPayment(razorpayOrderId, orderId, totalAmount,key) {
         const options = {
-          key: "rzp_test_4HLPmXxSQOOb8K",
+          key: key,
           amount: totalAmount , 
           currency: "INR",
           name: "CellNext",
