@@ -73,7 +73,7 @@ const productDetails = async (req, res) => {
             category: findCategory,
             relatedProducts: finalRelatedProducts,
             cartItemCount,
-
+            variantIndex,
         });
     } catch (error) {
         console.error('Product details error:', error);

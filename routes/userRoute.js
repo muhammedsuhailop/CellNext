@@ -7,6 +7,7 @@ const cartController = require('../controllers/user/cartController');
 const checkoutController = require('../controllers/user/checkoutController');
 const orderController = require('../controllers/user/orderController');
 const walletController = require('../controllers/user/walletController');
+const wishlistController = require('../controllers/user/wishlistController');
 const passport = require('passport');
 const { userAuth, adminAuth } = require('../middlewares/auth')
 
@@ -76,9 +77,13 @@ router.get('/my-orders', userAuth, orderController.loadOrderPage);
 router.patch('/orders/:orderId/cancel', userAuth, orderController.cancelOrder);
 router.patch('/orders/:orderId/cancel-item', userAuth, orderController.cancelItemOrder);
 router.patch('/orders/request-return', userAuth, orderController.returnRequest);
-router.post('/orders/verify-razorpay-payment',userAuth,orderController.verifyRazorpayPayment);
+router.post('/orders/verify-razorpay-payment', userAuth, orderController.verifyRazorpayPayment);
 
 //Wallet
-router.get('/wallet',userAuth,walletController.loadWalletPage);
+router.get('/wallet', userAuth, walletController.loadWalletPage);
+
+//Wishlist
+router.get('/wishlist', userAuth, wishlistController.loadWishList);
+router.post('/wishlist/add', userAuth, wishlistController.addToWishlist);
 
 module.exports = router
