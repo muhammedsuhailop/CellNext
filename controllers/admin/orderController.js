@@ -18,6 +18,7 @@ const getOrders = async (req, res) => {
         const orders = await Orders.find(query)
             .populate('userId', 'name email')
             .populate('address')
+            .sort({ createdOn: -1 })
             .skip(skip)
             .limit(limit)
             .exec();

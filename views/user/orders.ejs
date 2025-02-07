@@ -23,40 +23,40 @@
     <div class="row">
       <%- include('../../views/partials/user/acc-sidebar') %>
       <div class=" col-lg-9 col-md-8">
-      <section class="accounts">
-        <div class="order-body mx-2">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h4 class="section-heading">My Orders</h4>
-            </div>
-            <div>
-              <a href="/shop" class="gen-btn"><i class='bx bxs-cart'></i> Shope Now</a>
-            </div>
-          </div>
-
-          <% if (orderDetails.length === 0) { %>
-          <div class="alert alert-info">You have no orders yet.</div>
-          <a href="/shop" class="gen-btn">Time to Grab Your First Order</a>
-          <% } %>
-
-          <% orderDetails.reverse().forEach(order => { %>
-          <div class="order-card no-radius-card">
-            <div class="row align-items-center border-bottom pb-2 mb-3">
-
-              <% if (order.status === 'Pending') { %>
-              <div class="col-md-2 ">
-                <button class="btn btn-danger btn-sm btn-action" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+        <section class="accounts">
+          <div class="order-body mx-2">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h4 class="section-heading">My Orders</h4>
               </div>
-              <% } %>
-
-              <div class="col-md-6">
-                <h6 class="mb-1">Order ID: <%= order.orderId %></h6>
-                <p class="mb-0"><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
+              <div>
+                <a href="/shop" class="gen-btn"><i class='bx bxs-cart'></i> Shope Now</a>
               </div>
+            </div>
 
-              <div class="col-md-4 text-md-end">
-                <p class="mb-0"><strong>Status:</strong>
-                  <span class="btn-sm 
+            <% if (orderDetails.length === 0) { %>
+            <div class="alert alert-info">You have no orders yet.</div>
+            <a href="/shop" class="gen-btn">Time to Grab Your First Order</a>
+            <% } %>
+
+            <% orderDetails.reverse().forEach(order => { %>
+            <div class="order-card no-radius-card">
+              <div class="row align-items-center border-bottom pb-2 mb-3">
+
+                <% if (order.status === 'Pending') { %>
+                <div class="col-md-2 ">
+                  <button class="btn btn-danger btn-sm btn-action" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+                </div>
+                <% } %>
+
+                <div class="col-md-6">
+                  <h6 class="mb-1">Order ID: <%= order.orderId %></h6>
+                  <p class="mb-0"><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
+                </div>
+
+                <div class="col-md-4 text-md-end">
+                  <p class="mb-0"><strong>Status:</strong>
+                    <span class="btn-sm 
                     <% if (order.status === 'Pending') { %> bg-info text-white
                     <% } else if (order.status === 'Placed') { %> bg-info text-white
                     <% } else if (order.status === 'Shipped') { %> bg-primary text-white
@@ -66,124 +66,124 @@
                     <% } else if (order.status === 'Cancel Request') { %> bg-danger text-white
                       <% } else if (order.status === 'Partial Return') { %> bg-warning text-white
                     <% } %> mx-2">
-                    <% if (order.status === 'Cancel Request') { %>
-                    Canacellation Requested
-                    <%}else { %>
-                    <%= order.status %>
-                    <% } %>
-                  </span>
-                </p>
+                      <% if (order.status === 'Cancel Request') { %>
+                      Canacellation Requested
+                      <%}else { %>
+                      <%= order.status %>
+                      <% } %>
+                    </span>
+                  </p>
+                </div>
               </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong>Final Price:</strong> ₹ <%= (order.finalAmount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })  %></p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Discount:</strong> ₹ <%= (order.discount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></p>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Payment Status:</strong> <span class="badge text-white bg-<%= order.paymentStatus === 'Pending' ? 'warning' : 'success' %>"><%= order.paymentStatus %></span></p>
+                </div>
+              </div>
+
+
+              <h6 class="mt-4">Order Items</h6>
+              <table class="order-table">
+                <thead>
+                  <tr>
+                    <th>Product Name</th>
+                    <th>Color</th>
+                    <th>Size</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% order.items.reverse().forEach(item => { %>
+                  <tr>
+                    <td><%= item.productName %></td>
+                    <td><%= item.variantDetails.color || "N/A" %></td>
+                    <td>
+                      <% if (item.variantDetails.size && item.variantDetails.size !== "NA") { %>
+                      <%= item.variantDetails.size %>
+                      <% } else { %>
+                      -
+                      <% } %>
+                    </td>
+                    <td><%= item.quantity %></td>
+                    <td>₹<%= item.variantDetails.salePrice %></td>
+                    <td>
+                      <span class="badge badge-secondary "><%= item.itemStatus %></span>
+                    </td>
+                    <td>
+                      <% if (item.itemStatus === 'Pending'|| item.itemStatus === 'Placed') { %>
+                      <button class="btn btn-danger btn-sm btn-action" onclick="cancelItemOrder('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Cancel
+                      </button>
+                      <% } %>
+                      <% if (item.itemStatus === 'Delivered') { %>
+                      <button class="btn btn-warning btn-sm btn-action text-white" onclick="openReturnModal('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Return</button>
+                      <% }  %>
+                    </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
             </div>
+            <% }) %>
 
-            <div class="row">
-              <div class="col-md-6">
-                <p><strong>Final Price:</strong> ₹ <%= (order.finalAmount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })  %></p>
-              </div>
-              <div class="col-md-6">
-                <p><strong>Discount:</strong> ₹ <%= (order.discount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></p>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
-              </div>
-              <div class="col-md-6">
-                <p><strong>Payment Status:</strong> <span class="badge text-white bg-<%= order.paymentStatus === 'Pending' ? 'warning' : 'success' %>"><%= order.paymentStatus %></span></p>
-              </div>
-            </div>
-
-
-            <h6 class="mt-4">Order Items</h6>
-            <table class="order-table">
-              <thead>
-                <tr>
-                  <th>Product Name</th>
-                  <th>Color</th>
-                  <th>Size</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <% order.items.reverse().forEach(item => { %>
-                <tr>
-                  <td><%= item.productName %></td>
-                  <td><%= item.variantDetails.color || "N/A" %></td>
-                  <td>
-                    <% if (item.variantDetails.size && item.variantDetails.size !== "NA") { %>
-                    <%= item.variantDetails.size %>
-                    <% } else { %>
-                    -
-                    <% } %>
-                  </td>
-                  <td><%= item.quantity %></td>
-                  <td>₹<%= item.variantDetails.salePrice %></td>
-                  <td>
-                    <span class="badge badge-secondary "><%= item.itemStatus %></span>
-                  </td>
-                  <td>
-                    <% if (item.itemStatus === 'Pending') { %>
-                    <button class="btn btn-danger btn-sm btn-action" onclick="cancelItemOrder('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Cancel
+            <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <!-- Modal Header -->
+                  <div class="modal-header bg-secondary text-white">
+                    <h5 class="modal-title" id="returnModalLabel">Return Item</h5>
+                    <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
                     </button>
-                    <% } %>
-                    <% if (item.itemStatus === 'Delivered') { %>
-                    <button class="btn btn-warning btn-sm btn-action text-white" onclick="openReturnModal('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Return</button>
-                    <% }  %>
-                  </td>
-                </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
-          <% }) %>
+                  </div>
 
-          <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <!-- Modal Header -->
-                <div class="modal-header bg-secondary text-white">
-                  <h5 class="modal-title" id="returnModalLabel">Return Item</h5>
-                  <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
+                  <!-- Modal Body -->
+                  <div class="modal-body">
+                    <form id="returnForm">
+                      <input type="hidden" id="orderId">
+                      <input type="hidden" id="productId">
+                      <input type="hidden" id="variantIndex">
 
-                <!-- Modal Body -->
-                <div class="modal-body">
-                  <form id="returnForm">
-                    <input type="hidden" id="orderId">
-                    <input type="hidden" id="productId">
-                    <input type="hidden" id="variantIndex">
+                      <!-- Return Reason -->
+                      <div class="form-group d-flex align-items-center">
+                        <label for="returnReason" class="mx-2 me-3"><strong>Reason for Return</strong></label>
+                        <input type="text" class="form-control" id="returnReason" name="reason" list="reason-options" placeholder="Enter or select a reason" pattern="[A-Za-z0-9\s]+" />
+                        <datalist id="reason-options">
+                          <option value="Damaged product"></option>
+                          <option value="Wrong item received"></option>
+                          <option value="Quality issue"></option>
+                        </datalist>
+                      </div>
+                    </form>
+                  </div>
 
-                    <!-- Return Reason -->
-                    <div class="form-group d-flex align-items-center">
-                      <label for="returnReason" class="mx-2 me-3"><strong>Reason for Return</strong></label>
-                      <input type="text" class="form-control" id="returnReason" name="reason" list="reason-options" placeholder="Enter or select a reason" pattern="[A-Za-z0-9\s]+" />
-                      <datalist id="reason-options">
-                        <option value="Damaged product"></option>
-                        <option value="Wrong item received"></option>
-                        <option value="Quality issue"></option>
-                      </datalist>
-                    </div>
-                  </form>
-                </div>
-
-                <!-- Modal Footer -->
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                  <button type="button" class="btn btn-dark" onclick="submitReturnRequest()">Submit Request</button>
+                  <!-- Modal Footer -->
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-dark" onclick="submitReturnRequest()">Submit Request</button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-        </div>
-      </section>
-    </div>
+          </div>
+        </section>
+      </div>
     </div>
   </div>
 </section>

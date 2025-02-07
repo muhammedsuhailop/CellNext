@@ -12,12 +12,17 @@ const loadWalletPage = async (req, res) => {
         const userId = req.session.user;
         const userData = await User.findById(userId);
         const cartItemCount = req.session.cartItemCount || 0;
-        const wallet = await Wallet.findOne({ userId: userId })
+        let wallet = await Wallet.findOne({ userId: userId })
             .populate('transactions.orderId')
             .exec();
 
         if (!wallet) {
-            return res.status(404).json({ error: 'Wallet not found.' });
+            console.log("No wallet found, creating new wallet...");
+            wallet = new Wallet({ userId: userId, transactions: [] });
+            await wallet.save();
+            userData.wallet = wallet._id;
+            await userData.save();
+            console.log("Wallet created successfully.");
         }
 
         res.render('wallet', {

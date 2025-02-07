@@ -153,8 +153,6 @@ const addToCart = async (req, res) => {
         const { productId, variantId, quantity } = req.body;
         const userId = req.session.user;
 
-        console.log({ productId, variantId, quantity });
-
         const product = await ProductV2.findById(productId);
         if (!product) {
             return res.status(404).json({ success: false, message: 'Product not found' });
@@ -221,7 +219,6 @@ const addToCart = async (req, res) => {
         const cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
         req.session.cartItemCount = cartItemCount;
 
-        console.log('cart::', cart);
         res.json({ success: true, message: 'Successfully added to cart.', cart });
     } catch (err) {
         console.error('Error adding to cart:', err);
