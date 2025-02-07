@@ -33,7 +33,8 @@
               <div class="card-body text-center">
                 <h5 class="card-title">Available Balance</h5>
                 <p class="card-text fs-3">₹
-                  {{ wallet.balance }}
+                  <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })
+                        .format(wallet.balance).replace('₹', '').trim() %>
                 </p>
               </div>
             </div>
@@ -60,10 +61,10 @@
                       <td><%= transaction.transactionId %></td>
                       <td><%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %></td>
                       <td class="<%= transaction.type === 'credit' ? 'text-success' : 'text-danger' %>">
-                        ₹<%= transaction.amount.toFixed(2) %>
+                        <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(transaction.amount).trim() %>
                       </td>
                       <td><%= transaction.description || 'N/A' %></td>
-                      <td>₹<%= transaction.balanceAfterTransaction.toFixed(2) %></td>
+                      <td><%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(transaction.balanceAfterTransaction).replace('₹', '₹ ').trim() %></td>
                       <td><%= transaction.createdAt.toLocaleString() %></td>
                     </tr>
                     <% }) %>
