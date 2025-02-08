@@ -83,7 +83,8 @@ router.post('/orders/verify-razorpay-payment', userAuth, orderController.verifyR
 router.get('/wallet', userAuth, walletController.loadWalletPage);
 
 //Wishlist
-router.get('/wishlist', userAuth, wishlistController.loadWishList);
+router.get('/wishlist', userAuth, wishlistController.loadWishlist);
 router.post('/wishlist/add', userAuth, wishlistController.addToWishlist);
+router.delete('/wishlist/remove/:productId', userAuth, wishlistController.removeProductFromWishlist);
 
 module.exports = router

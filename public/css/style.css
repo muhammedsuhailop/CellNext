@@ -4695,3 +4695,60 @@ ol {
 #removeCouponBtn {
 	cursor: pointer;
 }
+
+.cart__actions {
+	text-align: center;
+}
+
+.btn-move-to-cart {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 10px;
+	background: #f3f2ee;
+	color: #1d1d1f;
+	font-size: 14px;
+	font-weight: 500;
+	border-radius: 0px 20px 20px 0px;
+	cursor: pointer;
+	transition: all 0.3s ease-in-out;
+	text-decoration: none;
+	box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.btn-move-to-cart i {
+	font-size: 16px;
+	margin-right: 1px;
+	margin-left: 3px;
+	;
+	color: inherit;
+}
+
+.btn-move-to-cart:hover {
+	background: #e5e5e7;
+	border-color: #c7c7cc;
+	box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.btn-move-to-cart:active {
+	background: #dcdcdf;
+	border-color: #bcbcc0;
+	transform: scale(0.98);
+}
+
+.btn-move-to-cart.disabled {
+	background: #f2f2f2;
+	color: #a1a1a6;
+	border-color: #e0e0e0;
+	cursor: not-allowed;
+	box-shadow: none;
+}
+
+.header__nav__option a.active {
+	color: #0071E3;
+	font-weight: bold;
+	border-bottom: 3px solid #e53637;
+	padding-bottom: 5px;
+	transition: border-bottom 0.3s ease-in-out;
+	font-weight: 600;
+}

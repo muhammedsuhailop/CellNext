@@ -1,0 +1,237 @@
+<link rel="stylesheet" href="css/product-page.css" type="text/css">
+
+<%- include('../../views/partials/user/header') %>
+<!-- Header Section End -->
+
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb__text">
+          <h4>Wishlist</h4>
+          <div class="breadcrumb__links">
+            <a href="/">Home</a>
+            <span>Wishlist</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<!-- Shopping Cart Section Begin -->
+<section class="shopping-cart spad">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="shopping__cart__table">
+          <table>
+            <% if (wishlistItems.length > 0) { %>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% wishlistItems.forEach(item => { %>
+              <tr data-product-id="<%= item.productId %>" data-variant-id="<%= item.variantId %>">
+                <td class="product__cart__item">
+                  <div class="product__cart__item__pic" onclick="redirectToProduct('<%= item.productId %>', '<%= item.variantId %>')">
+                    <img src="<%= item.image %>" alt="<%= item.name %>">
+                  </div>
+                  <div class="product__cart__item__text" onclick="redirectToProduct('<%= item.productId %>', '<%= item.variantId %>')">
+                    <h6><%= item.name %></h6>
+                    <h6>
+                      <del>₹ <%= new Intl.NumberFormat('en-IN', {
+                            style: 'currency',
+                            currency: 'INR',
+                            minimumFractionDigits: 2
+                          }).format(item.regularPrice).replace('₹', '').trim() %></del>
+                    </h6>
+                    <span class="font-weight-light"><%= item.color %>
+                      <% if (item.size !== 'NA') { %>
+                      | <%= item.size %>
+                      <% } %>
+                    </span>
+                  </div>
+                </td>
+
+                <td class="cart__price">₹ <%= new Intl.NumberFormat('en-IN', { 
+                    style: 'currency', 
+                    currency: 'INR', 
+                    minimumFractionDigits: 1 
+                }).format(item.total).replace('₹', '').trim() %>
+                </td>
+                <td class="cart__actions">
+                  <span id="move-to-cart" class="move-to-cart btn-move-to-cart" data-product-id="<%= item.productId %>" data-variant-id="<%= item.variantId %>">
+                    Move to Cart <i class='bx bxs-chevron-right'></i>
+                  </span>
+                </td>
+                <td class="cart__close">
+                  <span class="remove-from-wishlist" data-product-id="<%= item.productId %>" data-variant-id="<%= item.variantId %>" style="cursor: pointer;">
+                    <i class="fa fa-close"></i>
+                  </span>
+                </td>
+              </tr>
+              <% }) %>
+              <% } else { %>
+              <tr>
+                <td colspan="4" class="text-center">Your wishist is empty</td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+
+        <div class="row">
+          <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="continue__btn">
+              <a href="/shop">Continue Shopping</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+
+        <div class="cart__total">
+          <h6>Wishlist total</h6>
+          <ul>
+            <li>Subtotal <span class="subtotal">₹ <%= total.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></span></li>
+
+            <li>Total <span class="total">₹ <%= total.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></span></li>
+          </ul>
+
+          <% if (wishlistItems.length > 0) { %>
+          <a id="move-all-to-cart" class="primary-btn text-white">Go to Cart <i class='bx bxs-chevron-right'></i></a>
+          <% } else { %>
+          <a href="/shop" class="primary-btn">Continue Shopping</a>
+          <% } %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Shopping Cart Section End -->
+
+<%- include('../../views/partials/user/footer') %>
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    async function removeFromWishlist(productId, variantId, rowElement) {
+      try {
+        const response = await fetch(`/wishlist/remove/${productId}?variantId=${variantId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (response.ok) {
+          Swal.fire({
+            title: 'Removed!',
+            text: 'The product has been removed from your wishlist.',
+            icon: 'success',
+            confirmButtonText: 'Okay',
+            timer: 1200,
+            willClose: () => {
+              window.location.reload();
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        } else {
+          throw new Error("Failed to remove product from wishlist");
+        }
+      } catch (error) {
+        console.error("Error removing item:", error);
+        Swal.fire({
+          title: 'Error!',
+          text: 'An unexpected error occurred.',
+          icon: 'error',
+          confirmButtonText: 'Try again'
+        });
+      }
+    }
+
+    document.querySelectorAll("#move-to-cart").forEach(button => {
+      button.addEventListener("click", async (event) => {
+        event.preventDefault();
+
+        const rowElement = event.target.closest("tr");
+        const productId = rowElement.dataset.productId;
+        const variantId = rowElement.dataset.variantId;
+        const quantity = 1 + 0;
+
+        try {
+          const response = await fetch('/cart/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              productId,
+              variantId,
+              quantity
+            })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            await removeFromWishlist(productId, variantId, rowElement);
+          } else {
+            throw new Error(data.message || "Failed to add to cart");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          Swal.fire({
+            title: 'Error!',
+            text: error.message || 'An unexpected error occurred.',
+            icon: 'error',
+            confirmButtonText: 'Try again'
+          });
+        }
+      });
+    });
+
+    document.querySelectorAll(".remove-from-wishlist").forEach(button => {
+      button.addEventListener("click", async (event) => {
+        event.preventDefault();
+
+        const rowElement = event.target.closest("tr");
+        const productId = rowElement.dataset.productId;
+        const variantId = rowElement.dataset.variantId;
+
+        const result = await Swal.fire({
+          title: 'Are you sure?',
+          text: 'This item will be removed from your wishlist.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, remove it!',
+          cancelButtonText: 'No, keep it',
+          reverseButtons: true
+        });
+
+        if (result.isConfirmed) {
+          await removeFromWishlist(productId, variantId, rowElement);
+        }
+      });
+    });
+  });
+
+
+  function redirectToProduct(productId, variantId) {
+    window.location.href = `/productDetails?id=${productId}&variant=${variantId}`;
+  }
+</script>

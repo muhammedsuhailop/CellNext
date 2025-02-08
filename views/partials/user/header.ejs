@@ -148,10 +148,10 @@
               <form action="/search" method="POST" id="searchForm" class="d-flex align-items-center" style="visibility: hidden; opacity: 0; width: 0; transition: width 0.3s, opacity 0.3s;">
                 <input type="text" class="form-control" placeholder="Search..." name="query" style="width: 150px;">
               </form>
-              <a href="#" class="d-flex justify-content-center align-items-center">
-                <i class="bx bx-heart bx-sm text-black"></i>
+              <a href="/wishlist" class="d-flex justify-content-center align-items-center <%= currentPath === '/wishlist' ? 'active' : '' %>">
+                <i class="text-black bx-sm <%= currentPath === '/wishlist' ? 'bx bxs-heart' : 'bx bx-heart ' %>"></i>
               </a>
-              <a href="/cart" class="d-flex justify-content-center align-items-center position-relative">
+              <a href="/cart" class="d-flex justify-content-center align-items-center position-relative <%= currentPath === '/cart' ? 'active' : '' %>">
                 <i class="bx bx-cart bx-sm text-black"></i>
                 <% if (cartItemCount >= 0) { %>
                 <span id="cart-count-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-white
