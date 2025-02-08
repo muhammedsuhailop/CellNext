@@ -5,6 +5,7 @@ const Address = require('../../models/addressSchema');
 const Wallet = require('../../models/walletSchema');
 const { v4: uuidv4 } = require('uuid');
 const PDFDocument = require('pdfkit');
+const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
 const { fetchSalesData, fetchOverallSalesData } = require('../../helpers/salesDataHelper');
@@ -207,8 +208,64 @@ const downloadPDF = async (req, res) => {
     }
 };
 
+const downloadExcel = async (req, res) => {
+    try {
+        const { filterType, startDate, endDate } = req.query;
+        console.log('Excel Report - filterType, startDate, endDate', filterType, startDate, endDate);
+
+        let dateFilter = {};
+        if (filterType && filterType !== "custom") {
+            const computedDates = getDateRange(filterType);
+            dateFilter.createdOn = { $gte: computedDates.startDate, $lte: computedDates.endDate };
+        } else if (startDate && endDate) {
+            dateFilter.createdOn = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            };
+        }
+
+        const salesData = await fetchSalesData({ filterType, startDate, endDate });
+        if (salesData.length === 0) {
+            return res.status(404).send('No sales data found for the selected filter.');
+        }
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sales Report');
+
+        worksheet.columns = [
+            { header: 'Invoice Date', key: 'invoiceDate', width: 15 },
+            { header: 'Total Orders', key: 'totalOrders', width: 15 },
+            { header: 'Total Sales', key: 'totalSales', width: 20 },
+            { header: 'Discount', key: 'totalDiscount', width: 20 },
+            { header: 'Coupon Applied', key: 'couponApplied', width: 15 }
+        ];
+
+        salesData.forEach(sale => {
+            worksheet.addRow({
+                invoiceDate: new Date(sale.invoiceDate || sale.date).toLocaleDateString(),
+                totalOrders: sale.totalOrders || 'N/A',
+                totalSales: `₹${(sale.totalSales || 0).toLocaleString('en-IN')}`,
+                totalDiscount: `₹${(sale.totalDiscount || 0).toLocaleString('en-IN')}`,
+                couponApplied: sale.couponAppliedCount || 0
+            });
+        });
+
+        worksheet.getRow(1).font = { bold: true };
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename="sales_report.xlsx"');
+
+        await workbook.xlsx.write(res);
+        res.end();
+    } catch (error) {
+        console.error('Error generating Excel report:', error);
+        res.status(500).send('Error generating Excel report');
+    }
+};
+
 
 module.exports = {
     loadSalesReport,
     downloadPDF,
+    downloadExcel
 }
