@@ -45,7 +45,31 @@ const adminAuth = (req, res, next) => {
     }
 }
 
+const userAuthAjax = (req, res, next) => {
+    if (req.session.user) {
+        User.findById(req.session.user)
+            .then(user => {
+                if (user && !user.isBlocked) {
+                    next();
+                } else {
+                    return res.status(401).json({ message: 'Your account may be temporarily or permanently disabled.' });
+                }
+            })
+            .catch(error => {
+                console.error('Error in userAuthAjax middleware:', error);
+                return res.status(500).json({ message: 'Internal Server Error' });
+            });
+    } else {
+        console.log('User session not found.');
+        return res.status(401).json({ message: 'Please login or signup' });
+    }
+};
+
+module.exports = userAuthAjax;
+
+
 module.exports = {
     userAuth,
-    adminAuth
+    adminAuth,
+    userAuthAjax
 }

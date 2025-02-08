@@ -9,7 +9,7 @@ const orderController = require('../controllers/user/orderController');
 const walletController = require('../controllers/user/walletController');
 const wishlistController = require('../controllers/user/wishlistController');
 const passport = require('passport');
-const { userAuth, adminAuth } = require('../middlewares/auth')
+const { userAuth, adminAuth, userAuthAjax } = require('../middlewares/auth')
 
 
 router.get('/pageNotFound', userController.pageNotFound);
@@ -62,11 +62,11 @@ router.put('/update-address', userAuth, profileController.editAddress);
 router.delete('/delete-address', userAuth, profileController.deleteAddress);
 
 //CartManagement
-router.post('/cart/add', cartController.addToCart);
+router.post('/cart/add', userAuthAjax, cartController.addToCart);
 router.get('/cart', userAuth, cartController.loadCartPage);
-router.delete('/cart/remove/:productId', userAuth, cartController.removeProductFromCart);
-router.post('/cart/apply-coupon', userAuth, cartController.applyCoupon);
-router.delete('/cart/remove-coupon', userAuth, cartController.removeCoupon);
+router.delete('/cart/remove/:productId', userAuthAjax, cartController.removeProductFromCart);
+router.post('/cart/apply-coupon', userAuthAjax, cartController.applyCoupon);
+router.delete('/cart/remove-coupon', userAuthAjax, cartController.removeCoupon);
 
 //Checkout Management
 router.get('/checkout', userAuth, checkoutController.getCheckout);
@@ -74,17 +74,17 @@ router.post('/place-order', userAuth, orderController.placeOrder);
 
 //Order Management
 router.get('/my-orders', userAuth, orderController.loadOrderPage);
-router.patch('/orders/:orderId/cancel', userAuth, orderController.cancelOrder);
-router.patch('/orders/:orderId/cancel-item', userAuth, orderController.cancelItemOrder);
-router.patch('/orders/request-return', userAuth, orderController.returnRequest);
-router.post('/orders/verify-razorpay-payment', userAuth, orderController.verifyRazorpayPayment);
+router.patch('/orders/:orderId/cancel', userAuthAjax, orderController.cancelOrder);
+router.patch('/orders/:orderId/cancel-item', userAuthAjax, orderController.cancelItemOrder);
+router.patch('/orders/request-return', userAuthAjax, orderController.returnRequest);
+router.post('/orders/verify-razorpay-payment', userAuthAjax, orderController.verifyRazorpayPayment);
 
 //Wallet
 router.get('/wallet', userAuth, walletController.loadWalletPage);
 
 //Wishlist
 router.get('/wishlist', userAuth, wishlistController.loadWishlist);
-router.post('/wishlist/add', userAuth, wishlistController.addToWishlist);
-router.delete('/wishlist/remove/:productId', userAuth, wishlistController.removeProductFromWishlist);
+router.post('/wishlist/add', userAuthAjax, wishlistController.addToWishlist);
+router.delete('/wishlist/remove/:productId', userAuthAjax, wishlistController.removeProductFromWishlist);
 
 module.exports = router
