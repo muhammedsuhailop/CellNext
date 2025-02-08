@@ -66,7 +66,8 @@ router.get('/coupons/view-coupons', adminAuth, couponController.getAllCoupons);
 router.delete('/coupons/delete-coupon', adminAuth, couponController.deleteCoupon);
 
 //Sales Reports
-router.get('/sales-report',reportControler.loadSalesReport);
+router.get('/sales-report', reportControler.loadSalesReport);
+router.get('/sales-report/download-pdf', reportControler.downloadPDF);
 
 //Error-Page
 router.get('/error-page', adminController.loadError);
