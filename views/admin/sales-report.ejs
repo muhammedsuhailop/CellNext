@@ -98,6 +98,7 @@
                           <th>Total Sales</th>
                           <th>Discount Applied</th>
                           <th>Coupon Applied</th>
+                          <th>Coupon Redeemed</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -108,6 +109,7 @@
                           <td><%= sale.totalSales.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></td>
                           <td><%= sale.totalDiscount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) %></td>
                           <td><%= sale.couponAppliedCount %></td>
+                          <td><%= sale.couponDiscount %></td>
                         </tr>
                         <% }); %>
                       </tbody>

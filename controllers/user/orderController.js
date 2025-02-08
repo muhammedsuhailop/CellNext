@@ -65,6 +65,75 @@ const placeOrder = async (req, res) => {
 
     let discountAmount = totalPrice - saleTotal;
     let finalAmount = saleTotal;
+    let couponDiscount = 0;
+    let coupon = cart.coupon
+
+    if (cart.coupon) {
+      const coupon = await Coupon.findById(cart.coupon);
+
+      if (!coupon || !coupon.isActive) {
+        cart.coupon = null;
+        coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+        coupon.totalUsed -= 1;
+        await coupon.save();
+        await cart.save();
+        return res.status(400).json({ success: false, message: 'Coupon is no longer valid and has been removed.' });
+      }
+
+      const now = new Date();
+      if (now < coupon.startOn || now > coupon.expireOn) {
+        cart.coupon = null;
+        coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+        coupon.totalUsed -= 1;
+        await coupon.save();
+        await cart.save();
+        return res.status(400).json({ success: false, message: 'Coupon has expired and has been removed.' });
+      }
+
+      if (coupon.totalUsageLimit !== null && coupon.totalUsed >= coupon.totalUsageLimit) {
+        cart.coupon = null;
+        coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+        coupon.totalUsed -= 1;
+        await coupon.save();
+        await cart.save();
+        return res.status(400).json({ success: false, message: 'Coupon usage limit exceeded and has been removed.' });
+      }
+
+      const userUsage = coupon.usedCount.get(userId.toString()) || 0;
+      if (userUsage > coupon.usageLimitPerUser) {
+        cart.coupon = null;
+        coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+        coupon.totalUsed -= 1;
+        await coupon.save();
+        await cart.save();
+        return res.status(400).json({ success: false, message: 'You have already used this coupon the maximum number of times. It has been removed.' });
+      }
+
+      if (totalPrice < coupon.minimumOrderAmount) {
+        cart.coupon = null;
+        coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+        coupon.totalUsed -= 1;
+        await coupon.save();
+        await cart.save();
+        return res.status(400).json({ success: false, message: `Your cart does not meet the minimum order amount of ₹${coupon.minimumOrderAmount}. Coupon removed.` });
+      }
+
+      validCoupon = true;
+
+      if (coupon.discountType === 'percentage') {
+        discountAmount = (saleTotal * coupon.discountValue) / 100;
+      } else {
+        discountAmount = coupon.discountValue;
+      }
+
+      if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+        discountAmount = coupon.maxDiscount;
+      }
+
+      couponDiscount = discountAmount;
+      finalAmount = saleTotal - discountAmount;
+      discountAmount = totalPrice - finalAmount;
+    }
 
     const newOrder = new Orders({
       userId: userId,
@@ -84,6 +153,9 @@ const placeOrder = async (req, res) => {
       subTotal,
       totalPrice,
       discount: discountAmount,
+      couponApplied: validCoupon,
+      couponDiscount: couponDiscount,
+      coupon,
       finalAmount,
       address: selectedAddress,
       additionalNote,
@@ -116,6 +188,7 @@ const placeOrder = async (req, res) => {
 
       await User.findByIdAndUpdate(userId, { $push: { orderHistory: newOrder._id } });
       cart.items = [];
+      cart.coupon = null;
       await cart.save();
       req.session.cartItemCount = 0;
 
@@ -155,6 +228,7 @@ const placeOrder = async (req, res) => {
       await User.findByIdAndUpdate(userId, { $push: { orderHistory: newOrder._id } });
 
       cart.items = [];
+      cart.coupon = null;
       await cart.save();
       req.session.cartItemCount = 0;
 
@@ -179,7 +253,7 @@ const placeOrder = async (req, res) => {
           message: 'Razorpay order created successfully.',
           razorpayOrderId: razorpayOrder.id,
           orderId: newOrder._id,
-          key:process.env.RAZORPAY_KEY,
+          key: process.env.RAZORPAY_KEY,
         });
       } catch (error) {
         return res.status(500).json({ success: false, message: 'Failed to create Razorpay order.' });
@@ -246,6 +320,7 @@ const verifyRazorpayPayment = async (req, res) => {
     if (user && user.cart && user.cart.length > 0) {
       const cart = user.cart[0];
       cart.items = [];
+      cart.coupon = null;
       await cart.save();
       req.session.cartItemCount = 0;
     }

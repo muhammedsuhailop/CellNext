@@ -43,7 +43,12 @@ async function fetchSalesData({ filterType, startDate, endDate, skip = 0, limit 
     }
 
     const pipeline = [
-        { $match: { ...dateFilter, status: "Placed" } },
+        {
+            $match: {
+                ...dateFilter,
+                status: { $nin: ["Pending", "Processing", "Cancelled", "Returned"] }
+            }
+        },
         {
             $group: {
                 _id: {
@@ -60,6 +65,15 @@ async function fetchSalesData({ filterType, startDate, endDate, skip = 0, limit 
                         $cond: {
                             if: { $eq: ["$couponApplied", true] },
                             then: 1,
+                            else: 0
+                        }
+                    }
+                },
+                couponDiscount: {
+                    $sum: {
+                        $cond: {
+                            if: { $eq: ["$couponApplied", true] },
+                            then: "$couponDiscount",
                             else: 0
                         }
                     }
@@ -81,7 +95,8 @@ async function fetchSalesData({ filterType, startDate, endDate, skip = 0, limit 
                 totalSales: 1,
                 totalDiscount: 1,
                 totalRevenue: 1,
-                couponAppliedCount: 1
+                couponAppliedCount: 1,
+                couponDiscount: 1
             }
         }
     ];

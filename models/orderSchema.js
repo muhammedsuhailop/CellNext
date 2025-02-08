@@ -87,8 +87,12 @@ const orderSchema = new Schema({
         default: false
     },
     coupon: {
-        code: String,
-        discount: Number
+        type: Schema.Types.ObjectId,
+        ref: 'Coupon'
+    },
+    couponDiscount: {
+        type: Number,
+        defaut: 0
     },
     payment: {
         method: {
