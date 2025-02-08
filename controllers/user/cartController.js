@@ -10,18 +10,29 @@ const loadCartPage = async (req, res) => {
             User.findById(userId),
             Cart.findOne({ userId }).populate('items.productId')
         ]);
-        const coupon = await Coupon.findById(cart.coupon);
+
         let outOfStockMessage = null;
         const cartItemCount = req.session.cartItemCount || 0;
 
-        if (!cart || cart.items.length === 0) {
-            if (cart.coupon) {
-                cart.coupon = null;
-                coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
-                coupon.totalUsed -= 1;
-                await coupon.save();
-                await cart.save();
+        let userCart = cart;
+        if (!userCart) {
+            userCart = new Cart({ userId, items: [] });
+            await userCart.save();
+            await User.findByIdAndUpdate(userId, { $push: { cart: userCart._id } });
+        }
+
+        if (userCart.items.length === 0) {
+            if (userCart.coupon) {
+                const coupon = await Coupon.findById(userCart.coupon);
+                if (coupon) {
+                    coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
+                    coupon.totalUsed -= 1;
+                    await coupon.save();
+                }
+                userCart.coupon = null;
+                await userCart.save();
             }
+
             return res.render('cart', {
                 user: userData,
                 cartItems: [],
@@ -35,26 +46,7 @@ const loadCartPage = async (req, res) => {
         }
 
         let newSubTotal = 0;
-        let eligibleAmount = 0;
-        let couponDiscount = 0;
-        let couponName = 'NA';
-        let validCoupon = null;
-
-        if (cart.coupon) {
-            validCoupon = await Coupon.findById(cart.coupon);
-            if (!validCoupon || !validCoupon.isActive) {
-                cart.coupon = null;
-                coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
-                coupon.totalUsed -= 1;
-                await coupon.save();
-                await cart.save();
-                couponName = null;
-            } else {
-                couponName = validCoupon.name;
-            }
-        }
-
-        const cartItems = cart.items.map((item) => {
+        const cartItems = userCart.items.map((item) => {
             const product = item.productId;
             const variant = product.variants[item.variantId];
 
@@ -79,57 +71,75 @@ const loadCartPage = async (req, res) => {
             };
         });
 
-        cart.subTotal = newSubTotal;
+        userCart.subTotal = newSubTotal;
 
-        if (validCoupon) {
-            let applicableCategories = validCoupon.applicableCategories.map(id => id.toString());
-            let applicableProducts = validCoupon.applicableProducts.map(id => id.toString());
+        let couponDiscount = 0;
+        let couponName = 'NA';
+        let validCoupon = null;
 
-            cartItems.forEach(item => {
-                const productCategory = item.productId.categoryId ? item.productId.categoryId.toString() : null;
-                let isEligible = false;
-
-                if (applicableCategories.includes('all')) {
-                    isEligible = applicableProducts.includes(item.productId._id.toString()) || applicableProducts.includes('all');
-                } else if (applicableProducts.includes('all')) {
-                    isEligible = applicableCategories.includes(productCategory);
-                } else {
-                    isEligible = applicableProducts.includes(item.productId._id.toString()) || applicableCategories.includes(productCategory);
+        if (userCart.coupon) {
+            validCoupon = await Coupon.findById(userCart.coupon);
+            if (!validCoupon || !validCoupon.isActive) {
+                userCart.coupon = null;
+                if (validCoupon) {
+                    validCoupon.usedCount.set(userId.toString(), validCoupon.usedCount.get(userId.toString()) - 1);
+                    validCoupon.totalUsed -= 1;
+                    await validCoupon.save();
                 }
-
-                if (isEligible) {
-                    eligibleAmount += item.total;
-                    couponName = validCoupon.name;
-                }
-            });
-
-            if (eligibleAmount >= validCoupon.minimumOrderAmount) {
-                if (validCoupon.discountType === 'percentage') {
-                    couponDiscount = (eligibleAmount * validCoupon.discountValue) / 100;
-                } else {
-                    couponDiscount = validCoupon.discountValue;
-                }
-
-                if (validCoupon.maxDiscount && couponDiscount > validCoupon.maxDiscount) {
-                    couponDiscount = validCoupon.maxDiscount;
-                }
+                await userCart.save();
             } else {
-                cart.coupon = null;
-                coupon.usedCount.set(userId.toString(), coupon.usedCount.get(userId.toString()) - 1);
-                coupon.totalUsed -= 1;
-                await coupon.save();
-                await cart.save();
-                couponName = null;
+                couponName = validCoupon.name;
+
+                const applicableCategories = validCoupon.applicableCategories.map(id => id.toString());
+                const applicableProducts = validCoupon.applicableProducts.map(id => id.toString());
+
+                let eligibleAmount = 0;
+
+                cartItems.forEach(item => {
+                    const productCategory = item.productId.categoryId ? item.productId.categoryId.toString() : null;
+                    let isEligible = false;
+
+                    if (applicableCategories.includes('all')) {
+                        isEligible = applicableProducts.includes(item.productId._id.toString()) || applicableProducts.includes('all');
+                    } else if (applicableProducts.includes('all')) {
+                        isEligible = applicableCategories.includes(productCategory);
+                    } else {
+                        isEligible = applicableProducts.includes(item.productId._id.toString()) || applicableCategories.includes(productCategory);
+                    }
+
+                    if (isEligible) {
+                        eligibleAmount += item.total;
+                    }
+                });
+
+                if (eligibleAmount >= validCoupon.minimumOrderAmount) {
+                    if (validCoupon.discountType === 'percentage') {
+                        couponDiscount = (eligibleAmount * validCoupon.discountValue) / 100;
+                    } else {
+                        couponDiscount = validCoupon.discountValue;
+                    }
+
+                    if (validCoupon.maxDiscount && couponDiscount > validCoupon.maxDiscount) {
+                        couponDiscount = validCoupon.maxDiscount;
+                    }
+                } else {
+                    userCart.coupon = null;
+                    validCoupon.usedCount.set(userId.toString(), validCoupon.usedCount.get(userId.toString()) - 1);
+                    validCoupon.totalUsed -= 1;
+                    await validCoupon.save();
+                    await userCart.save();
+                    couponName = null;
+                }
             }
         }
 
-        cart.total = Math.max(cart.subTotal - couponDiscount, 0);
-        await cart.save();
+        userCart.total = Math.max(userCart.subTotal - couponDiscount, 0);
+        await userCart.save();
 
         res.render('cart', {
             cartItems,
-            subTotal: cart.subTotal,
-            total: cart.total,
+            subTotal: userCart.subTotal,
+            total: userCart.total,
             user: userData,
             couponDiscount,
             outOfStockMessage,
