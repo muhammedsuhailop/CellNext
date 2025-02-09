@@ -6,8 +6,10 @@ const Coupon = require('../../models/couponSchema');
 const Wallet = require('../../models/walletSchema');
 const formatDate = require('../../helpers/formatDate');
 const env = require('dotenv').config();
+const path = require('path');
 const crypto = require("crypto");
 const Razorpay = require('razorpay');
+const PDFDocument = require('pdfkit');
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY,
   key_secret: process.env.RAZORPAY_SECRET,
@@ -522,6 +524,120 @@ const returnRequest = async (req, res) => {
   }
 }
 
+const generateInvoicePDF = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const order = await Orders.findById(orderId).lean();
+
+    if (!order) {
+      return res.status(404).send('Order not found.');
+    }
+
+    if (order.status !== 'Delivered') {
+      return res.status(400).send('Invoice is available only for delivered orders.');
+    }
+
+    const productIds = order.orderItems.map(item => item.productId);
+    const products = await ProductV2.find({ _id: { $in: productIds } }).lean();
+    const productMap = {};
+    products.forEach(product => {
+      productMap[product._id.toString()] = product.variants.map(variant => ({
+        productName: product.productName,
+        color: variant.color || 'NA',
+        size: variant.size && variant.size !== 'NA' ? variant.size : '',
+      }));
+    });
+
+    const doc = new PDFDocument({ margin: 50 });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="invoice_${order.orderId}.pdf"`);
+    doc.pipe(res);
+
+    const fontPath = path.join(__dirname, '../../public/fonts', 'DejaVuSans.ttf');
+    doc.registerFont('DejaVu', fontPath);
+    doc.font('DejaVu');
+
+    doc.fontSize(24).text('CellNext', { align: 'center' }).moveDown(0.5);
+    doc.fontSize(18).text('Invoice', { align: 'center' }).moveDown(1);
+
+    doc.fontSize(10)
+      .text(`Order ID: ${order.orderId}`)
+      .text(`Order Date: ${new Date(order.createdOn).toLocaleDateString('en-IN')}`)
+      .text(`Invoice Date: ${new Date(order.invoiceDate).toLocaleDateString('en-IN')}`)
+      .moveDown(1);
+
+    doc.fontSize(10).text('Billing Summary', { underline: true }).moveDown(0.5);
+    doc.text(`Total Price: ₹${(order.totalPrice).toLocaleString('en-IN')}`);
+    doc.text(`Discount: ₹${(order.discount).toLocaleString('en-IN')}`);
+    doc.text(`Coupon Discount: ₹${(order.couponDiscount || 0).toLocaleString('en-IN')}`);
+    doc.text(`Final Amount: ₹${(order.finalAmount).toLocaleString('en-IN')}`, { font: 'bold' }).moveDown(1.5);
+
+    doc.fontSize(14).text('Order Items', { underline: true }).moveDown(0.5);
+
+    const startX = 50;
+    const tableTop = doc.y;
+    const columnWidths = [350, 0, 30, 110, 100, 100];
+
+    doc.fontSize(10);
+    doc.text('Product Name', startX, tableTop, { width: columnWidths[0], align: 'left' });
+    doc.text('Qty', startX + columnWidths[0] + columnWidths[1], tableTop, { width: columnWidths[2], align: 'center' });
+    doc.text('Price', startX + columnWidths[0] + columnWidths[1], tableTop, { width: columnWidths[3], align: 'right' });
+    // doc.text('Delivered On', startX + columnWidths[0] + columnWidths[1] + columnWidths[3], tableTop, { width: columnWidths[4], align: 'center' });
+    // doc.text('Status', startX + columnWidths[0] + columnWidths[1] + columnWidths[3] + columnWidths[4], tableTop, { width: columnWidths[5], align: 'center' });
+
+    doc.moveTo(startX, tableTop + 20).lineTo(doc.page.width - doc.page.margins.right, tableTop + 20).stroke();
+
+    const rowSpacing = 25;
+
+    let rowY = tableTop + 25;
+    order.orderItems.forEach(item => {
+      const productDetails = productMap[item.productId.toString()];
+      const variantDetails = productDetails ? productDetails[item.variantId] : null;
+
+      const productName = variantDetails ? variantDetails.productName : 'Unknown Product';
+      const variantColor = variantDetails ? variantDetails.color : 'N/A';
+      const variantSize = variantDetails && variantDetails.size ? ` | ${variantDetails.size}` : '';
+      const deliveredOn = item.deliveredOn ? new Date(item.deliveredOn).toLocaleDateString('en-IN') : 'N/A';
+      let finalItemPrice = item.salePrice * item.quantity;
+
+      doc.fontSize(10);
+      doc.text(`${productName} ${variantColor} ${variantSize}`, startX, rowY, { width: columnWidths[0], align: 'left' });
+      doc.text(String(item.quantity), startX + columnWidths[0] + columnWidths[1], rowY, { width: columnWidths[2], align: 'center' });
+      doc.text(`₹${finalItemPrice.toLocaleString('en-IN')}`, startX + columnWidths[0] + columnWidths[1], rowY, { width: columnWidths[3], align: 'right' });
+      // doc.text(deliveredOn, startX + columnWidths[0] + columnWidths[1] + columnWidths[3], rowY, { width: columnWidths[4], align: 'center' });
+      // doc.text(item.itemStatus, startX + columnWidths[0] + columnWidths[1] + columnWidths[3] + columnWidths[4], rowY, { width: columnWidths[5], align: 'center' });
+
+      rowY += rowSpacing;
+    });
+
+    doc.moveDown(2);
+
+    const leftColumnX = 50;
+
+    const pageBottom = doc.page.height - doc.page.margins.bottom - 130;
+
+    doc.y = pageBottom - 20;
+    doc.text(` `, leftColumnX);
+    doc.fontSize(10).text('Payment Details', { underline: true }).moveDown(0.5);
+    doc.fontSize(8).text(`Payment Status: ${(order.payment.status).toLocaleString('en-IN')}`);
+    doc.text(`Payment Method: ${(order.payment.method)}`);
+    doc.text(`Transaction ID: ${(order.payment.transactionId).toLocaleString('en-IN')}`);
+    doc.text(`Total Payed: ₹${(order.finalAmount || 0).toLocaleString('en-IN')}`);
+    doc.text(`Payment Date: ${new Date(order.payment.paymentDate).toLocaleDateString('en-IN')}`, { font: 'bold' }).moveDown(1.5);
+    doc.fontSize(10).text('Thank you for your purchase!', { align: 'center' }).moveDown(1);
+
+    doc.moveTo(50, pageBottom + 95).lineTo(doc.page.width - 50, pageBottom + 95).stroke();
+    doc.fontSize(7)
+      .text(`This is a computer-generated invoice.| generated on ${new Date().toLocaleDateString('en-IN')}`, doc.x, pageBottom + 100, { align: 'center' })
+
+    doc.end();
+  } catch (error) {
+    console.error('Error generating invoice PDF:', error);
+    res.status(500).send('Error generating invoice PDF');
+  }
+};
+
+
 
 
 module.exports = {
@@ -530,5 +646,6 @@ module.exports = {
   cancelOrder,
   cancelItemOrder,
   returnRequest,
-  verifyRazorpayPayment
+  verifyRazorpayPayment,
+  generateInvoicePDF,
 }

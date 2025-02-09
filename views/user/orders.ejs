@@ -54,25 +54,34 @@
                   <p class="mb-0"><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
                 </div>
 
-                <div class="col-md-4 text-md-end">
-                  <p class="mb-0"><strong>Status:</strong>
-                    <span class="btn-sm 
-                    <% if (order.status === 'Pending') { %> bg-info text-white
-                    <% } else if (order.status === 'Placed') { %> bg-info text-white
-                    <% } else if (order.status === 'Shipped') { %> bg-primary text-white
-                    <% } else if (order.status === 'Delivered') { %> bg-success  text-white
-                    <% } else if (order.status === 'Returned') { %> bg-warning text-white
-                    <% } else if (order.status === 'Cancelled') { %> bg-danger text-white
-                    <% } else if (order.status === 'Cancel Request') { %> bg-danger text-white
-                      <% } else if (order.status === 'Partial Return') { %> bg-warning text-white
-                    <% } %> mx-2">
-                      <% if (order.status === 'Cancel Request') { %>
-                      Canacellation Requested
-                      <%}else { %>
-                      <%= order.status %>
-                      <% } %>
-                    </span>
-                  </p>
+                <div class="col-md-4 text-md-end d-flex justify-content-around align-items-center">
+                  <div>
+                    <p class="mb-0"><strong>Status:</strong>
+                      <span class="btn-sm 
+                      <% if (order.status === 'Pending') { %> bg-info text-white
+                      <% } else if (order.status === 'Placed') { %> bg-info text-white
+                      <% } else if (order.status === 'Shipped') { %> bg-primary text-white
+                      <% } else if (order.status === 'Delivered') { %> bg-success  text-white
+                      <% } else if (order.status === 'Returned') { %> bg-warning text-white
+                      <% } else if (order.status === 'Cancelled') { %> bg-danger text-white
+                      <% } else if (order.status === 'Cancel Request') { %> bg-danger text-white
+                        <% } else if (order.status === 'Partial Return') { %> bg-warning text-white
+                      <% } %> mx-2">
+                        <% if (order.status === 'Cancel Request') { %>
+                        Canacellation Requested
+                        <%}else { %>
+                        <%= order.status %>
+                        <% } %>
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <% if (order.status === 'Delivered') { %>
+                    <a href="/order/invoice/<%=order._id %>" class="btn btn-sm btn-secondary mx-2">
+                      <i class='bx bx-download'></i> Invoice
+                    </a>
+                    <% } %>
+                  </div>
                 </div>
               </div>
 
