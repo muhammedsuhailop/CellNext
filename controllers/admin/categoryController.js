@@ -7,13 +7,13 @@ const categoryInfo = async (req, res) => {
     try {
         let search = req.query.search || '';
         let page = parseInt(req.query.page) || 1;
-        const limit = 4;
+        const limit = 5;
         if (page < 1) page = 1;
 
         const searchCondition = search ? { name: { $regex: search, $options: 'i' } } : {};
 
         const categoryData = await Category.find(searchCondition)
-            .sort({ createdAt: -1 })
+            .sort({ name: 1 })
             .limit(limit)
             .skip((page - 1) * limit)
             .exec();
@@ -148,14 +148,26 @@ const addCategoryOffer = async (req, res) => {
             }
 
             product.variants = product.variants.map(variant => {
-                let salePrice = variant.regularPrice;
+                let salePrice = variant.salePrice;
+                const regularPrice = variant.regularPrice;
+
+                if (product.productOffer > 0) {
+                    const productOfferPercentage = product.productOffer / 100;
+                    salePrice = Math.round(salePrice / (1 - productOfferPercentage));
+                }
 
                 if (percentage > 0) {
-                    salePrice -= Math.floor(salePrice * (percentage / 100));
+                    const categoryOfferAmount = Math.round(salePrice * (percentage / 100));
+                    salePrice -= categoryOfferAmount;
                 }
 
                 if (product.productOffer > 0) {
-                    salePrice -= Math.floor(salePrice * (product.productOffer / 100));
+                    const productOfferAmount = Math.round(salePrice * (product.productOffer / 100));
+                    salePrice -= productOfferAmount;
+                }
+
+                if (salePrice > regularPrice) {
+                    salePrice = regularPrice;
                 }
 
                 return {
@@ -186,6 +198,8 @@ const removeCategoryOffer = async (req, res) => {
             return res.status(400).json({ status: false, message: 'Category not found' });
         }
 
+        const percentage = category.categoryOffer;
+
         const products = await ProductV2.find({ category: categoryId });
 
         for (const product of products) {
@@ -194,10 +208,27 @@ const removeCategoryOffer = async (req, res) => {
             }
 
             product.variants = product.variants.map(variant => {
-                let salePrice = variant.regularPrice;
+                let salePrice = variant.salePrice;
+                let originalPrice = salePrice;
+                const regularPrice = variant.regularPrice
+
 
                 if (product.productOffer > 0) {
-                    salePrice -= Math.floor(salePrice * (product.productOffer / 100));
+                    const productOfferPercentage = product.productOffer / 100;
+                    originalPrice = Math.round(salePrice / (1 - productOfferPercentage));
+                }
+
+                if (percentage > 0) {
+                    salePrice = Math.round(originalPrice / (1 - (percentage / 100)));
+                }
+
+                if (product.productOffer > 0) {
+                    const productOfferAmount = Math.round(salePrice * (product.productOffer / 100));
+                    salePrice -= productOfferAmount;
+                }
+
+                if (salePrice > regularPrice) {
+                    salePrice = regularPrice;
                 }
 
                 return {
@@ -219,8 +250,6 @@ const removeCategoryOffer = async (req, res) => {
         res.status(500).json({ status: false, message: 'Internal server error' });
     }
 };
-
-
 
 
 module.exports = {

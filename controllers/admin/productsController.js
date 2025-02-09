@@ -278,15 +278,17 @@ const addProductOffer = async (req, res) => {
             return res.json({ status: false, message: 'Invalid product offer percentage' });
         }
 
-        // Update sale price for each variant
         findProduct.variants = findProduct.variants.map(variant => {
-            let salePrice = variant.regularPrice;
+            let salePrice = variant.salePrice;
+            const regularPrice = variant.salePrice;
 
-            if (findCategory.categoryOffer > 0) {
-                salePrice -= Math.floor(salePrice * (findCategory.categoryOffer / 100));
+            if (percentage > 0) {
+                const productDiscount = Math.floor(salePrice * (percentage / 100));
+                salePrice -= productDiscount;
             }
 
-            salePrice -= Math.floor(salePrice * (percentage / 100));
+            const minimumPrice = Math.floor(regularPrice * 0.1);
+            salePrice = Math.max(salePrice, minimumPrice);
 
             return {
                 ...variant,
@@ -323,12 +325,12 @@ const removeProductOffer = async (req, res) => {
             return res.json({ status: false, message: 'No variants found for the product' });
         }
 
-        // Reset sale price for each variant
         findProduct.variants = findProduct.variants.map(variant => {
-            let salePrice = variant.regularPrice;
+            let salePrice = variant.salePrice;
 
-            if (findCategory.categoryOffer > 0) {
-                salePrice -= Math.floor(salePrice * (findCategory.categoryOffer / 100));
+            if (findProduct.productOffer > 0) {
+                const productOfferPercentage = findProduct.productOffer / 100;
+                salePrice = Math.floor(salePrice / (1 - productOfferPercentage));
             }
 
             return {
