@@ -162,7 +162,7 @@ const updateStatus = async (req, res) => {
                 const userWallet = await Wallet.findOne({ userId: order.userId._id });
 
                 if (userWallet) {
-                    const refundAmount = order.payment.finalAmount;
+                    const refundAmount = order.payment.finalAmount - order.couponDiscount;
 
                     const newTransaction = {
                         transactionId: uuidv4(),
@@ -339,7 +339,12 @@ const updateItemStatus = async (req, res) => {
                 const userWallet = await Wallet.findOne({ userId: order.userId._id });
 
                 if (userWallet) {
-                    const refundAmount = item.salePrice * item.quantity;
+                    let couponDiscountPerItem = 0;
+                    if (order.couponApplied) {
+                        const totalItems = order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
+                        couponDiscountPerItem = totalItems > 0 ? order.couponDiscount / totalItems : 0;
+                    }
+                    const refundAmount = (item.salePrice * item.quantity) - couponDiscountPerItem;
                     console.log('refundAmount', refundAmount)
 
                     const newTransaction = {
@@ -356,6 +361,7 @@ const updateItemStatus = async (req, res) => {
                     userWallet.balance += refundAmount;
                     await userWallet.save();
                     console.log(`Refund of ${refundAmount} added to user ${order.userId.name}'s wallet`);
+                    order.payment.status = "Refunded";
                 }
             }
         }

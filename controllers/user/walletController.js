@@ -25,6 +25,10 @@ const loadWalletPage = async (req, res) => {
             console.log("Wallet created successfully.");
         }
 
+        if (wallet && wallet.transactions) {
+            wallet.transactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+
         res.render('wallet', {
             user: userData,
             cartItemCount,
