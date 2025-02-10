@@ -113,7 +113,12 @@ async function fetchSalesData({ filterType, startDate, endDate, skip = 0, limit 
 
 async function fetchOverallSalesData(dateFilter) {
     const overallData = await Orders.aggregate([
-        { $match: { ...dateFilter, status: "Placed" } },
+        {
+            $match: {
+                ...dateFilter,
+                status: { $nin: ["Pending", "Processing", "Cancelled", "Returned"] }
+            }
+        },
         {
             $group: {
                 _id: null,

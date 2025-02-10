@@ -67,9 +67,9 @@
                       <div class="col-md-6">
                         <h5 class="card-title">Sales Summary</h5>
                         <p class="card-text">
-                          Total Items: <%= overallMetrics.overallSalesCount %> <br>
-                          Total Amount: ₹<%= overallMetrics.overallOrderAmount %> <br>
-                          Total Discount: ₹<%= overallMetrics.overallDiscount %>
+                          Total Items : <%= overallMetrics.overallSalesCount %> <br>
+                          Total Amount : ₹<%= overallMetrics.overallOrderAmount %> <br>
+                          Total Discount: ₹<%= overallMetrics.overallDiscount.toFixed(1) %>
                         </p>
                       </div>
                       <div class="col-md-6 d-flex flex-column align-items-end justify-content-center">
