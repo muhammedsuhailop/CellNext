@@ -15,13 +15,13 @@
 
 <body>
   <div class="container">
-    <div class="container-wrapper">
-      <h3 class="login-text"><i class="bi bi-person-circle ac-logo"></i>Login</h3>
+    <div class="container-wrapper" id="login-page">
+      <h3 class="login-text"><img src="/img/CellNext.png" alt="CN Logo" class="ac-logo">Login</h3>
       <h6 class="my-4"><span>Login with CellNext account</span></h6>
       <form method="post" action="/login" id="loginForm">
         <% if (locals.message && message.length > 0) { %>
         <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
-          <strong><%= message %></strong> 
+          <strong><%= message %></strong>
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <% } %>

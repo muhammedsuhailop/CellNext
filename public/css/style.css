@@ -169,7 +169,7 @@ ol {
 }
 
 .primary-btn:hover {
-	background: #868b8e;
+	background: #333;
 }
 
 .prof-btn {
@@ -4793,7 +4793,7 @@ ol {
 }
 
 #couponForm button:hover {
-	background-color: #868b8e;
+	background-color: #333;
 }
 
 .coupon-dropdown {
@@ -4835,4 +4835,9 @@ ol {
 	color: #155724;
 	background-color: #f3f2ee;
 	border-color: #c3e6cb;
+}
+
+#login-page {
+	background: url('/img/CellNext.png') no-repeat center center fixed !important;
+	background-size: cover;
 }

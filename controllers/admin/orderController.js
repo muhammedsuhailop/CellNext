@@ -446,13 +446,16 @@ const updateItemStatus = async (req, res) => {
         }
 
         let remainingTotal = 0;
+        let discount = 0;
         order.orderItems.forEach(item => {
             if (item.itemStatus !== "Cancelled" && item.itemStatus !== "Returned") {
                 remainingTotal += item.salePrice * item.quantity;
+                discount = item.regularPrice - item.salePrice;
             }
         });
 
         order.finalAmount = Math.max(0, remainingTotal - order.couponDiscount);
+        order.discount = discount;
 
         await order.save();
 

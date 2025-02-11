@@ -49,15 +49,15 @@ const placeOrder = async (req, res) => {
 
       let variant = product.variants[item.variantId];
       if (!variant) {
-        return res.status(400).json({ success: false, message: `Selected variant not found for ${product.name}.` });
+        return res.status(400).json({ success: false, message: `Selected variant not found for ${product.productName}.` });
       }
 
       if (item.quantity > 5) {
-        return res.status(400).json({ success: false, message: `Maximum cart quantity for ${product.name}: 5` });
+        return res.status(400).json({ success: false, message: `Maximum cart quantity for ${product.productName}: 5` });
       }
 
       if (item.quantity > variant.stock) {
-        return res.status(400).json({ success: false, message: `Insufficient stock for ${product.name}` });
+        return res.status(400).json({ success: false, message: `Insufficient stock for ${product.productName}` });
       }
 
       totalPrice += item.quantity * variant.regularPrice;

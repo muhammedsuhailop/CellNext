@@ -267,39 +267,6 @@
               <% } %>
               <li>Total <span id="checkout-total-amount">₹ <%= total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span></li>
             </ul>
-            <!-- <div class="checkout__input__checkbox">
-                <label for="acc-or">
-                  Create an account?
-                  <input type="checkbox" id="acc-or">
-                  <span class="checkmark"></span>
-                </label>
-              </div> -->
-            <p>We accept various payment methods: Credit/Debit cards, UPI, CellNext Wallet, and Cash on Delivery.</p>
-            <div class="checkout__input__checkbox">
-              <label for="paypal">
-                Razorpay
-                <input type="radio" id="razorpay" name="payment_method">
-                <span class="checkmark"></span>
-              </label>
-            </div>
-
-            <div class="checkout__input__checkbox">
-              <label for="wallet">
-                CellNext Wallet
-                <input type="radio" id="wallet" name="payment_method">
-                <span class="checkmark"></span>
-              </label>
-            </div>
-
-            <div class="checkout__input__checkbox">
-              <label for="cod">
-                Cash on Delivery
-                <input type="radio" id="cod" name="payment_method">
-                <span class="checkmark"></span>
-              </label>
-            </div>
-
-            <button type="button" class="site-btn">PLACE ORDER</button>
           </div>
         </div>
       </div>

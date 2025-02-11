@@ -95,9 +95,6 @@
                               </button>
                               <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="/admin/orders/order-details/<%= order.orderId %>">View & Update</a></li>
-                                <% if (order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== 'Returned') { %>
-                                <li><a class="dropdown-item text-danger" onclick="updateOrderStatus('<%= order.orderId %>', 'Cancelled')">Cancel Order</a></li>
-                                <% } %>
                                 <% if (order.status === 'Pending') { %>
                                 <li><a class="dropdown-item text-success" onclick="updateOrderStatus('<%= order.orderId %>', 'Placed')">Mark as Placed</a></li>
                                 <% } %>

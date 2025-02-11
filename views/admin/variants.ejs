@@ -318,7 +318,7 @@
         icon: result.status ? 'success' : 'error',
         confirmButtonText: 'OK'
       }).then(() => {
-        if (result.success) location.reload();
+        if (result.status) location.reload();
       });
     }
   </script>

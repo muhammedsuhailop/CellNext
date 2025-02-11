@@ -353,3 +353,11 @@ input:focus::placeholder {
 .google-btn {
     justify-content: center;
 }
+
+.ac-logo {
+    width: 45px;
+    height: 45px;
+    margin-right: 10px;
+    vertical-align: middle;
+    border-radius: 25px;
+}

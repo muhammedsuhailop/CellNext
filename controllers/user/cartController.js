@@ -12,7 +12,7 @@ const loadCartPage = async (req, res) => {
         ]);
 
         let outOfStockMessage = null;
-        const cartItemCount = req.session.cartItemCount || 0;
+        let cartItemCount = req.session.cartItemCount || 0;
 
         let userCart = cart;
         if (!userCart) {
@@ -53,6 +53,10 @@ const loadCartPage = async (req, res) => {
             if (!variant || variant.stock <= 0) {
                 item.quantity = 0;
                 outOfStockMessage = "Some items in your cart are out of stock and have been set to zero.";
+            }
+
+            if (item.quantity > variant.stock) {
+                item.quantity = variant.stock;
             }
 
             const itemTotal = item.quantity * variant.salePrice;
@@ -132,7 +136,8 @@ const loadCartPage = async (req, res) => {
                 }
             }
         }
-
+        req.session.cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+        cartItemCount = req.session.cartItemCount || 0;
         userCart.total = Math.max(userCart.subTotal - couponDiscount, 0);
         await userCart.save();
 
