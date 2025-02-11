@@ -1542,7 +1542,7 @@ ol {
 	display: inline-block;
 	font-size: 16px;
 	font-weight: 700;
-	color: #111111;
+	color: #868b8e;
 	height: 30px;
 	width: 30px;
 	border: 1px solid transparent;
@@ -1552,18 +1552,23 @@ ol {
 }
 
 .product__pagination a.active {
-	border-color: #111111;
+	border-color: #868b8e;
+	background-color: #868b8e;
+	color: #fff;
+	transition: all 0.3s ease-in-out;
 }
 
 .product__pagination a:hover {
-	border-color: #111111;
+	border-color: #868b8e;
+	box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15);
+	transform: scale(1.05);
 }
 
 .product__pagination span {
 	display: inline-block;
 	font-size: 16px;
 	font-weight: 700;
-	color: #111111;
+	color: #868b8e;
 	padding-left: 10px;
 	padding-right: 15px;
 }

@@ -30,7 +30,7 @@
                 <h4 class="section-heading">My Orders</h4>
               </div>
               <div>
-                <a href="/shop" class="gen-btn"><i class='bx bxs-cart'></i> Shope Now</a>
+                <a href="/shop" class="gen-btn"><i class='bx bxs-cart'></i> Shop Now</a>
               </div>
             </div>
 
@@ -164,16 +164,39 @@
             <div class="row">
               <div class="col-lg-12">
                 <div class="product__pagination">
-                  <% for(let i = 1; i <= totalPages; i++) { %>
-                  <% if(i === currentPage) { %>
+                  <% if (currentPage > 1) { %>
+                  <a href="?page=<%= currentPage - 1 %>">&lt;</a>
+                  <% } %>
+
+                  <% if (currentPage > 3) { %>
+                  <a href="?page=1">1</a>
+                  <% if (currentPage > 4) { %>
+                  <span>...</span>
+                  <% } %>
+                  <% } %>
+
+                  <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+                  <% if (i === currentPage) { %>
                   <a class="active" href="#"><%= i %></a>
                   <% } else { %>
                   <a href="?page=<%= i %>"><%= i %></a>
                   <% } %>
                   <% } %>
+
+                  <% if (currentPage < totalPages - 2) { %>
+                  <% if (currentPage < totalPages - 3) { %>
+                  <span>...</span>
+                  <% } %>
+                  <a href="?page=<%= totalPages %>"><%= totalPages %></a>
+                  <% } %>
+
+                  <% if (currentPage < totalPages) { %>
+                  <a href="?page=<%= currentPage + 1 %>"> &gt;</a>
+                  <% } %>
                 </div>
               </div>
             </div>
+
 
             <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered">
