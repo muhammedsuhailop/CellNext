@@ -25,14 +25,23 @@ const loadWalletPage = async (req, res) => {
             console.log("Wallet created successfully.");
         }
 
-        if (wallet && wallet.transactions) {
-            wallet.transactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        }
+        const page = parseInt(req.query.page) || 1;
+        const limit = 8;
+        const skip = (page - 1) * limit;
+        const totalTransactions = wallet.transactions.length;
+        const totalPages = Math.ceil(totalTransactions / limit);
+
+        const transactions = wallet.transactions
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .slice(skip, skip + limit);
 
         res.render('wallet', {
             user: userData,
             cartItemCount,
-            wallet
+            wallet,
+            transactions,
+            currentPage: page,
+            totalPages,
         });
 
     } catch (error) {

@@ -3,6 +3,7 @@ const ProductV2 = require('../../models/productsSchemaV2');
 const User = require('../../models/userSchema');
 const Address = require('../../models/addressSchema');
 const Wallet = require('../../models/walletSchema');
+const Coupon = require('../../models/couponSchema');
 const { v4: uuidv4 } = require('uuid');
 
 const getOrders = async (req, res) => {
@@ -293,8 +294,6 @@ const updateItemStatus = async (req, res) => {
         const { orderId } = req.params;
         const { productId, variantIndex, newStatus } = req.body;
 
-        console.log('On updateItemStatus');
-
         if (!orderId || !productId || variantIndex === undefined || !newStatus) {
             return res.status(400).json({ success: false, error: 'Missing required fields.' });
         }
@@ -303,8 +302,6 @@ const updateItemStatus = async (req, res) => {
         if (!order) {
             return res.status(404).json({ success: false, error: 'Order not found.' });
         }
-
-        console.log('Order on item status change', order);
 
         const item = order.orderItems.find(i => i.productId.toString() === productId.toString() && i.variantId === Number(variantIndex));
         if (!item) {
@@ -339,13 +336,64 @@ const updateItemStatus = async (req, res) => {
                 const userWallet = await Wallet.findOne({ userId: order.userId._id });
 
                 if (userWallet) {
-                    let couponDiscountPerItem = 0;
+                    let refundAmount = item.salePrice * item.quantity;
+
                     if (order.couponApplied) {
-                        const totalItems = order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
-                        couponDiscountPerItem = totalItems > 0 ? order.couponDiscount / totalItems : 0;
+                        const coupon = await Coupon.findById(order.coupon);
+                        if (coupon) {
+                            const applicableCategories = coupon.applicableCategories.map(id => id.toString());
+                            const applicableProducts = coupon.applicableProducts.map(id => id.toString());
+
+                            let remainingEligibleAmount = 0;
+                            let remainingTotal = 0;
+                            let otherItemsCount = 0;
+
+                            for (let otherItem of order.orderItems) {
+                                if (otherItem._id.toString() !== item._id.toString() && otherItem.itemStatus !== "Cancelled") {
+                                    const product = await ProductV2.findById(otherItem.productId);
+                                    if (!product) continue;
+
+                                    const salePrice = product.variants[otherItem.variantId].salePrice;
+                                    remainingTotal += otherItem.quantity * salePrice;
+
+                                    let isEligible = false;
+                                    if (applicableCategories.includes('all') || applicableProducts.includes('all')) {
+                                        isEligible = true;
+                                    } else if (applicableCategories.includes(product.category.toString()) || applicableProducts.includes(product._id.toString())) {
+                                        isEligible = true;
+                                    }
+
+                                    if (isEligible) {
+                                        remainingEligibleAmount += otherItem.quantity * salePrice;
+                                        otherItemsCount++;
+                                    }
+                                }
+                            }
+
+                            if (remainingEligibleAmount < coupon.minimumOrderAmount) {
+                                if (refundAmount < order.couponDiscount) {
+                                    let adjustedRefund = refundAmount - order.couponDiscount;
+
+                                    if (adjustedRefund < 0) {
+                                        adjustedRefund = 0;
+                                    }
+                                    refundAmount = adjustedRefund;
+                                    order.couponApplied = false;
+                                    order.coupon = null;
+                                    order.couponDiscount = 0;
+                                } else {
+                                    refundAmount -= order.couponDiscount;
+                                    order.couponApplied = false;
+                                    order.coupon = null;
+                                    order.couponDiscount = 0;
+                                }
+                            } else {
+                                const discountPerItem = order.couponDiscount / (otherItemsCount + 1);
+                                refundAmount -= discountPerItem;
+                                order.couponDiscount -= discountPerItem;
+                            }
+                        }
                     }
-                    const refundAmount = (item.salePrice * item.quantity) - couponDiscountPerItem;
-                    console.log('refundAmount', refundAmount)
 
                     const newTransaction = {
                         transactionId: uuidv4(),
@@ -360,8 +408,7 @@ const updateItemStatus = async (req, res) => {
                     userWallet.transactions.push(newTransaction);
                     userWallet.balance += refundAmount;
                     await userWallet.save();
-                    console.log(`Refund of ${refundAmount} added to user ${order.userId.name}'s wallet`);
-                    order.payment.status = "Refunded";
+                    order.payment.status = "Partially Refunded";
                 }
             }
         }
@@ -392,7 +439,20 @@ const updateItemStatus = async (req, res) => {
             order.payment.status = "Refunded";
         } else if (newStatus === "Returned") {
             order.payment.status = "Partially Refunded";
+        } else if (newStatus === "Cancelled" && allItemsSameStatus) {
+            order.payment.status = "Refunded";
+        } else if (newStatus === "Returned" && allItemsSameStatus) {
+            order.payment.status = "Refunded";
         }
+
+        let remainingTotal = 0;
+        order.orderItems.forEach(item => {
+            if (item.itemStatus !== "Cancelled" && item.itemStatus !== "Returned") {
+                remainingTotal += item.salePrice * item.quantity;
+            }
+        });
+
+        order.finalAmount = Math.max(0, remainingTotal - order.couponDiscount);
 
         await order.save();
 
@@ -402,6 +462,7 @@ const updateItemStatus = async (req, res) => {
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
+
 
 
 module.exports = {

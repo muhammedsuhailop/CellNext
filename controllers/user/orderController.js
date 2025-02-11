@@ -342,33 +342,35 @@ const loadOrderPage = async (req, res) => {
     const userData = await User.findById(userId);
 
     const user = await User.findById(userId).select('orderHistory').exec();
-
     if (!user) {
       return res.status(404).send('User not found');
     }
 
     const orderIds = user.orderHistory;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 4;
+    const skip = (page - 1) * limit;
+
+    const totalOrders = await Orders.countDocuments({ _id: { $in: orderIds } });
+    const totalPages = Math.ceil(totalOrders / limit);
 
     const orders = await Orders.find({ _id: { $in: orderIds } })
       .populate('address')
       .populate('userId', 'name email')
+      .sort({ createdOn: -1 })
+      .skip(skip)
+      .limit(limit)
       .exec();
-
-    console.log('orders ..', orders);
 
     const orderDetails = await Promise.all(
       orders.map(async (order) => {
         const items = await Promise.all(
           order.orderItems.map(async (item) => {
             const product = await ProductV2.findById(item.productId).exec();
-
             if (!product) {
-              console.error(`Error: Product not found for item ${item._id}`);
               return null;
             }
-
             const variant = product.variants[item.variantId] || {};
-
             return {
               productId: item.productId,
               productName: product.productName || "N/A",
@@ -387,13 +389,10 @@ const loadOrderPage = async (req, res) => {
         );
 
         const validItems = items.filter((item) => item !== null);
-
         let couponName = "NA";
         if (order.couponApplied && order.coupon) {
           const coupon = await Coupon.findById(order.coupon).select("name").lean();
-          if (coupon) {
-            couponName = coupon.name;
-          }
+          if (coupon) couponName = coupon.name;
         }
 
         return {
@@ -411,24 +410,26 @@ const loadOrderPage = async (req, res) => {
           user: order.userId,
           items: validItems,
           couponDiscount: order.couponDiscount,
-          couponName
+          couponName,
         };
       })
     );
 
     const cartItemCount = req.session.cartItemCount || 0;
 
-    console.log('orderDetails...', orderDetails);
     res.render('orders', {
       user: userData,
       orderDetails,
       cartItemCount,
+      currentPage: page,
+      totalPages,
     });
   } catch (error) {
     console.error('Error fetching order details:', error);
     res.redirect('/pageNotFound');
   }
 };
+
 
 
 const cancelOrder = async (req, res) => {
