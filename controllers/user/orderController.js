@@ -69,6 +69,7 @@ const placeOrder = async (req, res) => {
     let finalAmount = saleTotal;
     let couponDiscount = 0;
     let coupon = cart.coupon
+    let validCoupon = false;
 
     if (cart.coupon) {
       const coupon = await Coupon.findById(cart.coupon);
@@ -387,6 +388,14 @@ const loadOrderPage = async (req, res) => {
 
         const validItems = items.filter((item) => item !== null);
 
+        let couponName = "NA";
+        if (order.couponApplied && order.coupon) {
+          const coupon = await Coupon.findById(order.coupon).select("name").lean();
+          if (coupon) {
+            couponName = coupon.name;
+          }
+        }
+
         return {
           _id: order._id,
           orderId: order.orderId,
@@ -401,6 +410,8 @@ const loadOrderPage = async (req, res) => {
           address: order.address,
           user: order.userId,
           items: validItems,
+          couponDiscount: order.couponDiscount,
+          couponName
         };
       })
     );

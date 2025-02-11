@@ -67,8 +67,9 @@ router.get('/cart', userAuth, cartController.loadCartPage);
 router.delete('/cart/remove/:productId', userAuthAjax, cartController.removeProductFromCart);
 router.post('/cart/apply-coupon', userAuthAjax, cartController.applyCoupon);
 router.delete('/cart/remove-coupon', userAuthAjax, cartController.removeCoupon);
+router.get('/cart/available-coupons', userAuthAjax, cartController.getCoupons);
 
-//Checkout Management
+//Checkout Management 
 router.get('/checkout', userAuth, checkoutController.getCheckout);
 router.post('/place-order', userAuth, orderController.placeOrder);
 

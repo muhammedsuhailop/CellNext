@@ -115,14 +115,17 @@
           <h6>Discount codes</h6>
           <p id="couponMessage"></p>
           <% if (couponName && couponName !== 'NA') { %>
-          <div class="alert alert-success d-flex justify-content-between align-items-center">
+          <div class="alert-square alert-success-square d-flex justify-content-between align-items-center">
             <span>You've applied <strong><%= couponName %></strong> coupon</span>
             <i id="removeCouponBtn" class='bx bx-x lead'></i>
           </div>
           <% } else { %>
           <form id="couponForm">
-            <input type="text" id="couponCode" placeholder="Coupon code" required>
-            <button type="submit">Apply</button>
+            <div class="coupon-input-wrapper">
+              <input type="text" id="couponCode" placeholder="Enter coupon code" autocomplete="off">
+              <button type="submit">Apply</button>
+              <div id="couponDropdown" class="coupon-dropdown" style="display: none;"></div>
+            </div>
           </form>
           <% } %>
         </div>
@@ -151,7 +154,54 @@
 <!-- Shopping Cart Section End -->
 
 <%- include('../../views/partials/user/footer') %>
+
+
 <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const couponInput = document.getElementById("couponCode");
+    const couponDropdown = document.getElementById("couponDropdown");
+
+    couponInput.addEventListener("focus", async function() {
+      try {
+        const response = await fetch("/cart/available-coupons");
+        const data = await response.json();
+
+        if (data.status && data.coupons.length > 0) {
+          displayCoupons(data.coupons);
+        } else {
+          couponDropdown.innerHTML = "<p class='no-coupons'>No coupons available</p>";
+          couponDropdown.style.display = "block";
+        }
+      } catch (error) {
+        console.error("Error fetching coupons:", error);
+      }
+    });
+
+    document.addEventListener("click", function(event) {
+      if (!couponInput.contains(event.target) && !couponDropdown.contains(event.target)) {
+        couponDropdown.style.display = "none";
+      }
+    });
+
+    function displayCoupons(coupons) {
+      couponDropdown.innerHTML = "";
+      coupons.forEach(coupon => {
+        const couponItem = document.createElement("div");
+        couponItem.classList.add("coupon-item");
+        couponItem.innerHTML = `
+                <strong>${coupon.name}</strong> - ${coupon.discountType === "percentage" ? coupon.discountValue + "% Off" : "₹" + coupon.discountValue} 
+                <br><small>Min Order: ₹${coupon.minimumOrderAmount.toLocaleString('en-IN')}</small>
+            `;
+        couponItem.addEventListener("click", function() {
+          couponInput.value = coupon.name;
+          couponDropdown.style.display = "none";
+        });
+        couponDropdown.appendChild(couponItem);
+      });
+      couponDropdown.style.display = "block";
+    }
+  });
+
   document.getElementById("removeCouponBtn")?.addEventListener("click", async function(event) {
     try {
       const result = await Swal.fire({
@@ -201,8 +251,7 @@
       });
     }
   });
-</script>
-<script>
+
   document.getElementById("couponForm").addEventListener("submit", async function(event) {
     event.preventDefault();
 
@@ -256,9 +305,7 @@
       });
     }
   });
-</script>
 
-<script>
   document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".remove-from-cart").forEach(button => {
       button.addEventListener("click", async (event) => {
@@ -321,9 +368,7 @@
       });
     });
   });
-</script>
 
-<script>
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('#dec-quantity').forEach(function(decBtn) {
       decBtn.addEventListener('click', function() {

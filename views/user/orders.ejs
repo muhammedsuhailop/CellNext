@@ -86,19 +86,30 @@
               </div>
 
               <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <p><strong>Final Price:</strong> ₹ <%= (order.finalAmount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })  %></p>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <p><strong>Discount:</strong> ₹ <%= (order.discount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></p>
+                </div>
+                <div class="col-md-4">
+                  <p><strong>Payment Method:</strong> <%= (order.paymentMethod).toUpperCase() %></p>
                 </div>
               </div>
 
               <div class="row">
-                <div class="col-md-6">
-                  <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                <div class="col-md-4">
+                  <% if (order.couponName !== 'NA') { %>
+                  <p><strong>Copon Name:</strong> <%= order.couponName %></p>
+                  <% } %>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
+                  <% if (order.couponName !== 'NA') { %>
+                  <p><strong>Copon Discount:</strong> <%= order.couponDiscount %></p>
+                  <% } %>
+
+                </div>
+                <div class="col-md-4">
                   <p><strong>Payment Status:</strong> <span class="badge text-white bg-<%= order.paymentStatus === 'Pending' ? 'warning' : 'success' %>"><%= order.paymentStatus %></span></p>
                 </div>
               </div>

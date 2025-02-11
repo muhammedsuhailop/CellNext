@@ -424,6 +424,23 @@ const removeCoupon = async (req, res) => {
     }
 }
 
+const getCoupons = async (req, res) => {
+    try {
+        const currentDate = new Date();
+
+        const availableCoupons = await Coupon.find({
+            isActive: true,
+            expireOn: { $gte: currentDate },
+        }).select("name discountType discountValue minimumOrderAmount")
+            .sort({ discountValue: -1 });
+
+        res.json({ status: true, coupons: availableCoupons });
+    } catch (error) {
+        console.error("Error fetching coupons:", error);
+        res.status(500).json({ status: false, message: "Internal Server Error" });
+    }
+}
+
 
 module.exports = {
     addToCart,
@@ -431,4 +448,5 @@ module.exports = {
     removeProductFromCart,
     applyCoupon,
     removeCoupon,
+    getCoupons,
 }
