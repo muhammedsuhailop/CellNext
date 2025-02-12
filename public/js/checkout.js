@@ -250,11 +250,14 @@ window.addEventListener('load', function () {
         const totalAmount = document.getElementById('checkout-total-amount')?.innerText.trim();
         const selectedPaymentMethod = [...paymentMethodRadios].find(radio => radio.checked);
 
-        console.log('selectedPaymentMethod',selectedPaymentMethod)
-
         if (!selectedAddress || !selectedPaymentMethod) {
             Swal.fire('Error', 'Please select an address and a payment method.', 'error');
             return;
+        }
+
+        if (selectedPaymentMethod.id === 'cod' && parseFloat(totalAmount.replace(/[^\d.]/g, "")) < 1000) {
+            Swal.fire('Error', 'Cash on Delivery (COD) is not available for orders below ₹1000.', 'error');
+            return
         }
 
         const orderData = {
@@ -302,9 +305,9 @@ window.addEventListener('load', function () {
                     window.location.href = '/my-orders';
                 });
             } else if (selectedPaymentMethod.id === 'razorpay') {
-                console.log('result.razorpayOrderId',result.razorpayOrderId);
-                console.log('result.orderId',result.orderId)
-                initiateRazorpayPayment(result.razorpayOrderId, result.orderId, totalAmount,result.key);
+                console.log('result.razorpayOrderId', result.razorpayOrderId);
+                console.log('result.orderId', result.orderId)
+                initiateRazorpayPayment(result.razorpayOrderId, result.orderId, totalAmount, result.key);
             }
 
         } catch (error) {
@@ -313,52 +316,52 @@ window.addEventListener('load', function () {
         }
     });
 
-    async function initiateRazorpayPayment(razorpayOrderId, orderId, totalAmount,key) {
+    async function initiateRazorpayPayment(razorpayOrderId, orderId, totalAmount, key) {
         const options = {
-          key: key,
-          amount: totalAmount , 
-          currency: "INR",
-          name: "CellNext",
-          description: "Order Payment",
-          order_id: razorpayOrderId,
-          image:'/img/CellNext.png',
-          handler: async function (response) {
-            try {
-              const verifyResponse = await fetch('/orders/verify-razorpay-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  orderId,
-                  razorpayPaymentId: response.razorpay_payment_id,
-                  razorpaySignature: response.razorpay_signature,
-                }),
-              });
-      
-              const verifyResult = await verifyResponse.json();
-              if (verifyResult.success) {
-                Swal.fire({
-                  title: 'Success',
-                  text: 'Payment successful! Your order is confirmed.',
-                  icon: 'success',
-                  timer: 3500,
-                  timerProgressBar: true,
-                  showConfirmButton: false,
-                }).then(() => {
-                  window.location.href = '/my-orders';
-                });
-              } else {
-                Swal.fire('Error', 'Payment verification failed. Please contact support.', 'error');
-              }
-            } catch (error) {
-              Swal.fire('Error', 'Payment verification error. Try again.', 'error');
-            }
-          },
-          theme: {
-            color: "#3399cc",
-          },
+            key: key,
+            amount: totalAmount,
+            currency: "INR",
+            name: "CellNext",
+            description: "Order Payment",
+            order_id: razorpayOrderId,
+            image: '/img/CellNext.png',
+            handler: async function (response) {
+                try {
+                    const verifyResponse = await fetch('/orders/verify-razorpay-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            orderId,
+                            razorpayPaymentId: response.razorpay_payment_id,
+                            razorpaySignature: response.razorpay_signature,
+                        }),
+                    });
+
+                    const verifyResult = await verifyResponse.json();
+                    if (verifyResult.success) {
+                        Swal.fire({
+                            title: 'Success',
+                            text: 'Payment successful! Your order is confirmed.',
+                            icon: 'success',
+                            timer: 3500,
+                            timerProgressBar: true,
+                            showConfirmButton: false,
+                        }).then(() => {
+                            window.location.href = '/my-orders';
+                        });
+                    } else {
+                        Swal.fire('Error', 'Payment verification failed. Please contact support.', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Payment verification error. Try again.', 'error');
+                }
+            },
+            theme: {
+                color: "#3399cc",
+            },
         };
-      
+
         const razorpay = new Razorpay(options);
         razorpay.open();
-      }
+    }
 });
