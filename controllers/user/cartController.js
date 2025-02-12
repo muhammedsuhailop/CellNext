@@ -138,7 +138,7 @@ const loadCartPage = async (req, res) => {
         }
         req.session.cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
         cartItemCount = req.session.cartItemCount || 0;
-        userCart.total = Math.max(userCart.subTotal - couponDiscount, 0);
+        userCart.total = Math.max(userCart.subTotal - couponDiscount, 0) + cart.deliveryCharge;
         await userCart.save();
 
         res.render('cart', {
@@ -149,7 +149,8 @@ const loadCartPage = async (req, res) => {
             couponDiscount,
             outOfStockMessage,
             cartItemCount,
-            couponName
+            couponName,
+            deliveryCharge: userCart.deliveryCharge,
         });
     } catch (error) {
         console.error("Error loading cart:", error);
@@ -189,29 +190,31 @@ const addToCart = async (req, res) => {
 
         if (!cart) {
             cart = new Cart({ userId, items: [] });
-            await cart.save();
-            await User.findByIdAndUpdate(userId, { $push: { cart: cart._id } });
         }
 
-        const existingItem = cart.items.find(item =>
-            item.productId.toString() === productId && item.variantId === variantId
-        );
+        let itemExists = false;
 
-        if (existingItem) {
-            if (existingItem.quantity + quantity > 5) {
-                return res.status(400).json({
-                    success: false,
-                    message: `Maximum cart quantity: 5`,
-                });
+        cart.items = cart.items.map(item => {
+            if (item.productId.toString() === productId && item.variantId === variantId) {
+                itemExists = true;
+                if (item.quantity + quantity > 5) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Maximum cart quantity: 5`,
+                    });
+                }
+                if (item.quantity + quantity > variant.stock) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Item in cart! Insufficient stock`,
+                    });
+                }
+                item.quantity += quantity;
             }
-            if (existingItem.quantity + quantity > variant.stock) {
-                return res.status(400).json({
-                    success: false,
-                    message: `Item in cart! Insufficient stock`,
-                });
-            }
-            existingItem.quantity += quantity;
-        } else {
+            return item;
+        });
+
+        if (!itemExists) {
             cart.items.push({ productId, variantId, quantity });
         }
 
@@ -227,14 +230,18 @@ const addToCart = async (req, res) => {
         }
 
         cart.subTotal = cartSubTotal;
-        cart.total = cartSubTotal;
+        cart.deliveryCharge = cartSubTotal < 10000 ? 79 : 0;
+        cart.total = cart.subTotal + cart.deliveryCharge;
 
-        await cart.save();
+        const updatedCart = await cart.save();
+
+        console.log('after modiying cart:', updatedCart)
 
         const cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
         req.session.cartItemCount = cartItemCount;
 
         res.json({ success: true, message: 'Successfully added to cart.', cart });
+
     } catch (err) {
         console.error('Error adding to cart:', err);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -278,7 +285,8 @@ const removeProductFromCart = async (req, res) => {
         });
 
         updatedCart.subTotal = totalAmount;
-        updatedCart.total = totalAmount;
+        updatedCart.deliveryCharge = updatedCart.items.length === 0 ? 0 : (totalAmount < 10000 ? 79 : 0);
+        updatedCart.total = totalAmount + updatedCart.deliveryCharge;
 
         await updatedCart.save();
 

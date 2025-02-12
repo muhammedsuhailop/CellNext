@@ -115,8 +115,8 @@
           <h6>Discount codes</h6>
           <p id="couponMessage"></p>
           <% if (couponName && couponName !== 'NA') { %>
-          <div class="alert-square alert-success-square d-flex justify-content-between align-items-center">
-            <span>You've applied <strong><%= couponName %></strong> coupon</span>
+          <div class="alert-square special-notes-green d-flex justify-content-between align-items-center" id="couponForm">
+            <span>You've applied <b> <%= couponName %></b> coupon</span>
             <i id="removeCouponBtn" class='bx bx-x lead'></i>
           </div>
           <% } else { %>
@@ -136,7 +136,13 @@
             <% if (couponDiscount > 0) { %>
             <li>Coupon Discount <span class="coupon-discount">₹ <%= couponDiscount.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></span></li>
             <% } %>
-
+            <li>Delivery Charge
+              <% if (deliveryCharge === 0) { %>
+              <span class="delivery-charge"><s class="gray-text">₹ 79</s> 0.0</span>
+              <% } else { %>
+              <span class="delivery-charge">₹ <%= deliveryCharge.toFixed(1) %></span>
+              <% } %>
+            </li>
             <li>Total <span class="total">₹ <%= total.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></span></li>
           </ul>
 
@@ -145,6 +151,13 @@
           <% } else { %>
           <a href="/shop" class="primary-btn">Continue Shopping</a>
           <% } %>
+          <div class="mt-4">
+            <% if (deliveryCharge !== 0) { %>
+            <span class="special-notes-red">Orders above ₹ 10,000 qualify for free delivery.</span>
+            <% } else { %>
+            <span class="special-notes-green">Congratulations! Your cart qualifies for free delivery.</span>
+            <% } %>
+          </div>
         </div>
 
       </div>

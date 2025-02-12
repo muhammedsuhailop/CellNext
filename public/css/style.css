@@ -4841,3 +4841,28 @@ ol {
 	background: url('/img/CellNext.png') no-repeat center center fixed !important;
 	background-size: cover;
 }
+
+.gray-text {
+	color: gray;
+}
+
+.special-notes-red {
+	display: block;
+	background-color: #f8f9fa;
+	color: #d9534f;
+	font-size: 1rem;
+	font-weight: 600;
+	padding: 10px 15px;
+	border-left: 4px solid #d9534f;
+	margin-top: 10px;
+}
+
+.special-notes-green {
+	display: block;
+	background-color: #f1fdf4;
+	color: #28a745;
+	font-size: 1rem;
+	padding: 10px 15px;
+	border-left: 4px solid #28a745;
+	margin-top: 10px;
+}

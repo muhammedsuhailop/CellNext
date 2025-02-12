@@ -135,7 +135,9 @@ const placeOrder = async (req, res) => {
 
       couponDiscount = discountAmount;
       finalAmount = saleTotal - discountAmount;
+      deliveryCharge = finalAmount < 10000 ? 79 : 0;
       discountAmount = totalPrice - finalAmount;
+      finalAmount += deliveryCharge;
     }
 
     const newOrder = new Orders({
@@ -159,6 +161,7 @@ const placeOrder = async (req, res) => {
       couponApplied: validCoupon,
       couponDiscount: couponDiscount,
       coupon,
+      deliveryCharge,
       finalAmount,
       address: selectedAddress,
       additionalNote,

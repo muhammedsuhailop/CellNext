@@ -50,17 +50,16 @@ const getCheckout = async (req, res) => {
             return {
                 ...item,
                 name: product.productName,
-                price: variant.salePrice || variant.regularPrice,
-                total: (variant.salePrice || variant.regularPrice) * item.quantity,
+                price: variant.salePrice,
+                total: (variant.salePrice) * item.quantity,
                 quantity: item.quantity,
             };
         }).filter(item => item !== null);
 
         const subtotal = cartItems.reduce((sum, item) => sum + item.total, 0);
         const total = cart.total;
+        const deliveryCharge = cart.deliveryCharge;
         couponDiscount = subtotal - total;
-
-        console.log('Cart Items:', cartItems);
         const cartItemCount = req.session.cartItemCount || 0;
 
         res.render('checkout', {
@@ -72,6 +71,7 @@ const getCheckout = async (req, res) => {
             cartItemCount,
             couponName: couponName || 'NA',
             couponDiscount,
+            deliveryCharge
         })
     } catch (error) {
         console.error(error);

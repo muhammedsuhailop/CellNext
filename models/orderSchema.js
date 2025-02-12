@@ -55,11 +55,14 @@ const orderSchema = new Schema({
         type: Number,
         default: 0
     },
+    deliveryCharge: {
+        type: Number
+    },
     finalAmount: {
         type: Number,
         required: true,
         default: function () {
-            return this.totalPrice - this.discount;
+            return this.totalPrice - this.discount + this.deliveryCharge;
         }
     },
     address: {
