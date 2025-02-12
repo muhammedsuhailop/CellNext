@@ -104,7 +104,7 @@ const orderSchema = new Schema({
         },
         status: {
             type: String,
-            enum: ['Pending', 'Completed', 'Failed', 'Refunded', 'Partially Refunded'],
+            enum: ['Pending', 'Completed', 'Failed', 'Refunded', 'Partially Refunded', 'Cancelled'],
             default: 'Pending'
         },
         transactionId: {

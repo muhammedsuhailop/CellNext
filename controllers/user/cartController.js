@@ -41,7 +41,8 @@ const loadCartPage = async (req, res) => {
                 cartItemCount,
                 couponDiscount: 0,
                 couponName: 'NA',
-                outOfStockMessage
+                outOfStockMessage,
+                deliveryCharge: 0
             });
         }
 
@@ -150,7 +151,7 @@ const loadCartPage = async (req, res) => {
             outOfStockMessage,
             cartItemCount,
             couponName,
-            deliveryCharge: userCart.deliveryCharge,
+            deliveryCharge: userCart.deliveryCharge || 0,
         });
     } catch (error) {
         console.error("Error loading cart:", error);
