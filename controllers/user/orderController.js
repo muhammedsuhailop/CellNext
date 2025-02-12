@@ -66,7 +66,8 @@ const placeOrder = async (req, res) => {
     }
 
     let discountAmount = totalPrice - saleTotal;
-    let finalAmount = saleTotal;
+    let deliveryCharge = saleTotal < 10000 ? 79 : 0;
+    let finalAmount = saleTotal + deliveryCharge;
     let couponDiscount = 0;
     let coupon = cart.coupon
     let validCoupon = false;

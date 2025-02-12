@@ -337,6 +337,16 @@ const updateItemStatus = async (req, res) => {
 
                 if (userWallet) {
                     let refundAmount = item.salePrice * item.quantity;
+                    let newFinalAmount = order.finalAmount - refundAmount;
+
+                    if (newFinalAmount < 10000) {
+                        if (order.deliveryCharge === 0) {
+                            refundAmount -= 79;
+                            order.deliveryCharge = 79;
+                        }
+                    }
+
+                    refundAmount = Math.max(refundAmount, 0);
 
                     if (order.couponApplied) {
                         const coupon = await Coupon.findById(order.coupon);
