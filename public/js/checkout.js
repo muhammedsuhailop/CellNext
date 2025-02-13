@@ -336,8 +336,8 @@ window.addEventListener('load', function () {
                             razorpaySignature: response.razorpay_signature,
                         }),
                     });
-
                     const verifyResult = await verifyResponse.json();
+                    console.log('verifyResult', verifyResult);
                     if (verifyResult.success) {
                         Swal.fire({
                             title: 'Success',
@@ -359,9 +359,40 @@ window.addEventListener('load', function () {
             theme: {
                 color: "#3399cc",
             },
+            modal: {
+                ondismiss: function () {
+                    console.log('Razorpay payment window closed by user.');
+                }
+            }
         };
 
         const razorpay = new Razorpay(options);
+
+        razorpay.on('payment.failed', async function (response) {
+            console.log("Payment failed: ", response.error);
+            try {
+                const markResponse = await fetch('/orders/mark-payment-failed', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId })
+                });
+                const markResult = await markResponse.json();
+                console.log('Marked as failed:', markResult);
+            } catch (err) {
+                console.error("Error marking payment as failed:", err);
+            }
+            Swal.fire({
+                title: 'Payment Failed',
+                text: response.error.description || 'Payment could not be completed. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                razorpay.close();
+                window.location.href = '/my-orders';
+            });
+        });
+
         razorpay.open();
     }
+
 });

@@ -10,6 +10,7 @@ const path = require('path');
 const crypto = require("crypto");
 const Razorpay = require('razorpay');
 const PDFDocument = require('pdfkit');
+const axios = require('axios');
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY,
   key_secret: process.env.RAZORPAY_SECRET,
@@ -255,6 +256,8 @@ const placeOrder = async (req, res) => {
           payment_capture: 1
         });
 
+        console.log('==razorpayOrder==', razorpayOrder);
+
         newOrder.payment.transactionId = razorpayOrder.id;
         await newOrder.save();
         await User.findByIdAndUpdate(userId, { $push: { orderHistory: newOrder._id } });
@@ -282,36 +285,64 @@ const verifyRazorpayPayment = async (req, res) => {
   try {
     const { orderId, razorpayPaymentId, razorpaySignature } = req.body;
 
-    const order = await Orders.findById(orderId);
-    if (!order || order.payment.status !== 'Pending') {
-      return res.status(400).json({ success: false, message: 'Invalid or already processed order.' });
+    if (!razorpayPaymentId || !razorpayPaymentId.startsWith('pay_')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Razorpay payment ID'
+      });
     }
 
-    const razorpayOrderId = order.payment.transactionId;
+    const order = await Orders.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    if (order.payment.status === 'Completed') {
+      return res.status(400).json({ success: false, message: 'Order already processed.' });
+    }
 
     const secret = process.env.RAZORPAY_SECRET;
-    const data = razorpayOrderId + '|' + razorpayPaymentId;
-    const generatedSignature = crypto.createHmac('sha256', secret)
-      .update(data)
+    const razorpayOrderId = order.payment.transactionId;
+    const generatedSignature = crypto
+      .createHmac('sha256', secret)
+      .update(`${razorpayOrderId}|${razorpayPaymentId}`)
       .digest('hex');
 
-    console.log('Generated Signature:', generatedSignature);
-    console.log('Received Signature:', razorpaySignature);
 
     if (generatedSignature !== razorpaySignature) {
-      return res.status(400).json({ success: false, message: 'Payment verification failed. Signature mismatch.' });
+      order.payment.status = 'Failed';
+      await order.save();
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid payment signature'
+      });
     }
 
-    order.payment.status = 'Completed';
-    order.status = 'Placed';
-    order.orderItems = order.orderItems.map(item => {
-      item.itemStatus = 'Placed';
-      return item;
-    });
+    let payment;
+    try {
+      payment = await razorpay.payments.fetch(razorpayPaymentId);
+    } catch (err) {
+      console.error('Razorpay Fetch Payment API Error:', err);
+      console.error('Error Object:', JSON.stringify(err, null, 2));
+      order.payment.status = 'Failed';
+      await order.save();
+      return res.status(400).json({
+        success: false,
+        message: err.error?.description || 'Payment verification failed'
+      });
+    }
 
-    await order.save();
+    if (payment.status === 'captured') {
+      order.payment.status = 'Completed';
+      order.status = 'Placed';
 
-    const updateStock = async () => {
+      order.orderItems = order.orderItems.map(item => ({
+        ...item,
+        itemStatus: 'Placed'
+      }));
+
+      await order.save();
+
       for (const item of order.orderItems) {
         const product = await ProductV2.findById(item.productId);
         if (product) {
@@ -322,26 +353,54 @@ const verifyRazorpayPayment = async (req, res) => {
           }
         }
       }
-    };
 
-    await updateStock();
+      const userId = order.userId;
+      const user = await User.findById(userId).populate('cart');
+      if (user && user.cart && user.cart.length > 0) {
+        const cart = user.cart[0];
+        cart.items = [];
+        cart.coupon = null;
+        await cart.save();
+        req.session.cartItemCount = 0;
+      }
 
-    const userId = order.userId;
-    const user = await User.findById(userId).populate('cart');
-    if (user && user.cart && user.cart.length > 0) {
-      const cart = user.cart[0];
-      cart.items = [];
-      cart.coupon = null;
-      await cart.save();
-      req.session.cartItemCount = 0;
+    } else {
+      order.payment.status = 'Failed';
+      order.status = 'Pending';
+      await order.save();
+
+      return res.status(400).json({
+        success: false,
+        message: `Payment failed: ${payment.error_description || 'Unknown reason'}`
+      });
     }
 
-    res.json({ success: true, message: 'Payment verified and order confirmed.' });
+    res.json({ success: true, message: 'Payment verified' });
   } catch (error) {
-    console.error('Razorpay Payment Verification Error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    console.error('General Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+const markPaymentFailed = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const order = await Orders.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    order.payment.status = 'Failed';
+    order.status = 'Pending';
+    await order.save();
+
+    res.json({ success: true, message: 'Order marked as payment failed.' });
+  } catch (error) {
+    console.error('Error marking payment as failed:', error);
+    res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+}
+
 
 
 const loadOrderPage = async (req, res) => {
@@ -668,4 +727,5 @@ module.exports = {
   returnRequest,
   verifyRazorpayPayment,
   generateInvoicePDF,
+  markPaymentFailed,
 }
