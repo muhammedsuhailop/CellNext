@@ -80,6 +80,7 @@ router.patch('/orders/:orderId/cancel-item', userAuthAjax, orderController.cance
 router.patch('/orders/request-return', userAuthAjax, orderController.returnRequest);
 router.post('/orders/verify-razorpay-payment', userAuthAjax, orderController.verifyRazorpayPayment);
 router.post('/orders/mark-payment-failed', userAuthAjax, orderController.markPaymentFailed);
+router.put('/orders/retry-payment', userAuthAjax, orderController.retryPayment);
 router.get('/order/invoice/:id', userAuth, orderController.generateInvoicePDF);
 
 //Wallet

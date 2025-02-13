@@ -1,4 +1,6 @@
 <%- include('../../views/partials/user/header') %>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 
 <!-- Breadcrumb Section Begin -->
 <section class="breadcrumb-option">
@@ -158,6 +160,28 @@
                   <% }) %>
                 </tbody>
               </table>
+              <% if (order.status === 'Pending' && order.paymentMethod === 'razorpay' ) { %>
+              <% if (new Date() - new Date(order.invoiceDate) <= 24 * 60 * 60 * 1000) { %>
+              <div class="row  justify-content-between">
+                <div class="col-md-8 mx-2">
+                  <i>
+                    Payment retries are allowed within 24 hours of order initiation.
+                  </i>
+                </div>
+
+                <div class="col-md-2 mx-2">
+                  <button class="btn bg-info text-white btn-sm btn-action" onclick="retryPayment('<%= order._id %>')">Retry Payment</button>
+                </div>
+              </div>
+              <% } else { %>
+              <div class="row justify-content-center display-block">
+                <div class="col-md-12">
+                  <i>You can only retry your payment within 24 hours of order initiation.</i>
+                </div>
+              </div>
+
+              <% } %>
+              <% } %>
             </div>
             <% }) %>
 
@@ -261,6 +285,113 @@
   </div>
 </div>
 <!-- Search End -->
+
+<script>
+  async function retryPayment(orderId) {
+    try {
+      const response = await fetch(`/orders/retry-payment`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          orderId
+        })
+      });
+
+      const result = await response.json();
+      console.log('Retry Payment Response:', result);
+
+      if (!result.success) {
+        Swal.fire('Error', result.message, 'error');
+        return;
+      }
+
+      const options = {
+        key: result.key,
+        amount: result.finalAmount * 100,
+        currency: "INR",
+        name: "CellNext",
+        description: "Retry Order Payment",
+        order_id: result.razorpayOrderId,
+        image: '/img/CellNext.png',
+        handler: async function(response) {
+          try {
+            const verifyResponse = await fetch('/orders/verify-razorpay-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                orderId,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              }),
+            });
+
+            const verifyResult = await verifyResponse.json();
+            console.log('Payment Verification Response:', verifyResult);
+
+            if (verifyResult.success) {
+              Swal.fire({
+                title: 'Success',
+                text: 'Payment successful! Your order is confirmed.',
+                icon: 'success',
+                timer: 3500,
+                timerProgressBar: true,
+                showConfirmButton: false,
+              }).then(() => {
+                window.location.href = '/my-orders';
+              });
+            } else {
+              Swal.fire('Error', 'Payment verification failed. Please contact support.', 'error');
+            }
+          } catch (error) {
+            Swal.fire('Error', 'Payment verification error. Try again.', 'error');
+          }
+        },
+        theme: {
+          color: "#3399cc"
+        },
+      };
+
+      const razorpay = new Razorpay(options);
+
+      razorpay.on('payment.failed', async function(response) {
+        console.log("Payment failed: ", response.error);
+        try {
+          const markResponse = await fetch('/orders/mark-payment-failed', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              orderId
+            })
+          });
+          const markResult = await markResponse.json();
+          console.log('Marked as failed:', markResult);
+        } catch (err) {
+          console.error("Error marking payment as failed:", err);
+        }
+        Swal.fire({
+          title: 'Payment Failed',
+          text: response.error.description || 'Payment could not be completed. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          razorpay.close();
+          window.location.href = '/my-orders';
+        });
+      });
+
+      razorpay.open();
+    } catch (error) {
+      console.error('Error initiating retry payment:', error);
+      Swal.fire('Error', 'Something went wrong. Please try again later.', 'error');
+    }
+  }
+</script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {

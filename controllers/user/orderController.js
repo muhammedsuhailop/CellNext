@@ -440,16 +440,16 @@ const loadOrderPage = async (req, res) => {
             const variant = product.variants[item.variantId] || {};
             return {
               productId: item.productId,
-              productName: product.productName || "N/A",
+              productName: product.productName || "NA",
               variantDetails: {
-                color: variant.color || "N/A",
-                size: variant.size || "N/A",
+                color: variant.color || "NA",
+                size: variant.size || "NA",
                 salePrice: item.salePrice,
                 regularPrice: item.regularPrice,
               },
               quantity: item.quantity,
               itemStatus: item.itemStatus,
-              cancellationReason: item.cancellationReason || "N/A",
+              cancellationReason: item.cancellationReason || "NA",
               variantIndex: item.variantId,
             };
           })
@@ -473,6 +473,7 @@ const loadOrderPage = async (req, res) => {
           couponApplied: order.couponApplied,
           paymentMethod: order.payment.method,
           paymentStatus: order.payment.status,
+          invoiceDate: order.invoiceDate,
           address: order.address,
           user: order.userId,
           items: validItems,
@@ -502,9 +503,16 @@ const loadOrderPage = async (req, res) => {
 const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
+    const userId = req.session.user;
 
-    const order = await Orders.findById(orderId);
-    if (!order) return res.status(404).json({ message: "Order not found" });
+    const order = await Orders.findOne({ _id: orderId, userId });
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    if (order.userId.toString() !== userId.toString()) {
+      return res.status(403).json({ success: false, message: "Unauthorized access" });
+    }
 
     order.status = "Cancel Request";
 
@@ -525,9 +533,13 @@ const cancelItemOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { productId, variantIndex } = req.body;
+    const userId = req.session.user;
 
     const order = await Orders.findById(orderId);
     if (!order) return res.status(404).json({ message: "Order not found" });
+    if (order.userId.toString() !== userId.toString()) {
+      return res.status(403).json({ success: false, message: "Unauthorized access" });
+    }
 
     console.log(productId, variantIndex);
     console.log(order.orderItems);
@@ -716,6 +728,67 @@ const generateInvoicePDF = async (req, res) => {
   }
 };
 
+const retryPayment = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const order = await Orders.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (order.payment.status !== 'Failed' && order.payment.status !== 'Pending') {
+      return res.status(400).json({ success: false, message: 'This order is not eligible for retry' });
+    }
+
+    if (new Date() - new Date(order.invoiceDate) > 24 * 60 * 60 * 1000) {
+      return res.status(400).json({ success: false, message: 'Payment retries are allowed only within 24 hours of order initiation.' });
+    }
+
+    // Check stock availability before retrying payment
+    for (const item of order.orderItems) {
+      const product = await ProductV2.findById(item.productId);
+      if (!product) {
+        return res.status(400).json({ success: false, message: `Product not found: ${item.productId}` });
+      }
+
+      const variant = product.variants[item.variantId];
+      if (!variant || variant.stock < item.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient stock for product ${product.productName}`
+        });
+      }
+    }
+
+    // Create a new Razorpay order
+    const razorpayOrder = await razorpay.orders.create({
+      amount: order.finalAmount * 100, // Convert to paise
+      currency: 'INR',
+      receipt: `retry_${order._id}`,
+      payment_capture: 1
+    });
+
+    // Update order with new transaction details
+    order.payment.transactionId = razorpayOrder.id;
+    order.payment.status = 'Pending';
+    order.status = 'Pending';
+    await order.save();
+
+    return res.json({
+      success: true,
+      message: 'Payment retry initiated successfully.',
+      razorpayOrderId: razorpayOrder.id,
+      orderId: order._id,
+      key: process.env.RAZORPAY_KEY,
+    });
+
+  } catch (error) {
+    console.error('Error retrying payment:', error);
+    res.status(500).json({ success: false, message: 'Server error while retrying payment' });
+  }
+};
+
 
 
 
@@ -728,4 +801,5 @@ module.exports = {
   verifyRazorpayPayment,
   generateInvoicePDF,
   markPaymentFailed,
+  retryPayment,
 }
