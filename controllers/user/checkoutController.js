@@ -14,6 +14,12 @@ const getCheckout = async (req, res) => {
             return res.status(404).send('Cart not found');
         }
 
+        const validCart = cart.items.filter(item => item.quantity > 0);
+        if (validCart.length === 0) {
+            req.flash('message', 'Cannot proceed to checkout. Cart is empty or items are out of stock.');
+            res.redirect('/cart');
+        }
+
         const coupon = await Coupon.findById(cart.coupon);
         let couponName = null;
         if (coupon) {
@@ -31,6 +37,11 @@ const getCheckout = async (req, res) => {
 
             if (!product) {
                 console.error(`Product not found for ID: ${item.productId}`);
+                return null;
+            }
+
+            if (item.quantity === 0) {
+                console.error(`Ignoring as quantity is 0`);
                 return null;
             }
 

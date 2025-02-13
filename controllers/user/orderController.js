@@ -28,15 +28,15 @@ const placeOrder = async (req, res) => {
     const userId = req.session.user;
     const user = await User.findById(userId).populate('cart');
 
-    if (!user || !user.cart || user.cart.length === 0 || user.cart[0].items.length === 0) {
-      return res.status(400).json({ success: false, message: 'Your cart is empty or invalid.' });
-    }
-
     const cart = user.cart[0];
-    const cartItems = cart.items;
+    cartItems = cart.items.filter(item => item.quantity > 0);
     let subTotal = 0;
     let totalPrice = 0;
     let saleTotal = 0;
+
+    if (!user || !user.cart || user.cart.length === 0 || user.cart[0].items.length === 0 || cart.length === 0) {
+      return res.status(400).json({ success: false, message: 'Your cart is empty or invalid.' });
+    }
 
     const products = await ProductV2.find({
       '_id': { $in: cartItems.map(item => item.productId) }

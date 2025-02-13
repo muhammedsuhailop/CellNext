@@ -29,6 +29,14 @@
     <div class="row">
       <div class="col-lg-8">
         <div class="shopping__cart__table">
+          <% if (locals.message && message.length > 0) { %>
+          <div class="alert alert-danger alert-dismissible fade show " role="alert">
+            <span><%= message %></span>
+            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <% } %>
           <% if (typeof outOfStockMessage !== 'undefined' && outOfStockMessage) { %>
           <div class="alert alert-warning">
             <%= outOfStockMessage %>
@@ -149,7 +157,7 @@
 
           <a href="/checkout" class="primary-btn">Proceed to checkout</a>
           <div class="mt-4">
-            <% if (deliveryCharge !== 0) { %>
+            <% if (subTotal < 10000 ) { %>
             <span class="special-notes-red">Orders above ₹ 10,000 qualify for free delivery.</span>
             <% } else { %>
             <span class="special-notes-green">Congratulations! Your cart qualifies for free delivery.</span>

@@ -13,6 +13,7 @@ const loadCartPage = async (req, res) => {
 
         let outOfStockMessage = null;
         let cartItemCount = req.session.cartItemCount || 0;
+        const message = req.flash('message')[0];
 
         let userCart = cart;
         if (!userCart) {
@@ -42,7 +43,8 @@ const loadCartPage = async (req, res) => {
                 couponDiscount: 0,
                 couponName: 'NA',
                 outOfStockMessage,
-                deliveryCharge: 0
+                deliveryCharge: 0,
+                message: message,
             });
         }
 
@@ -54,6 +56,8 @@ const loadCartPage = async (req, res) => {
             if (!variant || variant.stock <= 0) {
                 item.quantity = 0;
                 outOfStockMessage = "Some items in your cart are out of stock and have been set to zero.";
+            } else if (item.quantity === 0 && variant.stock > 0) {
+                item.quantity = 1;
             }
 
             if (item.quantity > variant.stock) {
@@ -139,7 +143,12 @@ const loadCartPage = async (req, res) => {
         }
         req.session.cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
         cartItemCount = req.session.cartItemCount || 0;
-        userCart.total = Math.max(userCart.subTotal - couponDiscount, 0) + cart.deliveryCharge;
+        if (cartItems.length === 1 && cartItems[0].quantity === 0) {
+            userCart.deliveryCharge = 0;
+        } else {
+            userCart.deliveryCharge = userCart.subTotal - couponDiscount < 10000 ? 79 : 0;
+        }
+        userCart.total = Math.max(userCart.subTotal - couponDiscount, 0) + userCart.deliveryCharge;
         await userCart.save();
 
         res.render('cart', {
@@ -152,6 +161,7 @@ const loadCartPage = async (req, res) => {
             cartItemCount,
             couponName,
             deliveryCharge: userCart.deliveryCharge || 0,
+            message: message,
         });
     } catch (error) {
         console.error("Error loading cart:", error);
