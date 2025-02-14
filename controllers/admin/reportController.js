@@ -48,7 +48,7 @@ function buildDateFilter(filterType, startDate, endDate) {
 
 const loadSalesReport = async (req, res) => {
     try {
-        const { filterType, startDate, endDate, page = 1, limit = 10 } = req.query;
+        const { filterType, startDate, endDate, page = 1, limit = 10, searchQuery = '' } = req.query;
         let dateFilter = {};
 
         if (filterType && filterType !== "custom") {
@@ -85,6 +85,7 @@ const loadSalesReport = async (req, res) => {
             startDate,
             endDate,
             overallMetrics,
+            searchQuery,
             messages: {
                 success: successMessage.length > 0 ? successMessage[0] : null,
                 error: errorMessage.length > 0 ? errorMessage[0] : null,

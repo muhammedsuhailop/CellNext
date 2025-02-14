@@ -22,7 +22,7 @@
    <ul class="menu-inner py-1">
 
      <!-- Dashboard -->
-     <li class="menu-item <%= currentPath.startsWith('/admin/') ? 'active open' : '' %>">
+     <li class="menu-item <%= ['/admin/', '/admin/dashboard', '/admin/sales-report'].includes(currentPath) ? 'active open' : '' %>">
        <a href="/admin/" class="menu-link menu-toggle">
          <i class="menu-icon tf-icons bx bx-home-circle"></i>
          <div data-i18n="Layouts">Dashboard</div>
@@ -31,6 +31,13 @@
          <li class="menu-item <%= currentPath === '/admin/' ? 'active' : '' %>">
            <a href="/admin/" class="menu-link">
              <div data-i18n="Without menu">View Dashboard</div>
+           </a>
+         </li>
+       </ul>
+       <ul class="menu-sub">
+         <li class="menu-item <%= currentPath === '/admin/dashboard' ? 'active' : '' %>">
+           <a href="/admin/dashboard" class="menu-link">
+             <div data-i18n="Without menu">Dashboard</div>
            </a>
          </li>
        </ul>
