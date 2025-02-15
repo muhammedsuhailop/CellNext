@@ -70,7 +70,7 @@ router.delete('/coupons/delete-coupon', adminAuth, couponController.deleteCoupon
 router.get('/sales-report', adminAuth, reportControler.loadSalesReport);
 router.get('/sales-report/download-pdf', adminAuth, reportControler.downloadPDF);
 router.get('/sales-report/download-excel', adminAuth, reportControler.downloadExcel);
-router.get('/dashboard', dashboardController.loadBestSellingReports);
+router.get('/dashboard', dashboardController.loadDashboard);
 
 //Error-Page
 router.get('/error-page', adminController.loadError);

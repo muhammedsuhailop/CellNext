@@ -420,6 +420,10 @@ const updateItemStatus = async (req, res) => {
                                 (otherItem) => otherItem._id.toString() !== item._id.toString() && otherItem.itemStatus !== "Cancelled"
                             );
 
+                            const otherItemsCount = order.orderItems.filter(
+                                (otherItem) => otherItem._id.toString() !== item._id.toString() && otherItem.itemStatus !== "Cancelled"
+                            ).length;
+
 
                             let isCouponStillValid = await checkCouponValidity(
                                 remainingItems,
