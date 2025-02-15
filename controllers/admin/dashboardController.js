@@ -287,10 +287,12 @@ const loadDashboard = async (req, res) => {
                     delivered: { $sum: { $cond: [{ $eq: ["$orderItems.itemStatus", "Delivered"] }, 1, 0] } },
                     cancelled: { $sum: { $cond: [{ $eq: ["$orderItems.itemStatus", "Cancelled"] }, 1, 0] } },
                     returned: { $sum: { $cond: [{ $eq: ["$orderItems.itemStatus", "Returned"] }, 1, 0] } },
+                    cancelRequest: { $sum: { $cond: [{ $eq: ["$orderItems.itemStatus", "Cancel Request"] }, 1, 0] } },
+                    returnRequest: { $sum: { $cond: [{ $eq: ["$orderItems.itemStatus", "Return Request"] }, 1, 0] } },
                     inProcess: { $sum: { $cond: [{ $in: ["$orderItems.itemStatus", ["Pending", "Processing", "Cancel Request", "Return Request"]] }, 1, 0] } }
                 }
             },
-            { $project: { _id: 0, delivered: 1, cancelled: 1, inProcess: 1, returned: 1 } }
+            { $project: { _id: 0, delivered: 1, cancelled: 1, inProcess: 1, returned: 1, cancelRequest: 1, returnRequest: 1 } }
         ];
 
         const [bestSellingProducts,
@@ -342,6 +344,8 @@ const loadDashboard = async (req, res) => {
         }));
 
         const totalRevenue = fullRevenueData.reduce((acc, cur) => acc + cur.revenue, 0);
+
+        console.log('orderStatusData0', orderStatusData)
 
         res.render("dashboard", {
             bestSellingProducts,

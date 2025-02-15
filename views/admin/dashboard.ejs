@@ -70,6 +70,7 @@
               <div class="col-lg-4 mb-4">
                 <div class="row">
                   <div class="row">
+
                     <div class="col-6 mb-4">
                       <div class="card">
                         <div class="card-body">
@@ -78,9 +79,11 @@
                               <i class='bx bxs-package text-success fs-2'></i>
                             </div>
                           </div>
-                          <span class="d-block mb-1">Delivered</span>
-                          <h3 class="card-title text-nowrap mb-2"><%= orderStatusData[0].delivered %></h3>
-                          <small class="fw-semibold">Items</small>
+                          <a href="/admin/orders" class="text-secondary">
+                            <span class="d-block mb-1">Delivered</span>
+                            <h3 class="card-title text-nowrap mb-2"><%= orderStatusData[0].delivered %></h3>
+                            <small class="fw-semibold">Items</small>
+                          </a>
                         </div>
                       </div>
                     </div>
@@ -90,17 +93,19 @@
                         <div class="card-body">
                           <div class="card-title d-flex align-items-start justify-content-between">
                             <div class="avatar flex-shrink-0">
-                              <i class='bx bx-loader-circle text-primary fs-2'></i>
+                              <i class='bx bx-error text-danger fs-2'></i>
                             </div>
                           </div>
-                          <span class="d-block mb-1">In Process</span>
-                          <h3 class="card-title text-nowrap mb-2"><%= orderStatusData[0].inProcess %></h3>
-                          <small class="fw-semibold">Items</small>
+                          <a href="/admin/orders" class="text-secondary">
+                            <span class="d-block mb-1">Action Required</span>
+                            <h3 class="card-title text-nowrap mb-2"><%= orderStatusData[0].cancelRequest + orderStatusData[0].returnRequest %></h3>
+                            <small class="fw-semibold">Items</small>
                         </div>
+                        </a>
                       </div>
                     </div>
                   </div>
-                  <div class="col-6 mb-4">
+                  <div class="col-4 mb-4">
                     <div class="card">
                       <div class="card-body">
                         <div class="card-title d-flex align-items-start justify-content-between">
@@ -108,14 +113,16 @@
                             <i class='bx bx-arrow-back text-warning fs-2'></i>
                           </div>
                         </div>
-                        <span class="d-block mb-1">Returned</span>
-                        <h3 class="card-title text-nowrap mb-2"><%= orderStatusData[0].returned %></h3>
-                        <small class="fw-semibold">Items</small>
+                        <a href="/admin/orders" class="text-secondary">
+                          <span class="d-block mb-1">Returned</span>
+                          <h3 class="card-title text-nowrap mb-2"><%= orderStatusData[0].returned %></h3>
+                          <small class="fw-semibold">Items</small>
+                        </a>
                       </div>
                     </div>
                   </div>
 
-                  <div class="col-6 mb-4">
+                  <div class="col-4 mb-4">
                     <div class="card">
                       <div class="card-body">
                         <div class="card-title d-flex align-items-start justify-content-between">
@@ -123,150 +130,170 @@
                             <i class='bx bx-block text-danger fs-2'></i>
                           </div>
                         </div>
-                        <span class="d-block mb-1">Cancelled</span>
-                        <h3 class="card-title text-nowrap mb-2"><%= orderStatusData[0].cancelled %></h3>
-                        <small class="fw-semibold">Items</small>
+                        <a href="/admin/orders" class="text-secondary">
+                          <span class="d-block mb-1">Cancelled</span>
+                          <h3 class="card-title text-nowrap mb-2"><%= orderStatusData[0].cancelled %></h3>
+                          <small class="fw-semibold">Items</small>
+                        </a>
                       </div>
                     </div>
                   </div>
 
+                  <div class="col-4 mb-4">
+                    <div class="card">
+                      <div class="card-body">
+                        <div class="card-title d-flex align-items-start justify-content-between">
+                          <div class="avatar flex-shrink-0">
+                            <i class='bx bx-loader-circle text-primary fs-2'></i>
+                          </div>
+                        </div>
+                        <a href="/admin/orders" class="text-secondary">
+                          <span class="d-block mb-1">In Process</span>
+                          <h3 class="card-title text-nowrap mb-2"><%= orderStatusData[0].inProcess %></h3>
+                          <small class="fw-semibold">Items</small>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Second Row -->
+          <div class="row">
+            <!-- Best Selling Products -->
+            <div class="col-lg-6 mb-4">
+              <div class="card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                  <div class="card-title mb-0">
+                    <h5 class="m-0 me-2">Best Selling Products</h5>
+                    <small class="text-muted">Top 10 Products</small>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <ul class="p-0 m-0">
+                    <% bestSellingProducts.forEach(product => { %>
+                    <li class="d-flex mb-4 pb-1">
+                      <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-primary">
+                          <img src="<%=product.firstVariantImage %>" alt="">
+                        </span>
+                      </div>
+                      <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="me-2">
+                          <h6 class="mb-0"><%= product.productName %></h6>
+                          <small class="text-muted">Brand: <%= product.brand %></small>
+                        </div>
+                        <div class="user-progress">
+                          <small class="fw-semibold"><%= product.totalSold %> Sold</small>
+                        </div>
+                      </div>
+                    </li>
+                    <% }) %>
+                  </ul>
                 </div>
               </div>
             </div>
 
-            <!-- Second Row -->
-            <div class="row">
-              <!-- Best Selling Products -->
-              <div class="col-lg-6 mb-4">
-                <div class="card h-100">
-                  <div class="card-header d-flex align-items-center justify-content-between pb-0">
-                    <div class="card-title mb-0">
-                      <h5 class="m-0 me-2">Best Selling Products</h5>
-                      <small class="text-muted">Top 10 Products</small>
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <ul class="p-0 m-0">
-                      <% bestSellingProducts.forEach(product => { %>
-                      <li class="d-flex mb-4 pb-1">
-                        <div class="avatar flex-shrink-0 me-3">
-                          <span class="avatar-initial rounded bg-label-primary">
-                            <img src="<%=product.firstVariantImage %>" alt="">
-                          </span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                          <div class="me-2">
-                            <h6 class="mb-0"><%= product.productName %></h6>
-                            <small class="text-muted">Brand: <%= product.brand %></small>
-                          </div>
-                          <div class="user-progress">
-                            <small class="fw-semibold"><%= product.totalSold %> Sold</small>
-                          </div>
-                        </div>
-                      </li>
-                      <% }) %>
-                    </ul>
-                  </div>
+            <!-- Best Selling Categories (Graph) -->
+            <div class="col-lg-6 mb-4">
+              <div class="card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                  <h5 class="m-0">Best Selling Categories</h5>
                 </div>
-              </div>
-
-              <!-- Best Selling Categories (Graph) -->
-              <div class="col-lg-6 mb-4">
-                <div class="card h-100">
-                  <div class="card-header d-flex align-items-center justify-content-between">
-                    <h5 class="m-0">Best Selling Categories</h5>
-                  </div>
-                  <div class="card-body">
-                    <canvas id="bestSellingChart"></canvas>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Third Row -->
-            <div class="row">
-              <!-- Best Selling Brands -->
-              <div class="col-lg-6 mb-4">
-                <div class="card h-100">
-                  <div class="card-header d-flex align-items-center justify-content-between pb-0">
-                    <div class="card-title mb-0">
-                      <h5 class="m-0 me-2">Best Selling Brands</h5>
-                      <small class="text-muted">Top 10 Brands</small>
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <ul class="p-0 m-0">
-                      <% bestSellingBrands.forEach(brand => { %>
-                      <li class="d-flex mb-4 pb-1">
-                        <div class="avatar flex-shrink-0 me-3">
-                          <span class="">
-                            <img src="<%=brand.brandImage %>" alt="" style="object-fit: contain; width: 100%; height: 100%;">
-                          </span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                          <div class="me-2">
-                            <h6 class="mb-0"><%= brand._id %></h6>
-                          </div>
-                          <div class="user-progress">
-                            <small class="fw-semibold"><%= brand.totalSold %> Products Sold</small>
-                          </div>
-                        </div>
-                      </li>
-                      <% }) %>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Best Selling Categories (List) -->
-              <div class="col-lg-6 mb-4">
-                <div class="card h-100">
-                  <div class="card-header d-flex align-items-center justify-content-between pb-0">
-                    <div class="card-title mb-0">
-                      <h5 class="m-0 me-2">Best Selling Categories</h5>
-                      <small class="text-muted">Top 10 Categories</small>
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <ul class="p-0 m-0">
-                      <% bestSellingCategories.forEach(cat => { %>
-                      <li class="d-flex mb-4 pb-1">
-                        <div class="avatar flex-shrink-0 me-3">
-                          <span class="">
-                            <img src="<%=cat.firstVariantImage %>" alt="" style="object-fit: contain; width: 100%; height: 100%;">
-                          </span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                          <div class="me-2">
-                            <h6 class="mb-0"><%= cat.categoryName %></h6>
-                          </div>
-                          <div class="user-progress">
-                            <small class="fw-semibold"><%= cat.totalSold %> Products Sold</small>
-                          </div>
-                        </div>
-                      </li>
-                      <% }) %>
-                    </ul>
-                  </div>
+                <div class="card-body">
+                  <canvas id="bestSellingChart"></canvas>
                 </div>
               </div>
             </div>
           </div>
-          <!-- / Content -->
 
-          <!-- Footer -->
-          <%- include('../../views/partials/admin/footer') %>
-          <!-- / Footer -->
+          <!-- Third Row -->
+          <div class="row">
+            <!-- Best Selling Brands -->
+            <div class="col-lg-6 mb-4">
+              <div class="card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                  <div class="card-title mb-0">
+                    <h5 class="m-0 me-2">Best Selling Brands</h5>
+                    <small class="text-muted">Top 10 Brands</small>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <ul class="p-0 m-0">
+                    <% bestSellingBrands.forEach(brand => { %>
+                    <li class="d-flex mb-4 pb-1">
+                      <div class="avatar flex-shrink-0 me-3">
+                        <span class="">
+                          <img src="<%=brand.brandImage %>" alt="" style="object-fit: contain; width: 100%; height: 100%;">
+                        </span>
+                      </div>
+                      <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="me-2">
+                          <h6 class="mb-0"><%= brand._id %></h6>
+                        </div>
+                        <div class="user-progress">
+                          <small class="fw-semibold"><%= brand.totalSold %> Products Sold</small>
+                        </div>
+                      </div>
+                    </li>
+                    <% }) %>
+                  </ul>
+                </div>
+              </div>
+            </div>
 
-          <div class="content-backdrop fade"></div>
+            <!-- Best Selling Categories (List) -->
+            <div class="col-lg-6 mb-4">
+              <div class="card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                  <div class="card-title mb-0">
+                    <h5 class="m-0 me-2">Best Selling Categories</h5>
+                    <small class="text-muted">Top 10 Categories</small>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <ul class="p-0 m-0">
+                    <% bestSellingCategories.forEach(cat => { %>
+                    <li class="d-flex mb-4 pb-1">
+                      <div class="avatar flex-shrink-0 me-3">
+                        <span class="">
+                          <img src="<%=cat.firstVariantImage %>" alt="" style="object-fit: contain; width: 100%; height: 100%;">
+                        </span>
+                      </div>
+                      <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="me-2">
+                          <h6 class="mb-0"><%= cat.categoryName %></h6>
+                        </div>
+                        <div class="user-progress">
+                          <small class="fw-semibold"><%= cat.totalSold %> Products Sold</small>
+                        </div>
+                      </div>
+                    </li>
+                    <% }) %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <!-- Content wrapper -->
-      </div>
-      <!-- / Layout page -->
-    </div>
+        <!-- / Content -->
 
-    <!-- Overlay -->
-    <div class="layout-overlay layout-menu-toggle"></div>
+        <!-- Footer -->
+        <%- include('../../views/partials/admin/footer') %>
+        <!-- / Footer -->
+
+        <div class="content-backdrop fade"></div>
+      </div>
+      <!-- Content wrapper -->
+    </div>
+    <!-- / Layout page -->
+  </div>
+
+  <!-- Overlay -->
+  <div class="layout-overlay layout-menu-toggle"></div>
   </div>
   <!-- / Layout wrapper -->
 

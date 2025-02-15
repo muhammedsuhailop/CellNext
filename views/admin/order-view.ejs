@@ -114,11 +114,10 @@
               <!-- General Buttons -->
               <div class="mt-4">
                 <button class="btn btn-primary" onclick="updateOrderStatus('<%= order.orderId %>', 'Shipped')">Mark as Shipped</button>
-                <button class="btn btn-success" onclick="updateOrderStatus('<%= order.orderId %>', 'Delivered')">Mark as Delivered</button>
               </div>
               <% } %>
             </div>
-
+            <%- include('../../views/partials/admin/footer') %>
           </div>
           <!-- Content wrapper -->
         </div>
@@ -130,7 +129,7 @@
   </div>
   <!-- / Layout wrapper -->
 
-  <%- include('../../views/partials/admin/footer') %>
+
 
   <script>
     // Function to update item status

@@ -42,13 +42,8 @@ async function fetchSalesData({ filterType, startDate, endDate, skip = 0, limit 
         dateFilter.createdOn = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    const pipeline = [
-        {
-            $match: {
-                ...dateFilter,
-                status: { $nin: ["Pending", "Processing", "Cancelled", "Returned"] }
-            }
-        },
+    const basePipeline = [
+        { $match: { ...dateFilter, status: { $nin: ["Pending", "Processing", "Cancelled", "Returned"] } } },
         {
             $group: {
                 _id: {
@@ -61,22 +56,10 @@ async function fetchSalesData({ filterType, startDate, endDate, skip = 0, limit 
                 totalDiscount: { $sum: "$discount" },
                 totalRevenue: { $sum: "$finalAmount" },
                 couponAppliedCount: {
-                    $sum: {
-                        $cond: {
-                            if: { $eq: ["$couponApplied", true] },
-                            then: 1,
-                            else: 0
-                        }
-                    }
+                    $sum: { $cond: { if: { $eq: ["$couponApplied", true] }, then: 1, else: 0 } }
                 },
                 couponDiscount: {
-                    $sum: {
-                        $cond: {
-                            if: { $eq: ["$couponApplied", true] },
-                            then: "$couponDiscount",
-                            else: 0
-                        }
-                    }
+                    $sum: { $cond: { if: { $eq: ["$couponApplied", true] }, then: "$couponDiscount", else: 0 } }
                 }
             }
         },
@@ -84,13 +67,7 @@ async function fetchSalesData({ filterType, startDate, endDate, skip = 0, limit 
         {
             $project: {
                 _id: 0,
-                date: {
-                    $dateFromParts: {
-                        year: "$_id.year",
-                        month: "$_id.month",
-                        day: "$_id.day"
-                    }
-                },
+                date: { $dateFromParts: { year: "$_id.year", month: "$_id.month", day: "$_id.day" } },
                 totalOrders: 1,
                 totalSales: 1,
                 totalDiscount: 1,
@@ -101,12 +78,17 @@ async function fetchSalesData({ filterType, startDate, endDate, skip = 0, limit 
         }
     ];
 
+    const totalResults = await Orders.aggregate(basePipeline);
+    const totalSalesCount = totalResults.length;
+
     if (limit > 0) {
-        pipeline.push({ $skip: skip });
-        pipeline.push({ $limit: limit });
+        basePipeline.push({ $skip: skip });
+        basePipeline.push({ $limit: limit });
     }
 
-    return await Orders.aggregate(pipeline);
+    const paginatedResults = await Orders.aggregate(basePipeline);
+
+    return { paginatedResults, totalSalesCount };
 }
 
 

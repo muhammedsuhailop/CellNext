@@ -48,12 +48,16 @@ function buildDateFilter(filterType, startDate, endDate) {
 
 const loadSalesReport = async (req, res) => {
     try {
-        const { filterType, startDate, endDate, page = 1, limit = 10, searchQuery = '' } = req.query;
+        let { filterType, startDate, endDate, page = 1, limit = 10, searchQuery = '' } = req.query;
         let dateFilter = {};
 
+        const pageNumber = Math.max(1, parseInt(page) || 1);
+        const pageSize = Math.max(1, parseInt(limit) || 10);
+        const skip = (pageNumber - 1) * pageSize;
+
         if (filterType && filterType !== "custom") {
-            const { startDate, endDate } = getDateRange(filterType);
-            dateFilter.createdOn = { $gte: startDate, $lte: endDate };
+            const { startDate: rangeStart, endDate: rangeEnd } = getDateRange(filterType);
+            dateFilter.createdOn = { $gte: rangeStart, $lte: rangeEnd };
         } else if (startDate && endDate) {
             dateFilter.createdOn = {
                 $gte: new Date(startDate),
@@ -61,24 +65,17 @@ const loadSalesReport = async (req, res) => {
             };
         }
 
-        const pageNumber = parseInt(page) || 1;
-        const pageSize = parseInt(limit) || 10;
-        const skip = (pageNumber - 1) * pageSize;
-
-        const salesData = await fetchSalesData({ filterType, startDate, endDate, skip, limit: pageSize });
-        console.log('salesData', salesData)
+        const { paginatedResults, totalSalesCount } = await fetchSalesData({ filterType, startDate, endDate, skip, limit: pageSize });
 
         const overallMetrics = await fetchOverallSalesData(dateFilter);
-        console.log('overallMetrics', overallMetrics)
 
-        const totalSalesCount = await Orders.countDocuments({ ...dateFilter, status: "Placed" });
-        const totalPages = Math.ceil(totalSalesCount / pageSize);
+        const totalPages = Math.max(1, Math.ceil(totalSalesCount / pageSize));
 
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
 
         res.render("sales-report", {
-            salesData,
+            salesData: paginatedResults,
             currentPage: pageNumber,
             totalPages,
             filterType,
@@ -95,7 +92,9 @@ const loadSalesReport = async (req, res) => {
         console.error("Error fetching sales report:", error);
         res.status(500).send("Internal Server Error");
     }
-}
+};
+
+
 
 const downloadPDF = async (req, res) => {
     try {
@@ -114,9 +113,10 @@ const downloadPDF = async (req, res) => {
             };
         }
 
-        const salesData = await fetchSalesData({ filterType, startDate, endDate });
+        // const salesData = await fetchSalesData({ filterType, startDate, endDate });
+        const { paginatedResults } = await fetchSalesData({ filterType, startDate, endDate });
 
-        if (salesData.length === 0) {
+        if (paginatedResults.length === 0) {
             return res.status(404).send('No sales data found for the selected filter.');
         }
 
@@ -183,7 +183,7 @@ const downloadPDF = async (req, res) => {
         ], y, true);
         doc.moveDown(0.5);
 
-        salesData.forEach((sale) => {
+        paginatedResults.forEach((sale) => {
             y = drawRow([
                 new Date(sale.date).toLocaleDateString(),
                 `${sale.totalOrders}`,
@@ -225,8 +225,8 @@ const downloadExcel = async (req, res) => {
             };
         }
 
-        const salesData = await fetchSalesData({ filterType, startDate, endDate });
-        if (salesData.length === 0) {
+        const { paginatedResults } = await fetchSalesData({ filterType, startDate, endDate });
+        if (paginatedResults.length === 0) {
             return res.status(404).send('No sales data found for the selected filter.');
         }
 
@@ -241,7 +241,7 @@ const downloadExcel = async (req, res) => {
             { header: 'Coupon Applied', key: 'couponApplied', width: 15 }
         ];
 
-        salesData.forEach(sale => {
+        paginatedResults.forEach(sale => {
             worksheet.addRow({
                 invoiceDate: new Date(sale.invoiceDate || sale.date).toLocaleDateString(),
                 totalOrders: sale.totalOrders || 'N/A',
