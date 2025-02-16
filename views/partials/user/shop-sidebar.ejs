@@ -18,7 +18,7 @@
                 <ul class="nice-scroll">
                   <% categoriesWithIds.forEach(category => { %>
                   <li>
-                    <a href="/filter?category=<%= category._id %>">
+                    <a href="/filter?category=<%= category.name %>" class="<%= selectedFilters.category === category.name ? 'active' : '' %>">
                       <%= category.name %>
                     </a>
                   </li>
@@ -38,7 +38,11 @@
               <div class="shop__sidebar__brand">
                 <ul>
                   <% brand.forEach(brand => { %>
-                  <li><a href="/filter?brand=<%= brand._id %>"><%= brand.brandName %></a></li>
+                  <li>
+                    <a href="/filter?brand=<%= brand.brandName %>" class="<%= selectedFilters.brand === brand.brandName ? 'active' : '' %>">
+                      <%= brand.brandName %>
+                    </a>
+                  </li>
                   <% }) %>
                 </ul>
               </div>
@@ -67,8 +71,15 @@
                     ]; 
                     priceRanges.forEach(priceRange => { 
                       const queryString = `gt=${priceRange.gt}&lt=${priceRange.lt}`; 
-                    %>
-                  <li><a href="/filterPrice?<%= queryString %>"><%= priceRange.label %></a></li>
+                      const isActive = selectedFilters.price && 
+                        selectedFilters.price.gt == priceRange.gt && 
+                        selectedFilters.price.lt == priceRange.lt;
+                  %>
+                  <li>
+                    <a href="/filterPrice?<%= queryString %>" class="<%= isActive ? 'active' : '' %>">
+                      <%= priceRange.label %>
+                    </a>
+                  </li>
                   <% }) %>
                 </ul>
               </div>

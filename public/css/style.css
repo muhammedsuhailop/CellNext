@@ -4866,3 +4866,10 @@ ol {
 	border-left: 4px solid #28a745;
 	margin-top: 10px;
 }
+
+.shop__sidebar__categories a.active,
+.shop__sidebar__brand a.active,
+.shop__sidebar__price a.active {
+	font-weight: bold;
+	color: #868b8e;
+}

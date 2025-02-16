@@ -387,6 +387,13 @@ const loadShopePage = async (req, res) => {
         const brands = await Brand.find({ isBlocked: false });
         const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
         const cartItemCount = req.session.cartItemCount || 0;
+        req.session.filters = {
+            category: null,
+            brand: null,
+            price: { gt: null, lt: null },
+        };
+        req.session.filteredProducts = null;
+        selectedFilters = req.session.filters;
 
 
         res.render('shop', {
@@ -397,7 +404,8 @@ const loadShopePage = async (req, res) => {
             currentPage: page,
             totalPages: totalPages,
             categoriesWithIds: categoriesWithIds,
-            cartItemCount
+            cartItemCount,
+            selectedFilters,
         });
     } catch (error) {
         console.error('Shope page error:', error);
@@ -408,31 +416,40 @@ const loadShopePage = async (req, res) => {
 const filterProduct = async (req, res) => {
     try {
         const user = req.session.user;
-        const category = req.query.category;
-        const brand = req.query.brand;
 
-        console.log('Query Parameters:', { category, brand });
+        if (!req.session.filters) {
+            req.session.filters = {
+                category: null,
+                brand: null,
+                price: { gt: null, lt: null },
+            };
+        }
+
+
+        const categoryName = req.query.category || req.session.filters.category;
+        const brandName = req.query.brand || req.session.filters.brand;
+        const priceGt = req.query.gt !== undefined ? req.query.gt : req.session.filters.price.gt;
+        const priceLt = req.query.lt !== undefined ? req.session.filters.price.lt : req.session.filters.price.lt;
+
+        req.session.filters = { category: categoryName, brand: brandName, price: { gt: priceGt, lt: priceLt } };
+
+        console.log('Applied Filters:', req.session.filters);
 
         const blockedBrandNames = await Brand.find({ isBlocked: true }).select('brandName');
-        const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
+        const blockedBrandList = blockedBrandNames.map((b) => b.brandName);
 
-        const findCategory = category ? await Category.findOne({ _id: category }) : null;
-        const findBrand = brand ? await Brand.findOne({ _id: brand }) : null;
+        const findCategory = categoryName ? await Category.findOne({ name: categoryName }) : null;
+        const findBrand = brandName ? await Brand.findOne({ brandName }) : null;
 
-        console.log('Found Category:', findCategory);
-        console.log('Found Brand:', findBrand);
+        // console.log('Found Category:', findCategory);
+        // console.log('Found Brand:', findBrand);
 
         const brands = await Brand.find({}).lean();
 
-        const query = { isBlocked: false, brand: { $nin: blockedBrandList } };
+        let query = { isBlocked: false, brand: { $nin: blockedBrandList } };
 
-        if (findCategory) {
-            query.category = findCategory._id;
-        }
-
-        if (findBrand) {
-            query.brand = findBrand.brandName;
-        }
+        if (findCategory) query.category = findCategory._id;
+        if (findBrand) query.brand = findBrand.brandName;
 
         const findProducts = await ProductV2.find(query).lean();
 
@@ -440,27 +457,34 @@ const filterProduct = async (req, res) => {
             console.log('No products found for the given filters.');
         }
 
-        const allVariants = findProducts.flatMap(product =>
-            product.variants.map(variant => ({
-                _id: product._id,
-                productName: product.productName,
-                description: product.description,
-                brand: product.brand,
-                category: product.category,
-                productOffer: product.productOffer,
-                variantColor: variant.color,
-                variantSize: variant.size,
-                variantStorage: variant.storage,
-                variantRegularPrice: variant.regularPrice,
-                variantSalePrice: variant.salePrice,
-                variantStock: variant.stock,
-                variantImages: variant.images,
-                createdAt: product.createdAt,
-                updatedAt: product.updatedAt,
-            }))
+        let allVariants = findProducts.flatMap(product =>
+            product.variants
+                .filter(variant =>
+                    (!priceGt || variant.salePrice > priceGt) &&
+                    (!priceLt || variant.salePrice < priceLt)
+                )
+                .map(variant => ({
+                    _id: product._id,
+                    productName: product.productName,
+                    description: product.description,
+                    brand: product.brand,
+                    category: product.category,
+                    productOffer: product.productOffer,
+                    variantColor: variant.color,
+                    variantSize: variant.size,
+                    variantStorage: variant.storage,
+                    variantRegularPrice: variant.regularPrice,
+                    variantSalePrice: variant.salePrice,
+                    variantStock: variant.stock,
+                    variantImages: variant.images,
+                    createdAt: product.createdAt,
+                    updatedAt: product.updatedAt,
+                }))
         );
 
         allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        req.session.filteredProducts = allVariants;
 
         const itemsPerPage = 6;
         const currentPage = parseInt(req.query.page) || 1;
@@ -487,8 +511,8 @@ const filterProduct = async (req, res) => {
             }
         }
 
-        req.session.filteredProducts = allVariants;
         const cartItemCount = req.session.cartItemCount || 0;
+        selectedFilters = req.session.filters;
 
         res.render('shop', {
             user: userData,
@@ -497,11 +521,12 @@ const filterProduct = async (req, res) => {
             brand: brands,
             totalPages,
             currentPage,
-            selectedCategory: category,
-            categoriesWithIds: categoriesWithIds,
-            selectedBrand: brand || null,
-            totalProducts: totalProducts,
+            selectedCategory: categoryName,
+            categoriesWithIds,
+            selectedBrand: brandName || null,
+            totalProducts,
             cartItemCount,
+            selectedFilters
         });
 
     } catch (error) {
@@ -511,44 +536,73 @@ const filterProduct = async (req, res) => {
 };
 
 
+
 const filterByPrice = async (req, res) => {
     try {
         const user = req.session.user;
         const userData = user ? await User.findOne({ _id: user }) : null;
 
-        const brands = await Brand.find({}).lean();
-        const categories = await Category.find({ isListed: true }).lean();
-        const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+        if (!req.session.filters) {
+            req.session.filters = {
+                category: null,
+                brand: null,
+                price: { gt: null, lt: null },
+            };
+        }
+
+        const priceGt = req.query.gt !== undefined ? req.query.gt : req.session.filters.price.gt;
+        const priceLt = req.query.lt !== undefined ? req.query.lt : req.session.filters.price.lt;
+        req.session.filters.price = { gt: priceGt, lt: priceLt };
+
+        console.log('Applied Filters:', req.session.filters);
+
         const blockedBrandNames = await Brand.find({ isBlocked: true }).select('brandName');
         const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
 
-        const products = await ProductV2.find({
-            isBlocked: false,
-            brand: { $nin: blockedBrandList }
-        }).lean();
+        let allVariants = req.session.filteredProducts || [];
 
-        const allVariants = products.flatMap(product =>
-            product.variants
-                .filter(variant => variant.salePrice > req.query.gt && variant.salePrice < req.query.lt)
-                .map(variant => ({
-                    _id: product._id,
-                    productName: product.productName,
-                    description: product.description,
-                    brand: product.brand,
-                    category: product.category,
-                    variantColor: variant.color,
-                    variantSize: variant.size,
-                    variantStorage: variant.storage,
-                    variantRegularPrice: variant.regularPrice,
-                    variantSalePrice: variant.salePrice,
-                    variantStock: variant.stock,
-                    variantImages: variant.images,
-                    createdAt: product.createdAt,
-                    updatedAt: product.updatedAt,
-                }))
-        );
+        if (allVariants.length > 0) {
+            allVariants = allVariants.filter(variant =>
+                (!priceGt || variant.variantSalePrice > priceGt) &&
+                (!priceLt || variant.variantSalePrice < priceLt)
+            );
+        } else {
+            let query = {
+                isBlocked: false,
+                brand: { $nin: blockedBrandList }
+            };
 
-        allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const products = await ProductV2.find(query).lean();
+
+            allVariants = products.flatMap(product =>
+                product.variants
+                    .filter(variant =>
+                        (!priceGt || variant.salePrice > priceGt) &&
+                        (!priceLt || variant.salePrice < priceLt)
+                    )
+                    .map(variant => ({
+                        _id: product._id,
+                        productName: product.productName,
+                        description: product.description,
+                        brand: product.brand,
+                        category: product.category,
+                        variantColor: variant.color,
+                        variantSize: variant.size,
+                        variantStorage: variant.storage,
+                        variantRegularPrice: variant.regularPrice,
+                        variantSalePrice: variant.salePrice,
+                        variantStock: variant.stock,
+                        variantImages: variant.images,
+                        createdAt: product.createdAt,
+                        updatedAt: product.updatedAt,
+                    }))
+            );
+
+            allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        }
+
+        req.session.filteredProducts = allVariants;
 
         const itemsPerPage = 6;
         const currentPage = parseInt(req.query.page) || 1;
@@ -558,8 +612,12 @@ const filterByPrice = async (req, res) => {
         const totalPages = Math.ceil(totalProducts / itemsPerPage);
         const currentVariants = allVariants.slice(startIndex, endIndex);
 
-        req.session.filteredProducts = allVariants;
+        const brands = await Brand.find({}).lean();
+        const categories = await Category.find({ isListed: true }).lean();
+        const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+
         const cartItemCount = req.session.cartItemCount || 0;
+        selectedFilters = req.session.filters;
 
         res.render('shop', {
             user: userData,
@@ -568,9 +626,10 @@ const filterByPrice = async (req, res) => {
             brand: brands,
             totalPages,
             currentPage,
-            categoriesWithIds: categoriesWithIds,
-            totalProducts: totalProducts,
-            cartItemCount
+            categoriesWithIds,
+            totalProducts,
+            cartItemCount,
+            selectedFilters,
         });
 
     } catch (error) {
@@ -584,27 +643,36 @@ const searchProducts = async (req, res) => {
     try {
         const user = req.session.user;
         const userData = user ? await User.findOne({ _id: user }) : null;
-        const search = req.body.query;
+        const search = req.body.query?.trim() || "";
 
+        // Retrieve categories and brands
         const brands = await Brand.find({}).lean();
         const categories = await Category.find({ isListed: true }).lean();
         const categoryIds = categories.map(category => category._id.toString());
         const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+
+        // Retrieve blocked brands
         const blockedBrandNames = await Brand.find({ isBlocked: true }).select('brandName');
-        const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
+        const blockedBrandList = blockedBrandNames.map(brand => brand.brandName);
+        console.log('Applied Filters:', req.session.filters);
 
         let searchResult = [];
 
         if (req.session.filteredProducts && req.session.filteredProducts.length > 0) {
+            // Search within the session-stored products
             searchResult = req.session.filteredProducts.filter(product =>
-                product.productName.toLowerCase().includes(search.toLowerCase()));
+                product.productName.toLowerCase().includes(search.toLowerCase())
+            );
         } else {
-            const products = await ProductV2.find({
-                productName: { $regex: ".*" + search + ".*", $options: "i" },
+            // Query the database if session products are not available
+            let query = {
+                productName: { $regex: new RegExp(search, "i") },
                 isBlocked: false,
                 category: { $in: categoryIds },
-                brand: { $nin: blockedBrandList }
-            }).lean();
+                brand: { $nin: blockedBrandList },
+            };
+
+            const products = await ProductV2.find(query).lean();
 
             searchResult = products.flatMap(product =>
                 product.variants.map(variant => ({
@@ -620,15 +688,19 @@ const searchProducts = async (req, res) => {
                     variantSalePrice: variant.salePrice,
                     variantStock: variant.stock,
                     variantImages: variant.images,
-                    variantUpdatedAt: variant.updatedAt,
                     createdAt: product.createdAt,
                     updatedAt: product.updatedAt,
                 }))
             );
+
+            // Store results in session for faster access
+            req.session.filteredProducts = searchResult;
         }
 
-        searchResult.sort((a, b) => new Date(b.variantUpdatedAt) - new Date(a.variantUpdatedAt));
+        // Sort by last updated timestamp
+        searchResult.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
+        // Pagination
         const itemsPerPage = 6;
         const currentPage = parseInt(req.query.page) || 1;
         const totalProducts = searchResult.length;
@@ -636,6 +708,7 @@ const searchProducts = async (req, res) => {
         const endIndex = startIndex + itemsPerPage;
         const totalPages = Math.ceil(totalProducts / itemsPerPage);
         const currentProduct = searchResult.slice(startIndex, endIndex);
+
         const cartItemCount = req.session.cartItemCount || 0;
 
         res.render('shop', {
@@ -645,15 +718,17 @@ const searchProducts = async (req, res) => {
             brand: brands,
             totalPages,
             currentPage,
-            categoriesWithIds: categoriesWithIds,
-            totalProducts: totalProducts,
+            categoriesWithIds,
+            totalProducts,
             cartItemCount,
         });
+
     } catch (error) {
         console.error('Search error:', error);
         res.redirect('pageNotFound');
     }
 };
+
 
 
 module.exports = {
