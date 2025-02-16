@@ -4872,4 +4872,33 @@ ol {
 .shop__sidebar__price a.active {
 	font-weight: bold;
 	color: #868b8e;
+	font-size: 1.2rem;
+}
+
+.shop-button-clr {
+	width: 100%;
+	background-color: #f8f9fa;
+	color: #333;
+	font-size: 14px;
+	padding: 10px;
+	border: 1px solid #ccc;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	transition: background 0.3s, border-color 0.3s;
+}
+
+.shop-button-clr.active {
+	border: 2px solid #ccc;
+}
+
+.shop-button-clr:hover {
+	background-color: #e2e6ea;
+	border-color: #bbb;
+}
+
+.shop-button-clr .icon {
+	font-size: 16px;
 }

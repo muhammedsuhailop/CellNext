@@ -6,6 +6,11 @@
         <button type="submit"><span class="icon_search"></span></button>
       </form>
     </div>
+    <div class="shop__sidebar__search">
+      <button onclick="window.location.href='/shop'" class="shop-button-clr  <%= selectedFilters.category || selectedFilters.brand || selectedFilters.price.gt || selectedFilters.price.lt ? 'active' : '' %>">
+        <span class="icon"><i class='bx bxs-trash'></i></span> Clear Search & Filter Options
+      </button>
+    </div>
     <div class="shop__sidebar__accordion">
       <div class="accordion" id="accordionExample">
         <div class="card">
@@ -82,61 +87,6 @@
                   </li>
                   <% }) %>
                 </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-heading">
-            <a data-toggle="collapse" data-target="#collapseFour">Storage Size</a>
-          </div>
-          <div id="collapseFour" class="collapse show" data-parent="#accordionExample">
-            <div class="card-body">
-              <div class="shop__sidebar__size">
-                <% const sizes = ['64GB', '128GB', '256GB', '512GB', '1024GB']; %>
-                <% sizes.forEach(size => { %>
-                <label for="<%= size.toLowerCase() %>"><%= size %>
-                  <input type="radio" id="<%= size.toLowerCase() %>" name="size">
-                </label>
-                <% }) %>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-heading">
-            <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
-          </div>
-          <div id="collapseFive" class="collapse show" data-parent="#accordionExample">
-            <div class="card-body">
-              <div class="shop__sidebar__color">
-                <% const colors = ['red', 'blue', 'green', 'yellow', 'black', 'white', 'pink', 'purple', 'orange']; %>
-                <% colors.forEach((color, index) => { %>
-                <label class="c-<%= index + 1 %>" for="sp-<%= index + 1 %>">
-                  <input type="radio" id="sp-<%= index + 1 %>" name="color">
-                </label>
-                <% }) %>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-heading">
-            <a data-toggle="collapse" data-target="#collapseSix">Tags</a>
-          </div>
-          <div id="collapseSix" class="collapse show" data-parent="#accordionExample">
-            <div class="card-body">
-              <div class="shop__sidebar__tags">
-                <a href="#">Product</a>
-                <a href="#">Bags</a>
-                <a href="#">Shoes</a>
-                <a href="#">Fashio</a>
-                <a href="#">Clothing</a>
-                <a href="#">Hats</a>
-                <a href="#">Accessories</a>
               </div>
             </div>
           </div>
