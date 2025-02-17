@@ -357,6 +357,7 @@ const loadShopePage = async (req, res) => {
         req.session.filteredProducts = null;
         req.session.searchResult = null;
         req.session.sortBy = null;
+        req.session.search = null;
 
         const blockedBrandNames = await Brand.find({ isBlocked: true })
         const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
@@ -411,7 +412,8 @@ const loadShopePage = async (req, res) => {
             categoriesWithIds: categoriesWithIds,
             cartItemCount,
             selectedFilters,
-            sortBy: req.session.sortBy || null
+            sortBy: req.session.sortBy || null,
+            search: req.session.search || null,
         });
     } catch (error) {
         console.error('Shope page error:', error);
@@ -430,6 +432,14 @@ const filterProduct = async (req, res) => {
                 price: { gt: null, lt: null },
             };
         }
+
+        if (req.query.clearCategory) {
+            req.session.filters.category = null;
+        }
+        if (req.query.clearBrand) {
+            req.session.filters.brand = null;
+        }
+
 
         const categoryName = req.query.category || req.session.filters.category;
         const brandName = req.query.brand || req.session.filters.brand;
@@ -481,7 +491,7 @@ const filterProduct = async (req, res) => {
                         (!priceGt || variant.salePrice > priceGt) &&
                         (!priceLt || variant.salePrice < priceLt)
                     )
-                    .map(variant => ({
+                    .map((variant, variantIndex) => ({
                         _id: product._id,
                         productName: product.productName,
                         description: product.description,
@@ -497,6 +507,7 @@ const filterProduct = async (req, res) => {
                         variantImages: variant.images,
                         createdAt: product.createdAt,
                         updatedAt: product.updatedAt,
+                        variantNumber: variantIndex++,
                     }))
             );
         }
@@ -571,7 +582,8 @@ const filterProduct = async (req, res) => {
             totalProducts,
             cartItemCount,
             selectedFilters,
-            sortBy: req.session.sortBy || null
+            sortBy: req.session.sortBy || null,
+            search: req.session.search || null,
         });
 
     } catch (error) {
@@ -591,6 +603,10 @@ const filterByPrice = async (req, res) => {
                 brand: null,
                 price: { gt: null, lt: null },
             };
+        }
+
+        if (req.query.clearPrice) {
+            req.session.filters.price = { gt: null, lt: null };
         }
 
         const categoryName = req.query.category || req.session.filters.category;
@@ -638,7 +654,7 @@ const filterByPrice = async (req, res) => {
                         (!priceGt || variant.salePrice > priceGt) &&
                         (!priceLt || variant.salePrice < priceLt)
                     )
-                    .map(variant => ({
+                    .map((variant, variantIndex) => ({
                         _id: product._id,
                         productName: product.productName,
                         description: product.description,
@@ -654,6 +670,7 @@ const filterByPrice = async (req, res) => {
                         variantImages: variant.images,
                         createdAt: product.createdAt,
                         updatedAt: product.updatedAt,
+                        variantNumber: variantIndex++,
                     }))
             );
             const sortBy = req.session.sortBy || "newest";
@@ -714,6 +731,7 @@ const filterByPrice = async (req, res) => {
             cartItemCount,
             selectedFilters,
             sortBy: req.session.sortBy || null,
+            search: req.session.search || null,
         });
 
     } catch (error) {
@@ -742,6 +760,7 @@ const searchProducts = async (req, res) => {
         const userData = user ? await User.findOne({ _id: user }) : null;
 
         const search = req.session.searchQuery || "";
+        req.session.search = search;
 
         req.session.filters = {
             category: null,
@@ -768,7 +787,7 @@ const searchProducts = async (req, res) => {
         const products = await ProductV2.find(query).lean();
 
         let searchResult = products.flatMap(product =>
-            product.variants.map(variant => ({
+            product.variants.map((variant, variantIndex) => ({
                 _id: product._id,
                 productName: product.productName,
                 description: product.description,
@@ -784,6 +803,7 @@ const searchProducts = async (req, res) => {
                 createdAt: product.createdAt,
                 updatedAt: product.updatedAt,
                 sortBy: req.session.sortBy || null,
+                variantNumber: variantIndex++,
             }))
         );
 
@@ -839,6 +859,7 @@ const searchProducts = async (req, res) => {
             cartItemCount,
             selectedFilters: req.session.filters,
             sortBy: req.session.sortBy || null,
+            search: req.session.search || null,
         });
     } catch (error) {
         console.error('Search error:', error);
@@ -872,7 +893,7 @@ const sortShopProducts = async (req, res) => {
             }).lean();
 
             products = allProducts.flatMap(product =>
-                product.variants.map((variant) => ({
+                product.variants.map((variant, variantIndex) => ({
                     _id: product._id,
                     productName: product.productName,
                     description: product.description,
@@ -888,6 +909,7 @@ const sortShopProducts = async (req, res) => {
                     status: product.status,
                     createdAt: product.createdAt,
                     updatedAt: product.updatedAt,
+                    variantNumber: variantIndex++,
                 }))
             );
         }
@@ -940,6 +962,7 @@ const sortShopProducts = async (req, res) => {
             cartItemCount,
             selectedFilters: req.session.filters,
             sortBy: currentSortBy,
+            search: req.session.search || null,
         });
 
     } catch (error) {

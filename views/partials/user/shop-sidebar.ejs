@@ -2,15 +2,41 @@
   <div class="shop__sidebar">
     <div class="shop__sidebar__search">
       <form action="/search" method="POST">
-        <input type="text" placeholder="Search..." name="query">
+        <input type="text" placeholder="<%= search ? search : 'Search...'%>" name="query" class="<%= search ? 'active' : ''%>" value="<%= search ? search : ''%>">
         <button type="submit"><span class="icon_search"></span></button>
       </form>
     </div>
-    <div class="shop__sidebar__search">
-      <button onclick="window.location.href='/shop'" class="shop-button-clr  <%= selectedFilters.category || selectedFilters.brand || selectedFilters.price.gt || selectedFilters.price.lt ? 'active' : '' %>">
-        <span class="icon"><i class='bx bxs-trash'></i></span> Clear Search & Filter Options
-      </button>
+    <div class="filter-panel my-1">
+      <% if (search) { %>
+      <a href="/shop" class="btn btn-light btn-sm d-flex align-items-center">
+        Reset Search & Filter <i class='bx bx-x text-danger' style="font-size: 1.5rem;"></i>
+      </a>
+      <% } %>
+
+      <div class="filter-panel my-1 d-flex gap-2">
+
+        <% if (selectedFilters.category) { %>
+        <a href="/filter?clearCategory=true" class="btn btn-light btn-sm d-flex align-items-center">
+          <%= selectedFilters.category %> <i class='bx bx-x text-danger' style="font-size: 1.5rem;"></i>
+        </a>
+        <% } %>
+
+        <% if (selectedFilters.brand) { %>
+        <a href="/filter?clearBrand=true" class="btn btn-light btn-sm d-flex align-items-center">
+          <%= selectedFilters.brand %> <i class='bx bx-x text-danger' style="font-size: 1.5rem;"></i>
+        </a>
+        <% } %>
+      </div>
+      <div class="filter-panel my-1 d-flex gap-2">
+
+        <% if (selectedFilters.price.gt) { %>
+        <a href="/filterPrice?clearPrice=true" class="btn btn-light btn-sm d-flex align-items-center">
+          Reset Price <i class='bx bx-x text-danger' style="font-size: 1.5rem;"></i>
+        </a>
+        <% } %>
+      </div>
     </div>
+
     <div class="shop__sidebar__accordion">
       <div class="accordion" id="accordionExample">
 
@@ -77,6 +103,7 @@
           </div>
         </div>
 
+
         <div class="card">
           <div class="card-heading">
             <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
@@ -102,6 +129,7 @@
           <div class="card-heading">
             <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
           </div>
+
           <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
             <div class="card-body">
               <div class="shop__sidebar__price">

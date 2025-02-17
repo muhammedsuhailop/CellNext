@@ -1272,6 +1272,11 @@ ol {
 	height: 100%;
 }
 
+.shop__sidebar__search form input.active {
+	border: 2px solid #e5e5e5;
+	font-weight: 600;
+}
+
 .shop__sidebar__accordion .card {
 	border: none;
 	border-radius: 0;
@@ -4879,22 +4884,9 @@ ol {
 }
 
 .shop-button-clr {
-	width: 100%;
+	color: #212529;
 	background-color: #f8f9fa;
-	color: #b7b7b7;
-	font-size: 15px;
-	/* line-height: 32px; */
-	-webkit-transition: all, 0.3s;
-	-o-transition: all, 0.3s;
-	transition: all, 0.3s;
-	padding: 10px;
-	border: 1px solid #ccc;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	transition: background 0.3s, border-color 0.3s;
+	border-color: #f8f9fa;
 }
 
 .shop-button-clr.active {
@@ -4921,4 +4913,10 @@ ol {
 
 .shop__sidebar__sort a:hover {
 	color: #111111;
+}
+
+.filter-panel a {
+	color: #212529;
+	background-color: #f8f9fa;
+	border-color: #f8f9fa;
 }
