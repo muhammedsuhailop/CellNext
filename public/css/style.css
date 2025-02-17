@@ -1314,13 +1314,15 @@ ol {
 
 .shop__sidebar__categories ul li,
 .shop__sidebar__price ul li,
-.shop__sidebar__brand ul li {
+.shop__sidebar__brand ul li,
+.shop__sidebar__sort ul li {
 	list-style: none;
 }
 
 .shop__sidebar__categories ul li a,
 .shop__sidebar__price ul li a,
-.shop__sidebar__brand ul li a {
+.shop__sidebar__brand ul li a,
+.shop__sidebar__sort ul li button {
 	color: #b7b7b7;
 	font-size: 15px;
 	line-height: 32px;
@@ -1331,7 +1333,7 @@ ol {
 
 .shop__sidebar__categories ul li a:hover,
 .shop__sidebar__price ul li a:hover,
-.shop__sidebar__brand ul li a:hover {
+.shop__sidebar__brand ul li a:hover .shop__sidebar__sort ul li button:hover {
 	color: #111111;
 }
 
@@ -4869,7 +4871,8 @@ ol {
 
 .shop__sidebar__categories a.active,
 .shop__sidebar__brand a.active,
-.shop__sidebar__price a.active {
+.shop__sidebar__price a.active,
+.shop__sidebar__sort a.active {
 	font-weight: bold;
 	color: #868b8e;
 	font-size: 1.2rem;
@@ -4878,8 +4881,12 @@ ol {
 .shop-button-clr {
 	width: 100%;
 	background-color: #f8f9fa;
-	color: #333;
-	font-size: 14px;
+	color: #b7b7b7;
+	font-size: 15px;
+	/* line-height: 32px; */
+	-webkit-transition: all, 0.3s;
+	-o-transition: all, 0.3s;
+	transition: all, 0.3s;
 	padding: 10px;
 	border: 1px solid #ccc;
 	cursor: pointer;
@@ -4901,4 +4908,17 @@ ol {
 
 .shop-button-clr .icon {
 	font-size: 16px;
+}
+
+.shop__sidebar__sort a {
+	color: #b7b7b7;
+	font-size: 15px;
+	line-height: 32px;
+	-webkit-transition: all, 0.3s;
+	-o-transition: all, 0.3s;
+	transition: all, 0.3s;
+}
+
+.shop__sidebar__sort a:hover {
+	color: #111111;
 }

@@ -13,6 +13,44 @@
     </div>
     <div class="shop__sidebar__accordion">
       <div class="accordion" id="accordionExample">
+
+        <div class="card">
+          <div class="card-heading">
+            <a data-toggle="collapse" data-target="#collapseSort">Sort By</a>
+          </div>
+          <div id="collapseSort" class="collapse show" data-parent="#accordionExample">
+            <div class="card-body">
+              <div class="shop__sidebar__sort">
+                <form id="sortForm" action="/sort" method="GET">
+                  <ul>
+                    <li>
+                      <a href="/sort?sortBy=price-low-high" class="<%= sortBy === 'price-low-high' ? 'active' : '' %>">
+                        Price: Low to High
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/sort?sortBy=price-high-low" class="<%= sortBy === 'price-high-low' ? 'active' : '' %>">
+                        Price: High to Low
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/sort?sortBy=newest" class="<%= sortBy === 'newest' ? 'active' : '' %>">
+                        Newest Arrivals
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/sort?sortBy=oldest" class="<%= sortBy === 'oldest' ? 'active' : '' %>">
+                        Oldest First
+                      </a>
+                    </li>
+                  </ul>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
         <div class="card">
           <div class="card-heading">
             <a data-toggle="collapse" data-target="#collapseOne">Categories</a>

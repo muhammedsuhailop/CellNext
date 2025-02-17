@@ -355,6 +355,7 @@ const loadShopePage = async (req, res) => {
         };
         req.session.filteredProducts = null;
         req.session.searchResult = null;
+        req.session.sortBy = null;
 
         const blockedBrandNames = await Brand.find({ isBlocked: true })
         const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
@@ -409,6 +410,7 @@ const loadShopePage = async (req, res) => {
             categoriesWithIds: categoriesWithIds,
             cartItemCount,
             selectedFilters,
+            sortBy: req.session.sortBy || null
         });
     } catch (error) {
         console.error('Shope page error:', error);
@@ -498,7 +500,27 @@ const filterProduct = async (req, res) => {
             );
         }
 
-        allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const sortBy = req.session.sortBy || "newest"; // Default sort
+
+        switch (sortBy) {
+            case "price-low-high":
+                allVariants.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
+                break;
+            case "price-high-low":
+                allVariants.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
+                break;
+            case "newest":
+                allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                break;
+            case "oldest":
+                allVariants.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                break;
+            default:
+                break;
+        }
+
+
         req.session.filteredProducts = allVariants;
 
         const itemsPerPage = 6;
@@ -537,7 +559,8 @@ const filterProduct = async (req, res) => {
             selectedBrand: brandName || null,
             totalProducts,
             cartItemCount,
-            selectedFilters
+            selectedFilters,
+            sortBy: req.session.sortBy || null
         });
 
     } catch (error) {
@@ -622,7 +645,24 @@ const filterByPrice = async (req, res) => {
                         updatedAt: product.updatedAt,
                     }))
             );
-            allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const sortBy = req.session.sortBy || "newest";
+
+            switch (sortBy) {
+                case "price-low-high":
+                    allVariants.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
+                    break;
+                case "price-high-low":
+                    allVariants.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
+                    break;
+                case "newest":
+                    allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    break;
+                case "oldest":
+                    allVariants.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    break;
+                default:
+                    break;
+            }
         }
 
         req.session.filteredProducts = allVariants;
@@ -651,7 +691,8 @@ const filterByPrice = async (req, res) => {
             categoriesWithIds,
             totalProducts,
             cartItemCount,
-            selectedFilters
+            selectedFilters,
+            sortBy: req.session.sortBy || null,
         });
 
     } catch (error) {
@@ -721,12 +762,31 @@ const searchProducts = async (req, res) => {
                 variantImages: variant.images,
                 createdAt: product.createdAt,
                 updatedAt: product.updatedAt,
+                sortBy: req.session.sortBy || null,
             }))
         );
 
         req.session.searchResult = searchResult;
 
-        searchResult.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        // searchResult.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        const sortBy = req.session.sortBy || "newest";
+
+        switch (sortBy) {
+            case "price-low-high":
+                searchResult.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
+                break;
+            case "price-high-low":
+                searchResult.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
+                break;
+            case "newest":
+                searchResult.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                break;
+            case "oldest":
+                searchResult.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                break;
+            default:
+                break;
+        }
 
         const itemsPerPage = 6;
         const currentPage = parseInt(req.query.page) || 1;
@@ -747,12 +807,112 @@ const searchProducts = async (req, res) => {
             categoriesWithIds,
             totalProducts,
             cartItemCount,
+            selectedFilters: req.session.filters,
+            sortBy: req.session.sortBy || null,
         });
     } catch (error) {
         console.error('Search error:', error);
         res.redirect('pageNotFound');
     }
 };
+
+const sortShopProducts = async (req, res) => {
+    try {
+        const { sortBy } = req.query;
+        const user = req.session.user;
+        const userData = await User.findOne({ _id: user });
+
+        if (sortBy) {
+            req.session.sortBy = sortBy;
+        }
+
+        const currentSortBy = req.session.sortBy || "price-low-high";
+        let products = req.session.filteredProducts || req.session.searchResult;
+
+        if (!products || products.length === 0) {
+            const blockedBrandNames = await Brand.find({ isBlocked: true });
+            const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
+            const categories = await Category.find({ isListed: true });
+            const categoryIds = categories.map(category => category._id.toString());
+
+            const allProducts = await ProductV2.find({
+                isBlocked: false,
+                category: { $in: categoryIds },
+                brand: { $nin: blockedBrandList },
+            }).lean();
+
+            products = allProducts.flatMap(product =>
+                product.variants.map((variant) => ({
+                    _id: product._id,
+                    productName: product.productName,
+                    description: product.description,
+                    brand: product.brand,
+                    category: product.category,
+                    productOffer: product.productOffer,
+                    variantColor: variant.color,
+                    variantSize: variant.size,
+                    variantRegularPrice: variant.regularPrice,
+                    variantSalePrice: variant.salePrice,
+                    variantStock: variant.stock,
+                    variantImages: variant.images,
+                    status: product.status,
+                    createdAt: product.createdAt,
+                    updatedAt: product.updatedAt,
+                }))
+            );
+        }
+
+        // Apply sorting first
+        switch (currentSortBy) {
+            case "price-low-high":
+                products.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
+                break;
+            case "price-high-low":
+                products.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
+                break;
+            case "newest":
+                products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                break;
+            case "oldest":
+                products.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                break;
+            default:
+                break;
+        }
+
+        // Pagination logic
+        const page = parseInt(req.query.page) || 1;
+        const limit = 9;
+        const skip = (page - 1) * limit;
+        const paginatedProducts = products.slice(skip, skip + limit);
+        const totalPages = Math.ceil(products.length / limit);
+
+        // Fetch brands and categories
+        const brands = await Brand.find({ isBlocked: false });
+        const categories = await Category.find({ isListed: true });
+        const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+        const cartItemCount = req.session.cartItemCount || 0;
+
+        // Render the result
+        res.render("shop", {
+            user: userData,
+            products: paginatedProducts,
+            brand: brands,
+            totalProducts: products.length,
+            currentPage: page,
+            totalPages: totalPages,
+            categoriesWithIds: categoriesWithIds,
+            cartItemCount,
+            selectedFilters: req.session.filters,
+            sortBy: currentSortBy,
+        });
+
+    } catch (error) {
+        console.error("Sorting error:", error);
+        res.redirect("pageNotFound");
+    }
+};
+
 
 
 
@@ -773,5 +933,6 @@ module.exports = {
     filterByPrice,
     searchProducts,
     processSearch,
+    sortShopProducts,
 
 }
