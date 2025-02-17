@@ -121,7 +121,40 @@ async function fetchOverallSalesData(dateFilter) {
     }
 }
 
+
+const getPopularProducts = async () => {
+    try {
+        const month = new Date();
+        month.setDate(month.getDate() - 30);
+
+        const productSales = await Orders.aggregate([
+            {
+                $match: {
+                    status: { $nin: [] },
+                    createdOn: { $gte: month }
+                }
+            },
+            { $unwind: "$orderItems" },
+            {
+                $group: {
+                    _id: "$orderItems.productId",
+                    totalSold: { $sum: "$orderItems.quantity" }
+                }
+            }
+        ]);
+
+        const salesMap = new Map(productSales.map(sale => [sale._id.toString(), sale.totalSold]));
+
+        return salesMap;
+    } catch (error) {
+        console.error("Error fetching sales data:", error);
+        return new Map();
+    }
+};
+
+
 module.exports = {
     fetchSalesData,
-    fetchOverallSalesData
+    fetchOverallSalesData,
+    getPopularProducts,
 };

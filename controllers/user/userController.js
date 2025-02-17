@@ -7,6 +7,7 @@ const Wallet = require('../../models/walletSchema');
 const nodemailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
+const { getPopularProducts } = require('../../helpers/salesDataHelper');
 
 const loadHomePage = async (req, res) => {
     try {
@@ -503,21 +504,31 @@ const filterProduct = async (req, res) => {
         // allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         const sortBy = req.session.sortBy || "newest"; // Default sort
 
-        switch (sortBy) {
-            case "price-low-high":
-                allVariants.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
-                break;
-            case "price-high-low":
-                allVariants.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
-                break;
-            case "newest":
-                allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                break;
-            case "oldest":
-                allVariants.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                break;
-            default:
-                break;
+        if (sortBy === "popularity") {
+            const salesMap = await getPopularProducts();
+
+            allVariants.forEach(product => {
+                product.totalSold = salesMap.get(product._id.toString()) || 0;
+            });
+
+            allVariants.sort((a, b) => b.totalSold - a.totalSold);
+        } else {
+            switch (sortBy) {
+                case "price-low-high":
+                    allVariants.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
+                    break;
+                case "price-high-low":
+                    allVariants.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
+                    break;
+                case "newest":
+                    allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    break;
+                case "oldest":
+                    allVariants.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    break;
+                default:
+                    break;
+            }
         }
 
 
@@ -647,21 +658,31 @@ const filterByPrice = async (req, res) => {
             );
             const sortBy = req.session.sortBy || "newest";
 
-            switch (sortBy) {
-                case "price-low-high":
-                    allVariants.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
-                    break;
-                case "price-high-low":
-                    allVariants.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
-                    break;
-                case "newest":
-                    allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    break;
-                case "oldest":
-                    allVariants.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                    break;
-                default:
-                    break;
+            if (sortBy === "popularity") {
+                const salesMap = await getPopularProducts();
+
+                products.forEach(product => {
+                    product.totalSold = salesMap.get(product._id.toString()) || 0;
+                });
+
+                products.sort((a, b) => b.totalSold - a.totalSold);
+            } else {
+                switch (sortBy) {
+                    case "price-low-high":
+                        products.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
+                        break;
+                    case "price-high-low":
+                        products.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
+                        break;
+                    case "newest":
+                        products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                        break;
+                    case "oldest":
+                        products.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -768,24 +789,33 @@ const searchProducts = async (req, res) => {
 
         req.session.searchResult = searchResult;
 
-        // searchResult.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
         const sortBy = req.session.sortBy || "newest";
 
-        switch (sortBy) {
-            case "price-low-high":
-                searchResult.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
-                break;
-            case "price-high-low":
-                searchResult.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
-                break;
-            case "newest":
-                searchResult.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                break;
-            case "oldest":
-                searchResult.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                break;
-            default:
-                break;
+        if (sortBy === "popularity") {
+            const salesMap = await getPopularProducts();
+
+            products.forEach(product => {
+                product.totalSold = salesMap.get(product._id.toString()) || 0;
+            });
+
+            products.sort((a, b) => b.totalSold - a.totalSold);
+        } else {
+            switch (sortBy) {
+                case "price-low-high":
+                    products.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
+                    break;
+                case "price-high-low":
+                    products.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
+                    break;
+                case "newest":
+                    products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    break;
+                case "oldest":
+                    products.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    break;
+                default:
+                    break;
+            }
         }
 
         const itemsPerPage = 6;
@@ -862,38 +892,43 @@ const sortShopProducts = async (req, res) => {
             );
         }
 
-        // Apply sorting first
-        switch (currentSortBy) {
-            case "price-low-high":
-                products.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
-                break;
-            case "price-high-low":
-                products.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
-                break;
-            case "newest":
-                products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                break;
-            case "oldest":
-                products.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                break;
-            default:
-                break;
-        }
+        if (currentSortBy === "popularity") {
+            const salesMap = await getPopularProducts();
 
-        // Pagination logic
+            products.forEach(product => {
+                product.totalSold = salesMap.get(product._id.toString()) || 0;
+            });
+
+            products.sort((a, b) => b.totalSold - a.totalSold);
+        } else {
+            switch (currentSortBy) {
+                case "price-low-high":
+                    products.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
+                    break;
+                case "price-high-low":
+                    products.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
+                    break;
+                case "newest":
+                    products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    break;
+                case "oldest":
+                    products.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    break;
+                default:
+                    break;
+            }
+        }
         const page = parseInt(req.query.page) || 1;
         const limit = 9;
         const skip = (page - 1) * limit;
         const paginatedProducts = products.slice(skip, skip + limit);
         const totalPages = Math.ceil(products.length / limit);
 
-        // Fetch brands and categories
         const brands = await Brand.find({ isBlocked: false });
         const categories = await Category.find({ isListed: true });
         const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
         const cartItemCount = req.session.cartItemCount || 0;
 
-        // Render the result
         res.render("shop", {
             user: userData,
             products: paginatedProducts,

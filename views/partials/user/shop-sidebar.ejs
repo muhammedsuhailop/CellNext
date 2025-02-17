@@ -24,6 +24,11 @@
                 <form id="sortForm" action="/sort" method="GET">
                   <ul>
                     <li>
+                      <a href="/sort?sortBy=popularity" class="<%= sortBy === 'popularity' ? 'active' : '' %>">
+                        Popularity
+                      </a>
+                    </li>
+                    <li>
                       <a href="/sort?sortBy=price-low-high" class="<%= sortBy === 'price-low-high' ? 'active' : '' %>">
                         Price: Low to High
                       </a>
