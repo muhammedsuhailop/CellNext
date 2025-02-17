@@ -153,8 +153,18 @@
                       </button>
                       <% } %>
                       <% if (item.itemStatus === 'Delivered') { %>
+                      <% 
+                          const today = new Date();
+                          const deliveredOn = new Date(item.deliveredOn);
+                          const timeDifference = today - deliveredOn; 
+                          const daysDifference = timeDifference / (1000 * 3600 * 24); 
+                        %>
+
+                      <% if (daysDifference <= 14) { %>
                       <button class="btn btn-warning btn-sm btn-action text-white" onclick="openReturnModal('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Return</button>
-                      <% }  %>
+                      <% } %>
+                      <% } %>
+
                     </td>
                   </tr>
                   <% }) %>

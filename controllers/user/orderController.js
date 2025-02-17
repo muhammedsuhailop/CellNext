@@ -451,6 +451,7 @@ const loadOrderPage = async (req, res) => {
               itemStatus: item.itemStatus,
               cancellationReason: item.cancellationReason || "NA",
               variantIndex: item.variantId,
+              deliveredOn: item.deliveredOn || null,
             };
           })
         );

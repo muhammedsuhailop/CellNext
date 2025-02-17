@@ -13,7 +13,6 @@ const loadHomePage = async (req, res) => {
     try {
         const user = req.session.user;
         const categories = await Category.find({ isListed: true });
-        const brands = await Brand.find({ isBlocked: false });
         const productData = await ProductV2.find({
             isBlocked: false,
             category: { $in: categories.map(category => category._id) },
@@ -24,10 +23,8 @@ const loadHomePage = async (req, res) => {
             }
         });
 
-        productData.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-        const appleBrand = brands.find(brand => brand.brandName === 'Apple');
-        const appleId = appleBrand ? appleBrand._id : null;
         const heroData = [
             {
                 backgroundImage: "img/hero/oppo banner1.PNG",
@@ -41,7 +38,7 @@ const loadHomePage = async (req, res) => {
                 collection: "Apple Zone",
                 title: "iPhone: Where cutting-edge technology meets timeless elegance.",
                 description: "Designed to elevate your experience with unmatched performance and seamless style.",
-                link: appleId ? `/filter?brand=${appleId}` : "#"
+                link: '/filter?brand=Apple'
             }
         ];
 
