@@ -41,7 +41,7 @@ router.get('/filter', userController.filterProduct);
 router.get('/filterPrice', userController.filterByPrice);
 router.post('/search', userController.processSearch);
 router.get('/search', userController.searchProducts);
-router.get('/sort',userController.sortShopProducts);
+router.get('/sort', userController.sortShopProducts);
 
 //Product Management
 router.get('/productDetails', productcontroller.productDetails);
@@ -56,6 +56,7 @@ router.patch('/reset-password', profileController.resetPassword);
 router.get('/my-account', userAuth, profileController.loadMyAccounts);
 router.get('/edit-profile', userAuth, profileController.loadeditProfile);
 router.put('/update-profile', userAuth, profileController.editProfile);
+router.get('/generate-refferal-code', userAuthAjax, profileController.generateReferralCode);
 
 //Address Management
 router.get('/add-address', userAuth, profileController.loadAddAddress);

@@ -27,22 +27,22 @@
         <% } %>
         <div id="nameError" class="error-message"></div>
         <div class="item">
-          <label for="fullName">Full Name</label>
+          <label for="fullName">Full Name <span class="text-danger">*</span></label>
           <input class="input" type="text" id="name" placeholder="Enter your full name" name="name">
         </div>
         <div id="emailError" class="error-message"></div>
         <div class="item">
-          <label for="email">Email</label>
+          <label for="email">Email <span class="text-danger">*</span></label>
           <input class="input" type="email" id="email" placeholder="Enter your email address" name="email">
         </div>
         <div id="phoneError" class="error-message"></div>
         <div class="item">
-          <label for="phone">Phone</label>
+          <label for="phone">Phone <span class="text-danger">*</span></label>
           <input class="input" type="tel" id="phone" placeholder="Enter your phone number" name="phone">
         </div>
         <div id="passwordError" class="error-message"></div>
         <div class="item">
-          <label for="password">Password</label>
+          <label for="password">Password <span class="text-danger">*</span></label>
           <div class="position-relative">
             <input class="input" type="password" id="password" placeholder="Enter your password" name="password" required />
             <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y mx-2 toggle-visibility" id="togglePassword" style="opacity: 0; pointer-events: none;">
@@ -52,8 +52,12 @@
         </div>
         <div id="confirmPasswordError" class="error-message"></div>
         <div class="item">
-          <label for="confirmPassword">Confirm Password</label>
+          <label for="confirmPassword">Confirm Password <span class="text-danger">*</span></label>
           <input class="input" type="password" id="confirmPassword" placeholder="Re-enter your password" name="confirmPassword">
+        </div>
+        <div class="item">
+          <label for="referralCode">Referral Code (Optional)</label>
+          <input class="input" type="text" id="referralCode" placeholder="Referral Code(If Available)" name="referralCode">
         </div>
         <div class="item submit">
           <button type="submit" id="sendOtp">Send OTP</button>
@@ -68,6 +72,9 @@
       </div>
       <div class="item submit">
         <span class="ac text-muted">Already have an Account? <a href="/login">Login</a></span>
+      </div>
+      <div>
+        <p class="text-muted">Marked with <span class="text-danger">*</span> are mandatory.</p>
       </div>
     </div>
   </div>

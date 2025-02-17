@@ -7,7 +7,12 @@ const Wallet = require('../../models/walletSchema');
 const nodemailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
+const { v4: uuidv4 } = require('uuid');
 const { getPopularProducts } = require('../../helpers/salesDataHelper');
+
+function generateShortReferralCode(length = 6) {
+    return uuidv4().replace(/-/g, '').substring(0, length).toUpperCase();
+}
 
 const loadHomePage = async (req, res) => {
     try {
@@ -153,8 +158,8 @@ async function sendVerificationEmail(email, otp) {
 };
 
 const signup = async (req, res) => {
-    const { name, email, phone, password, confirmPassword } = req.body;
-    console.log({ name, email, phone, password, confirmPassword });
+    const { name, email, phone, password, confirmPassword, referralCode } = req.body;
+    console.log({ name, email, phone, password, confirmPassword, referralCode });
 
     try {
         if (password !== confirmPassword) {
@@ -178,8 +183,11 @@ const signup = async (req, res) => {
         }
 
         req.session.userOtp = genOtp;
+        req.session.referralCode = referralCode || null;
+        console.log('referralCode on signup ', req.session.referralCode);
         req.session.userData = { name, email, phone, password };
         console.log('Generated OTP:', req.session.userOtp);
+
 
         res.status(200).json({ message: 'OTP sent successfully' });
     } catch (error) {
@@ -246,6 +254,57 @@ const verifyOtp = async (req, res) => {
             await saveUserData.save();
 
             req.session.user = saveUserData._id;
+
+            const referralCode = req.session.referralCode;
+            if (referralCode) {
+                const referrer = await User.findOne({ referralCode });
+
+                if (referrer) {
+                    const referrerWallet = await Wallet.findOne({ userId: referrer._id });
+                    const referrerBalanceBefore = referrerWallet.balance;
+                    const referrerBalanceAfter = referrerBalanceBefore + 300;
+
+                    const referrerTransaction = {
+                        transactionId: uuidv4(),
+                        type: 'credit',
+                        amount: 300,
+                        description: `Referral bonus from ${user.name} signup`,
+                        orderId: null,
+                        transactionCategory: 'referral',
+                        balanceAfterTransaction: referrerBalanceAfter,
+                    };
+
+                    referrerWallet.transactions.push(referrerTransaction);
+                    referrerWallet.balance = referrerBalanceAfter;
+                    await referrerWallet.save();
+
+                    const newUserWallet = await Wallet.findOne({ userId: saveUserData._id });
+                    const newUserBalanceBefore = newUserWallet.balance;
+                    const newUserBalanceAfter = newUserBalanceBefore + 150;
+
+                    const newUserTransaction = {
+                        transactionId: uuidv4(),
+                        type: 'credit',
+                        amount: 150,
+                        description: 'Referral bonus for using referral code',
+                        orderId: null,
+                        transactionCategory: 'referral',
+                        balanceAfterTransaction: newUserBalanceAfter,
+                    };
+
+                    newUserWallet.transactions.push(newUserTransaction);
+                    newUserWallet.balance = newUserBalanceAfter;
+                    await newUserWallet.save();
+
+                    console.log('Referral bonuses applied.');
+                } else {
+                    console.log('Invalid referral code.');
+                }
+            }
+
+            const newReferralCode = generateShortReferralCode();
+            saveUserData.referralCode = newReferralCode;
+            await saveUserData.save();
 
             res.json({ success: true, redirectUrl: '/' });
         } else {

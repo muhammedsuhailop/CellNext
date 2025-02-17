@@ -60,6 +60,10 @@ const userSchema = new Schema({
     redeemed: {
         type: Boolean
     },
+    referralCode: {
+        type: String,
+        unique: true,
+    },
     searchHistory: [{
         category: {
             type: Schema.Types.ObjectId,

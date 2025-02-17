@@ -29,7 +29,7 @@ const walletTransactionSchema = new Schema({
     },
     transactionCategory: {
         type: String,
-        enum: ['order_payment', 'refund', 'admin_credit', 'adjustment'],
+        enum: ['order_payment', 'refund', 'admin_credit', 'adjustment', 'referral'],
         default: 'adjustment'
     },
     balanceAfterTransaction: {

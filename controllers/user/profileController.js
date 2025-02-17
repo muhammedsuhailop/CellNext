@@ -16,6 +16,10 @@ function generateOtp() {
     return otp;
 }
 
+function generateShortReferralCode(length = 6) {
+    return uuidv4().replace(/-/g, '').substring(0, length).toUpperCase();
+}
+
 async function sendVerificationEmail(email, otp) {
     try {
         const transporter = nodemailer.createTransport({
@@ -207,7 +211,7 @@ const loadAddAddress = async (req, res) => {
         const userId = req.session.user;
         const userData = await User.findById(userId);
         const cartItemCount = req.session.cartItemCount || 0;
-        res.render('add-address', { user: userData,cartItemCount })
+        res.render('add-address', { user: userData, cartItemCount })
     } catch (error) {
         console.log('error'.error);
         res.redirect('/pageNotFound');
@@ -335,6 +339,38 @@ const deleteAddress = async (req, res) => {
     }
 }
 
+const generateReferralCode = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.referralCode) {
+            return res.status(200).json({
+                message: 'You already have a referral code.',
+                referralCode: user.referralCode,
+            });
+        }
+
+        const newReferralCode = generateShortReferralCode();
+
+        user.referralCode = newReferralCode;
+        await user.save();
+
+        return res.status(200).json({
+            message: 'Referral code generated successfully!',
+            referralCode: newReferralCode,
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'An error occurred while generating the referral code.' });
+    }
+};
+
 
 
 module.exports = {
@@ -351,4 +387,5 @@ module.exports = {
     addAddress,
     editAddress,
     deleteAddress,
+    generateReferralCode,
 }

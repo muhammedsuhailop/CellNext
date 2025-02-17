@@ -22,192 +22,214 @@
     <div class="row">
       <%- include('../../views/partials/user/acc-sidebar') %>
       <div class=" col-lg-9 col-md-8">
-      <section class="accounts">
-        <div class="container-fluid">
-          <div class="checkout__form">
-            <form action="#">
+        <section class="accounts">
+          <div class="container-fluid">
+            <div class="checkout__form">
+              <form action="#">
+                <div class="address-section border p-3  mb-3 adr-out">
+                  <% if (messages.success.length > 0) { %>
+                  <% messages.success.forEach(msg => { %>
+                  <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+                    <strong>Success:</strong> <%= msg %>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <% }) %>
+                  <% } %>
+                  <% if (messages.error.length > 0) { %>
+                  <% messages.error.forEach(msg => { %>
+                  <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+                    <strong>Error:</strong> <%= msg %>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <% }) %>
+                  <% } %>
+
+                  <h5>My Profile</h5>
+                  <div class="card mt-4">
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                          <div class="profile__input">
+                            <p><strong>Name:</strong></p>
+                            <input class="prof form-control" type="text" placeholder="<%= user.name %>" disabled>
+                          </div>
+                        </div>
+                        <div class="col-12 col-md-6 mb-3">
+                          <div class="profile__input">
+                            <p><strong>Mobile Number:</strong></p>
+                            <input class="prof form-control" type="text" placeholder="<%= user.phone %>" disabled>
+                          </div>
+                        </div>
+                        <div class="col-12 mb-3">
+                          <div class="profile__input">
+                            <p><strong>Email Address:</strong></p>
+                            <input class="prof form-control" type="text" placeholder="<%= user.email %>" disabled>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row w-100">
+                  <div class="col-md-12 d-flex justify-content-center ">
+                    <div class="profile__input my-4">
+                      <a href="/edit-profile"><label class="prof-btn">Edit Profile</label></a>
+                      <a href="/add-address"><label class="prof-btn">Add New Address</label></a>
+                      <a href="/forgot-password">
+                        <lable class="prof-btn ">Reset Password</label>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+              <div class="card mb-3">
+                <div class="card-body adr-body">
+                  <h5 class="card-title">Referral Code</h5>
+                  <div class="row">
+                    <div class="col-lg-10 col-md-10">
+                      <span>Your Referral Code :</span> <strong><%= user.referralCode || 'Referral Code Not Available ' %></strong>
+                      <% if (!user.referralCode ) { %>
+                      <button id="generateReferralCodeBtn" class="btn btn-secondary mx-3">
+                        Generate New Referral Code
+                      </button>
+                      <p id="referralCodeMessage" class="mt-2 "></p>
+                      <p id="referralCode" class="mt-2"></p>
+                      <% } %>
+                    </div>
+                    <div class="col-lg-10 col-md-10 mx-2">
+                      <i class="special-notes-green">For every new user you refer, you will earn <strong>₹300 </strong> and they receive a <strong>₹150 </strong> sign-up bonus.</i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <h4>Saved Address</h4>
               <div class="address-section border p-3  mb-3 adr-out">
-                <% if (messages.success.length > 0) { %>
-                <% messages.success.forEach(msg => { %>
-                <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
-                  <strong>Success:</strong> <%= msg %>
-                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <% }) %>
-                <% } %>
-                <% if (messages.error.length > 0) { %>
-                <% messages.error.forEach(msg => { %>
-                <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
-                  <strong>Error:</strong> <%= msg %>
-                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <% }) %>
-                <% } %>
-
-                <h5>My Profile</h5>
-                <div class="card mt-4">
-                  <div class="card-body">
-                    <div class="row">
-                      <div class="col-12 col-md-6 mb-3">
-                        <div class="profile__input">
-                          <p><strong>Name:</strong></p>
-                          <input class="prof form-control" type="text" placeholder="<%= user.name %>" disabled>
+                <h5>My Addresses</h5>
+                <div class="list-group mt-4 ">
+                  <% if (addressData && addressData.address && addressData.address.length > 0) { %>
+                  <% addressData.address.forEach((adrs, index) => { %>
+                  <div class="card mb-3  ">
+                    <div class="card-body adr-body">
+                      <h5 class="card-title">Address <%= index + 1 %></h5>
+                      <div class="row">
+                        <div class="col-lg-6 col-md-6">
+                          <p><strong>Address Type:</strong> <%= adrs.addressType %></p>
+                          <p><strong>Name:</strong> <%= adrs.name %></p>
+                          <p><strong>Location:</strong> <%= adrs.city %>, <%= adrs.state %>, <%= adrs.country %></p>
+                        </div>
+                        <div class="col-lg-6 col-md-6">
+                          <p><strong>House No., Building Name:</strong> <%= adrs.houseName %></p>
+                          <p><strong>Landmark:</strong> <%= adrs.landmark %></p>
+                          <p><strong>PIN Code:</strong> <%= adrs.pinCode %></p>
+                        </div>
+                        <div class="col-lg-6 col-md-6">
+                          <p><strong>Phone:</strong> <%= adrs.phone %></p>
+                          <% if (adrs.alternatePhone) { %>
+                          <p><strong>Alternate Phone:</strong> <%= adrs.alternatePhone %></p>
+                          <% } %>
                         </div>
                       </div>
-                      <div class="col-12 col-md-6 mb-3">
-                        <div class="profile__input">
-                          <p><strong>Mobile Number:</strong></p>
-                          <input class="prof form-control" type="text" placeholder="<%= user.phone %>" disabled>
-                        </div>
-                      </div>
-                      <div class="col-12 mb-3">
-                        <div class="profile__input">
-                          <p><strong>Email Address:</strong></p>
-                          <input class="prof form-control" type="text" placeholder="<%= user.email %>" disabled>
-                        </div>
-                      </div>
+                      <button class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>" data-name="<%= adrs.name %>" data-address-type="<%= adrs.addressType %>" data-house-name="<%= adrs.houseName %>" data-city="<%= adrs.city %>" data-state="<%= adrs.state %>" data-country="<%= adrs.country %>" data-pin-code="<%= adrs.pinCode %>" data-phone="<%= adrs.phone %>" data-alternate-phone="<%= adrs.alternatePhone %>" data-landmark="<%= adrs.landmark %>">
+                        Edit Address
+                      </button>
+                      <button class="btn btn-sm btn-danger delete-address-btn" data-address-id="<%= adrs._id %>">
+                        Delete Address
+                      </button>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div class="row w-100">
-                <div class="col-md-12 d-flex justify-content-center ">
-                  <div class="profile__input my-4">
-                    <a href="/edit-profile"><label class="prof-btn">Edit Profile</label></a>
-                    <a href="/add-address"><label class="prof-btn">Add New Address</label></a>
-                    <a href="/forgot-password">
-                      <lable class="prof-btn ">Reset Password</label>
-                    </a>
+                  <% }); %>
+                  <% } else { %>
+                  <div class="alert alert-warning text-center" role="alert">
+                    Address not available.
                   </div>
+                  <% } %>
                 </div>
-              </div>
-            </form>
-            <h4>Saved Address</h4>
-            <div class="address-section border p-3  mb-3 adr-out">
-              <h5>My Addresses</h5>
-              <div class="list-group mt-4 ">
-                <% if (addressData && addressData.address && addressData.address.length > 0) { %>
-                <% addressData.address.forEach((adrs, index) => { %>
-                <div class="card mb-3  ">
-                  <div class="card-body adr-body">
-                    <h5 class="card-title">Address <%= index + 1 %></h5>
-                    <div class="row">
-                      <div class="col-lg-6 col-md-6">
-                        <p><strong>Address Type:</strong> <%= adrs.addressType %></p>
-                        <p><strong>Name:</strong> <%= adrs.name %></p>
-                        <p><strong>Location:</strong> <%= adrs.city %>, <%= adrs.state %>, <%= adrs.country %></p>
-                      </div>
-                      <div class="col-lg-6 col-md-6">
-                        <p><strong>House No., Building Name:</strong> <%= adrs.houseName %></p>
-                        <p><strong>Landmark:</strong> <%= adrs.landmark %></p>
-                        <p><strong>PIN Code:</strong> <%= adrs.pinCode %></p>
-                      </div>
-                      <div class="col-lg-6 col-md-6">
-                        <p><strong>Phone:</strong> <%= adrs.phone %></p>
-                        <% if (adrs.alternatePhone) { %>
-                        <p><strong>Alternate Phone:</strong> <%= adrs.alternatePhone %></p>
-                        <% } %>
-                      </div>
-                    </div>
-                    <button class="btn btn-sm btn-secondary edit-address-btn" data-address-id="<%= adrs._id %>" data-name="<%= adrs.name %>" data-address-type="<%= adrs.addressType %>" data-house-name="<%= adrs.houseName %>" data-city="<%= adrs.city %>" data-state="<%= adrs.state %>" data-country="<%= adrs.country %>" data-pin-code="<%= adrs.pinCode %>" data-phone="<%= adrs.phone %>" data-alternate-phone="<%= adrs.alternatePhone %>" data-landmark="<%= adrs.landmark %>">
-                      Edit Address
-                    </button>
-                    <button class="btn btn-sm btn-danger delete-address-btn" data-address-id="<%= adrs._id %>">
-                      Delete Address
-                    </button>
-                  </div>
-                </div>
-                <% }); %>
-                <% } else { %>
-                <div class="alert alert-warning text-center" role="alert">
-                  Address not available.
-                </div>
-                <% } %>
               </div>
             </div>
-          </div>
-          <!-- Modal HTML -->
-          <div class="modal fade" id="address-modal" tabindex="-1" role="dialog" aria-labelledby="addressModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="addressModalLabel">Edit Address</h5>
-                  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <form id="address-modal-form">
-                    <!-- Hidden Input to store Address ID -->
-                    <input type="hidden" name="addressId">
+            <!-- Modal HTML -->
+            <div class="modal fade" id="address-modal" tabindex="-1" role="dialog" aria-labelledby="addressModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="addressModalLabel">Edit Address</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form id="address-modal-form">
+                      <!-- Hidden Input to store Address ID -->
+                      <input type="hidden" name="addressId">
 
-                    <div class="mb-3">
-                      <label for="name" class="form-label">Name</label>
-                      <input type="text" class="form-control" name="name" required>
-                    </div>
+                      <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" required>
+                      </div>
 
-                    <div class="mb-3">
-                      <label class="form-label">Address Type</label>
-                      <input type="text" id="addressType" name="addressType" class="form-control" list="addressTypeOptions" onblur="this.value = this.value.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')">
+                      <div class="mb-3">
+                        <label class="form-label">Address Type</label>
+                        <input type="text" id="addressType" name="addressType" class="form-control" list="addressTypeOptions" onblur="this.value = this.value.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')">
 
-                      <datalist id="addressTypeOptions">
-                        <option value="Home"></option>
-                        <option value="Office"></option>
-                      </datalist>
-                    </div>
+                        <datalist id="addressTypeOptions">
+                          <option value="Home"></option>
+                          <option value="Office"></option>
+                        </datalist>
+                      </div>
 
-                    <div class="mb-3">
-                      <label for="houseName" class="form-label">House No., Building Name</label>
-                      <input type="text" class="form-control" name="houseName" required>
-                    </div>
+                      <div class="mb-3">
+                        <label for="houseName" class="form-label">House No., Building Name</label>
+                        <input type="text" class="form-control" name="houseName" required>
+                      </div>
 
-                    <div class="mb-3">
-                      <label for="landmark" class="form-label">Landmark</label>
-                      <input type="text" class="form-control" name="landmark" required>
-                    </div>
+                      <div class="mb-3">
+                        <label for="landmark" class="form-label">Landmark</label>
+                        <input type="text" class="form-control" name="landmark" required>
+                      </div>
 
-                    <div class="mb-3">
-                      <label for="city" class="form-label">City</label>
-                      <input type="text" class="form-control" name="city" required>
-                    </div>
+                      <div class="mb-3">
+                        <label for="city" class="form-label">City</label>
+                        <input type="text" class="form-control" name="city" required>
+                      </div>
 
-                    <div class="mb-3">
-                      <label for="state" class="form-label">State</label>
-                      <input type="text" class="form-control" name="state" required>
-                    </div>
+                      <div class="mb-3">
+                        <label for="state" class="form-label">State</label>
+                        <input type="text" class="form-control" name="state" required>
+                      </div>
 
-                    <div class="mb-3">
-                      <label for="country" class="form-label">Country</label>
-                      <input type="text" class="form-control" name="country" required>
-                    </div>
+                      <div class="mb-3">
+                        <label for="country" class="form-label">Country</label>
+                        <input type="text" class="form-control" name="country" required>
+                      </div>
 
-                    <div class="mb-3">
-                      <label for="pinCode" class="form-label">PIN Code</label>
-                      <input type="text" class="form-control" name="pinCode" required>
-                    </div>
+                      <div class="mb-3">
+                        <label for="pinCode" class="form-label">PIN Code</label>
+                        <input type="text" class="form-control" name="pinCode" required>
+                      </div>
 
-                    <div class="mb-3">
-                      <label for="phone" class="form-label">Phone</label>
-                      <input type="text" class="form-control" name="phone" required>
-                    </div>
+                      <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" name="phone" required>
+                      </div>
 
-                    <div class="mb-3">
-                      <label for="alternatePhone" class="form-label">Alternate Phone</label>
-                      <input type="text" class="form-control" name="alternatePhone">
-                    </div>
+                      <div class="mb-3">
+                        <label for="alternatePhone" class="form-label">Alternate Phone</label>
+                        <input type="text" class="form-control" name="alternatePhone">
+                      </div>
 
-                    <button id="save-address-btn" type="submit" class="btn btn-primary">Save Changes</button>
-                  </form>
+                      <button id="save-address-btn" type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-    </div>
+      </div>
 </section>
 </div>
 </div>
@@ -242,6 +264,23 @@
 <script src="js/main.js"></script>
 
 <script>
+  document.getElementById('generateReferralCodeBtn').addEventListener('click', async () => {
+    try {
+      const response = await fetch('/generate-refferal-code');
+      const data = await response.json();
+
+      if (response.ok) {
+        document.getElementById('referralCodeMessage').textContent = data.message;
+        document.getElementById('referralCode').textContent = 'Your Referral Code: ' + data.referralCode;
+      } else {
+        document.getElementById('referralCodeMessage').textContent = data.message;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById('referralCodeMessage').textContent = 'Something went wrong. Please try again later.';
+    }
+  });
+
   $(document).on('click', '.edit-address-btn', function() {
     var addressId = $(this).data('address-id');
 

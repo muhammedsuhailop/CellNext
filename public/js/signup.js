@@ -4,6 +4,7 @@ const fullName = document.getElementById("name");
 const email = document.getElementById("email");
 const phone = document.getElementById("phone");
 const sendOtpBtn = document.getElementById("sendOtp");
+const referralCode = document.getElementById("referralCode");
 
 function showError(element, message) {
     const errorElement = document.querySelector(`#${element}Error`);
@@ -85,6 +86,7 @@ sendOtpBtn.addEventListener("click", async (e) => {
         phone: phone.value.trim(),
         password: password.value.trim(),
         confirmPassword: confirmPassword.value.trim(),
+        referralCode: referralCode.value,
     };
 
     try {
