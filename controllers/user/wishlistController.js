@@ -18,6 +18,7 @@ const loadWishlist = async (req, res) => {
                 items: [],
             });
             await wishlist.save();
+            await User.findByIdAndUpdate(userId, { $push: { wishlist: wishlist._id } });
         }
 
         let totalWishlistPrice = 0;
@@ -79,6 +80,8 @@ const addToWishlist = async (req, res) => {
                 userId: userId,
                 items: [],
             });
+            await wishlist.save();
+            await User.findByIdAndUpdate(userId, { $push: { wishlist: wishlist._id } });
         }
         const itemExists = wishlist.items.some(
             item => item.productId.toString() === productId.toString() && item.variantIndex === variantIndex
