@@ -31,8 +31,8 @@
               document.write(new Date().getFullYear());
             </script>
             CellNext
-            <a href="#">
-              Contact Us
+            <a type="button" data-bs-toggle="modal" data-bs-target="#aboutUs">
+              About Us
             </a>
           </p>
         </div>
@@ -41,6 +41,39 @@
   </div>
 </footer>
 <!-- Footer Section End -->
+
+<div class="modal fade" id="aboutUs" tabindex="-1" aria-labelledby="contactAboutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="contactAboutModalLabel">Contact & About</h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <ul class="nav nav-tabs mb-3" id="modalTab" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="about-tab" data-toggle="tab" href="#about" role="tab">About Us</a>
+          </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+          <div class="tab-pane fade show active" id="about" role="tabpanel">
+            <p class="text-muted">Welcome to CellNext! We are dedicated to providing top-quality products and outstanding customer service.</p>
+            <p>For any inquiries, feel free to contact us through email directly.</p>
+
+            <div class="d-flex align-items-center">
+              <span id="emailText" class="mr-2">support@cellnext.com</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Search Begin -->
 <div class="search-model">

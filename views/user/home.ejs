@@ -109,18 +109,13 @@
           <div onclick="redirectToProduct('<%= product._id %>')" class="product__item__pic" style="background-image: url('<%= product.variants[0] && product.variants[0].images[0] ? product.variants[0].images[0] : 'img/no-image.png' %>');">
             <% /* eslint-enable */ %>
             <span class="label"><%= product.productOffer > 5 ? 'Sale' : '' %></span>
-            <ul class="product__hover">
-              <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
-              <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
-              <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
-            </ul>
           </div>
           <div class="product__item__text">
             <h6><%= product.productName %></h6>
             <% if (product.variants[0].stock <= 0) { %>
             <a class="text-danger font-weight-bold">Out of Stock</a>
             <% } else { %>
-            <a href="#" class="add-cart">+ Add To Cart</a>
+            <a onclick="redirectToProduct('<%= product._id %>')" class="add-cart">View Product</a>
             <% } %>
             <div class="rating">
               <% for(let j = 0; j < product.rating; j++) { %>

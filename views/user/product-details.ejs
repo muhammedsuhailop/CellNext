@@ -244,14 +244,6 @@
         <div class="product__item <%= isOnSale ? 'sale' : '' %>">
           <!-- Product Image -->
           <div onclick="redirectToProduct('<%= product._id %>')" class="product__item__pic" style="background-image: url('<%= variant.images[0] %>');">
-            <% if (isOnSale) { %>
-            <span class="label">Sale</span>
-            <% } %>
-            <ul class="product__hover">
-              <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
-              <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
-              <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
-            </ul>
           </div>
 
           <!-- Product Details -->
@@ -261,10 +253,11 @@
               <span class="text-muted"> |</span> <%= variant.size %>
               <% } %>
             </h6>
+
             <% if (isOutOfStock) { %>
             <a class="text-danger font-weight-bold">Out of Stock</a>
             <% } else { %>
-            <a href="#" class="add-cart">+ Add To Cart</a>
+            <a onclick="redirectToProduct('<%= product._id %>')" class="add-cart">View Product</a>
             <% } %>
 
             <!-- Rating -->
