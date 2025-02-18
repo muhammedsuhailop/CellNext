@@ -129,34 +129,60 @@
           <div class="card-heading">
             <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
           </div>
-
           <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
             <div class="card-body">
               <div class="shop__sidebar__price">
                 <ul>
                   <% 
-                    const priceRanges = [
-                      { label: '₹00.00 - ₹5000.00', gt: 0, lt: 5000 },
-                      { label: '₹5000.00 - ₹10000.00', gt: 5000, lt: 10000 },
-                      { label: '₹10000.00 - ₹15000.00', gt: 10000, lt: 15000 },
-                      { label: '₹15000.00 - ₹30000.00', gt: 15000, lt: 30000 },
-                      { label: '₹30000.00 - ₹40000.00', gt: 40000, lt: 40000 },
-                      { label: '₹40000.00 - ₹60000.00', gt: 40000, lt: 60000 },
-                      { label: '₹60000.00 - ₹80000.00', gt: 60000, lt: 80000 },
-                      { label: '₹80000.00+', gt: 80000, lt: 800000 } 
-                    ]; 
-                    priceRanges.forEach(priceRange => { 
-                      const queryString = `gt=${priceRange.gt}&lt=${priceRange.lt}`; 
+                    let priceRanges;
+                    let priceRanges1 = [
+                          { label: '₹00.00 - ₹5000.00', gt: 0, lt: 5000 },
+                          { label: '₹5000.00 - ₹10000.00', gt: 5000, lt: 10000 },
+                          { label: '₹10000.00 - ₹15000.00', gt: 10000, lt: 15000 },
+                          { label: '₹15000.00 - ₹30000.00', gt: 15000, lt: 30000 },
+                          { label: '₹30000.00 - ₹40000.00', gt: 40000, lt: 40000 },
+                          { label: '₹40000.00 - ₹60000.00', gt: 40000, lt: 60000 },
+                          { label: '₹60000.00 - ₹80000.00', gt: 60000, lt: 80000 },
+                          { label: '₹80000.00 - ₹100000.00', gt:860000, lt: 100000 },
+                          { label: '₹100000.00+', gt: 100000, lt: 1000000 }
+                        ];
+                  priceRanges2 = [
+                        { label: '₹0 - ₹1000', gt: 0, lt: 1000 },
+                        { label: '₹1000 - ₹5000', gt: 1000, lt: 5000 },
+                        { label: '₹5000 - ₹10000', gt: 5000, lt: 10000 },
+                        { label: '₹10000 - ₹25000', gt: 10000, lt: 25000 },
+                        { label: '₹25000 - ₹35000', gt: 25000, lt: 35000 },
+                        { label: '₹35000+', gt: 35000, lt: 100000 }
+                      ];
+                    if (selectedFilters && selectedFilters.category) {
+                      const category = selectedFilters.category.toLowerCase();
+                      if (category === 'smartphones') {
+                        priceRanges = priceRanges1;
+                      } else if (category === 'smart watches' || category === 'smartwatches') {
+                        priceRanges =priceRanges2;
+                      } else if (category === 'earphones') {
+                        priceRanges = priceRanges2;
+                      } else if (category === 'mobile accessories') {
+                        priceRanges = priceRanges2;
+                      } else {
+                        priceRanges = priceRanges1;
+                      }
+                    } else {
+                      priceRanges = priceRanges1;
+                    }
+              
+                    priceRanges.forEach(priceRange => {
+                      const queryString = `gt=${priceRange.gt}&lt=${priceRange.lt}`;
                       const isActive = selectedFilters.price && 
-                        selectedFilters.price.gt == priceRange.gt && 
-                        selectedFilters.price.lt == priceRange.lt;
+                                       selectedFilters.price.gt == priceRange.gt && 
+                                       selectedFilters.price.lt == priceRange.lt;
                   %>
                   <li>
                     <a href="/filterPrice?<%= queryString %>" class="<%= isActive ? 'active' : '' %>">
                       <%= priceRange.label %>
                     </a>
                   </li>
-                  <% }) %>
+                  <% }); %>
                 </ul>
               </div>
             </div>

@@ -24,191 +24,245 @@
   <div class="container">
     <div class="row">
       <%- include('../../views/partials/user/acc-sidebar') %>
-      <div class=" col-lg-9 col-md-8">
+      <div class="col-lg-9 col-md-8">
         <section class="accounts">
           <div class="order-body mx-2">
-            <div class="d-flex justify-content-between">
-              <div>
-                <h4 class="section-heading">My Orders</h4>
-              </div>
-              <div>
-                <a href="/shop" class="gen-btn"><i class='bx bxs-cart'></i> Shop Now</a>
-              </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="section-heading">My Orders</h4>
+              <a href="/shop" class="gen-btn">
+                <i class='bx bxs-cart'></i> Shop Now
+              </a>
             </div>
 
             <% if (orderDetails.length === 0) { %>
             <div class="alert alert-info">You have no orders yet.</div>
             <a href="/shop" class="gen-btn">Time to Grab Your First Order</a>
-            <% } %>
-
-            <% orderDetails.forEach(order => { %>
-            <div class="order-card no-radius-card">
-              <div class="row align-items-center border-bottom pb-2 mb-3">
-
-                <% if (order.status === 'Pending') { %>
-                <div class="col-md-2 ">
-                  <button class="btn btn-danger btn-sm btn-action" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
-                </div>
-                <% } %>
-
-                <div class="col-md-6">
-                  <h6 class="mb-1">Order ID: <%= order.orderId %></h6>
-                  <p class="mb-0"><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: '2-digit', year: '2-digit' }) %></p>
-                </div>
-
-                <div class="col-md-4 text-md-end d-flex justify-content-around align-items-center">
-                  <div>
-                    <p class="mb-0"><strong>Status:</strong>
-                      <span class="btn-sm 
-                      <% if (order.status === 'Pending') { %> bg-info text-white
-                      <% } else if (order.status === 'Placed') { %> bg-info text-white
-                      <% } else if (order.status === 'Shipped') { %> bg-primary text-white
-                      <% } else if (order.status === 'Delivered') { %> bg-success  text-white
-                      <% } else if (order.status === 'Returned') { %> bg-warning text-white
-                      <% } else if (order.status === 'Cancelled') { %> bg-danger text-white
-                      <% } else if (order.status === 'Cancel Request') { %> bg-danger text-white
-                        <% } else if (order.status === 'Partial Return') { %> bg-warning text-white
-                      <% } %> mx-2">
-                        <% if (order.status === 'Cancel Request') { %>
-                        Canacellation Requested
-                        <%}else { %>
-                        <%= order.status %>
-                        <% } %>
-                      </span>
-                    </p>
-                  </div>
-                  <div>
-                    <% if (order.status === 'Delivered') { %>
-                    <a href="/order/invoice/<%=order._id %>" class="btn btn-sm btn-secondary mx-2">
-                      <i class='bx bx-download'></i> Invoice
-                    </a>
-                    <% } %>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-md-4">
-                  <p><strong>Final Price:</strong> ₹ <%= (order.finalAmount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })  %></p>
-                </div>
-                <div class="col-md-4">
-                  <p><strong>Discount:</strong> ₹ <%= (order.discount).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></p>
-                </div>
-                <div class="col-md-4">
-                  <p><strong>Payment Method:</strong> <%= (order.paymentMethod).toUpperCase() %></p>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-md-4">
-                  <% if (order.couponName !== 'NA') { %>
-                  <p><strong>Copon Name:</strong> <%= order.couponName %></p>
-                  <% } %>
-                </div>
-                <div class="col-md-4">
-                  <% if (order.couponName !== 'NA') { %>
-                  <p><strong>Copon Discount:</strong> <%= order.couponDiscount %></p>
-                  <% } %>
-
-                </div>
-                <div class="col-md-4">
-                  <p><strong>Payment Status:</strong> <span class="badge text-white bg-<%= order.paymentStatus === 'Pending' ? 'warning' : 'success' %>"><%= order.paymentStatus %></span></p>
-                </div>
-              </div>
-
-
-              <h6 class="mt-4">Order Items</h6>
-              <table class="order-table">
+            <% } else { %>
+            <div class="table-responsive">
+              <table class="table ">
                 <thead>
                   <tr>
-                    <th>Product Name</th>
-                    <th>Color</th>
-                    <th>Size</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
+                    <th>Order ID</th>
+                    <th>Order Date</th>
                     <th>Status</th>
-                    <th></th>
+                    <th>Total Price</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <% order.items.reverse().forEach(item => { %>
+                  <% orderDetails.forEach(order => { %>
                   <tr>
-                    <td><%= item.productName %></td>
-                    <td><%= item.variantDetails.color || "N/A" %></td>
+                    <td><%= order.orderId %></td>
                     <td>
-                      <% if (item.variantDetails.size && item.variantDetails.size !== "NA") { %>
-                      <%= item.variantDetails.size %>
-                      <% } else { %>
-                      -
-                      <% } %>
-                    </td>
-                    <td><%= item.quantity %></td>
-                    <td>₹<%= item.variantDetails.salePrice %></td>
-                    <td>
-                      <span class="badge badge-secondary "><%= item.itemStatus %></span>
+                      <%= new Date(order.orderDate).toLocaleDateString('en-IN', { 
+                                weekday: 'short', day: '2-digit', month: '2-digit', year: '2-digit' 
+                              }) %>
                     </td>
                     <td>
-                      <% if (item.itemStatus === 'Pending'|| item.itemStatus === 'Placed') { %>
-                      <button class="btn btn-danger btn-sm btn-action" onclick="cancelItemOrder('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Cancel
+                      <span class="badge
+                            <% if (order.status === 'Pending' || order.status === 'Placed') { %>
+                              bg-info text-white
+                            <% } else if (order.status === 'Shipped') { %>
+                              bg-primary text-white
+                            <% } else if (order.status === 'Delivered') { %>
+                              bg-success text-white
+                            <% } else if (order.status === 'Returned' || order.status === 'Partial Return') { %>
+                              bg-warning text-white
+                            <% } else if (order.status === 'Cancelled' || order.status === 'Cancel Request') { %>
+                              bg-danger text-white
+                            <% } %>">
+                        <% if (order.status === 'Cancel Request') { %>
+                        Cancellation Requested
+                        <% } else { %>
+                        <%= order.status %>
+                        <% } %>
+                      </span>
+                    </td>
+                    <td>₹ <%= order.finalAmount.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></td>
+                    <td>
+                      <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#orderDetail<%= order._id %>" aria-expanded="false" aria-controls="orderDetail<%= order._id %>">
+                        View Details
                       </button>
-                      <% } %>
-                      <% if (item.itemStatus === 'Delivered') { %>
-                      <% 
-                          const today = new Date();
-                          const deliveredOn = new Date(item.deliveredOn);
-                          const timeDifference = today - deliveredOn; 
-                          const daysDifference = timeDifference / (1000 * 3600 * 24); 
-                        %>
+                    </td>
+                  </tr>
 
-                      <% if (daysDifference <= 14) { %>
-                      <button class="btn btn-warning btn-sm btn-action text-white" onclick="openReturnModal('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">Return</button>
-                      <% } %>
-                      <% } %>
+                  <tr class="collapse" id="orderDetail<%= order._id %>">
+                    <td colspan="5">
+                      <div class="order-card no-radius-card p-3">
+                        <div class="row align-items-center border-bottom pb-2 mb-3">
+                          <% if (order.status === 'Pending') { %>
+                          <div class="col-md-2">
+                            <button class="btn btn-danger btn-sm btn-action" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+                          </div>
+                          <% } %>
+                          <div class="col-md-6">
+                            <h6 class="mb-1">Order ID: <%= order.orderId %></h6>
+                            <p class="mb-0">
+                              <strong>Order Date:</strong>
+                              <%= new Date(order.orderDate).toLocaleDateString('en-IN', { 
+                                        weekday: 'long', day: '2-digit', month: '2-digit', year: '2-digit' 
+                                      }) %>
+                            </p>
+                          </div>
+                          <div class="col-md-4 text-md-end d-flex justify-content-around align-items-center">
+                            <div>
+                              <p class="mb-0">
+                                <strong>Status:</strong>
+                                <span class="btn-sm 
+                                      <% if (order.status === 'Pending') { %> bg-info text-white
+                                      <% } else if (order.status === 'Placed') { %> bg-info text-white
+                                      <% } else if (order.status === 'Shipped') { %> bg-primary text-white
+                                      <% } else if (order.status === 'Delivered') { %> bg-success text-white
+                                      <% } else if (order.status === 'Returned') { %> bg-warning text-white
+                                      <% } else if (order.status === 'Cancelled') { %> bg-danger text-white
+                                      <% } else if (order.status === 'Cancel Request') { %> bg-danger text-white
+                                      <% } else if (order.status === 'Partial Return') { %> bg-warning text-white
+                                      <% } %> mx-2">
+                                  <% if (order.status === 'Cancel Request') { %>
+                                  Cancellation Requested
+                                  <% } else { %>
+                                  <%= order.status %>
+                                  <% } %>
+                                </span>
+                              </p>
+                            </div>
+                            <div>
+                              <% if (order.status === 'Delivered') { %>
+                              <a href="/order/invoice/<%=order._id %>" class="btn btn-sm btn-secondary mx-2">
+                                <i class='bx bx-download'></i> Invoice
+                              </a>
+                              <% } %>
+                            </div>
+                          </div>
+                        </div>
 
+                        <div class="row">
+                          <div class="col-md-4">
+                            <p><strong>Final Price:</strong> ₹ <%= order.finalAmount.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></p>
+                          </div>
+                          <div class="col-md-4">
+                            <p><strong>Discount:</strong> ₹ <%= order.discount.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) %></p>
+                          </div>
+                          <div class="col-md-4">
+                            <p><strong>Payment Method:</strong> <%= order.paymentMethod.toUpperCase() %></p>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-4">
+                            <% if (order.couponName !== 'NA') { %>
+                            <p><strong>Coupon Name:</strong> <%= order.couponName %></p>
+                            <% } %>
+                          </div>
+                          <div class="col-md-4">
+                            <% if (order.couponName !== 'NA') { %>
+                            <p><strong>Coupon Discount:</strong> <%= order.couponDiscount %></p>
+                            <% } %>
+                          </div>
+                          <div class="col-md-4">
+                            <p>
+                              <strong>Payment Status:</strong>
+                              <span class="badge text-white bg-<%= order.paymentStatus === 'Pending' ? 'warning' : 'success' %>">
+                                <%= order.paymentStatus %>
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+
+                        <h6 class="mt-4">Order Items</h6>
+                        <div class="table-responsive">
+                          <table class="order-table table">
+                            <thead>
+                              <tr>
+                                <th>Product Name</th>
+                                <th>Color</th>
+                                <th>Size</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <% order.items.reverse().forEach(item => { %>
+                              <tr>
+                                <td><%= item.productName %></td>
+                                <td><%= item.variantDetails.color || "N/A" %></td>
+                                <td>
+                                  <% if (item.variantDetails.size && item.variantDetails.size !== "NA") { %>
+                                  <%= item.variantDetails.size %>
+                                  <% } else { %>
+                                  -
+                                  <% } %>
+                                </td>
+                                <td><%= item.quantity %></td>
+                                <td>₹<%= item.variantDetails.salePrice %></td>
+                                <td>
+                                  <span class="badge badge-secondary"><%= item.itemStatus %></span>
+                                </td>
+                                <td>
+                                  <% if (item.itemStatus === 'Pending' || item.itemStatus === 'Placed') { %>
+                                  <button class="btn btn-danger btn-sm btn-action" onclick="cancelItemOrder('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">
+                                    Cancel
+                                  </button>
+                                  <% } %>
+                                  <% if (item.itemStatus === 'Delivered') { 
+                                            const today = new Date();
+                                            const deliveredOn = new Date(item.deliveredOn);
+                                            const daysDifference = (today - deliveredOn) / (1000 * 3600 * 24);
+                                        %>
+                                  <% if (daysDifference <= 14) { %>
+                                  <button class="btn btn-warning btn-sm btn-action text-white" onclick="openReturnModal('<%= order._id %>', '<%= item.productId %>', '<%= item.variantIndex %>')">
+                                    Return
+                                  </button>
+                                  <% } %>
+                                  <% } %>
+                                </td>
+                              </tr>
+                              <% }) %>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <% if (order.status === 'Pending' && order.paymentMethod === 'razorpay') { %>
+                        <% if (new Date() - new Date(order.invoiceDate) <= 24 * 60 * 60 * 1000) { %>
+                        <div class="row justify-content-between">
+                          <div class="col-md-8 mx-2">
+                            <i>Payment retries are allowed within 24 hours of order initiation.</i>
+                          </div>
+                          <div class="col-md-2 mx-2">
+                            <button class="btn bg-info text-white btn-sm btn-action" onclick="retryPayment('<%= order._id %>')">Retry Payment</button>
+                          </div>
+                        </div>
+                        <% } else { %>
+                        <div class="row justify-content-center">
+                          <div class="col-md-12">
+                            <i>You can only retry your payment within 24 hours of order initiation.</i>
+                          </div>
+                        </div>
+                        <% } %>
+                        <% } %>
+                      </div>
                     </td>
                   </tr>
                   <% }) %>
                 </tbody>
               </table>
-              <% if (order.status === 'Pending' && order.paymentMethod === 'razorpay' ) { %>
-              <% if (new Date() - new Date(order.invoiceDate) <= 24 * 60 * 60 * 1000) { %>
-              <div class="row  justify-content-between">
-                <div class="col-md-8 mx-2">
-                  <i>
-                    Payment retries are allowed within 24 hours of order initiation.
-                  </i>
-                </div>
-
-                <div class="col-md-2 mx-2">
-                  <button class="btn bg-info text-white btn-sm btn-action" onclick="retryPayment('<%= order._id %>')">Retry Payment</button>
-                </div>
-              </div>
-              <% } else { %>
-              <div class="row justify-content-center display-block">
-                <div class="col-md-12">
-                  <i>You can only retry your payment within 24 hours of order initiation.</i>
-                </div>
-              </div>
-
-              <% } %>
-              <% } %>
             </div>
-            <% }) %>
 
+            <!-- Pagination -->
             <div class="row">
               <div class="col-lg-12">
                 <div class="product__pagination">
                   <% if (currentPage > 1) { %>
                   <a href="?page=<%= currentPage - 1 %>">&lt;</a>
                   <% } %>
-
                   <% if (currentPage > 3) { %>
                   <a href="?page=1">1</a>
                   <% if (currentPage > 4) { %>
                   <span>...</span>
                   <% } %>
                   <% } %>
-
                   <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
                   <% if (i === currentPage) { %>
                   <a class="active" href="#"><%= i %></a>
@@ -216,22 +270,21 @@
                   <a href="?page=<%= i %>"><%= i %></a>
                   <% } %>
                   <% } %>
-
                   <% if (currentPage < totalPages - 2) { %>
                   <% if (currentPage < totalPages - 3) { %>
                   <span>...</span>
                   <% } %>
                   <a href="?page=<%= totalPages %>"><%= totalPages %></a>
                   <% } %>
-
                   <% if (currentPage < totalPages) { %>
-                  <a href="?page=<%= currentPage + 1 %>"> &gt;</a>
+                  <a href="?page=<%= currentPage + 1 %>">&gt;</a>
                   <% } %>
                 </div>
               </div>
             </div>
+            <% } %>
 
-
+            <!-- Return Modal -->
             <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -242,15 +295,12 @@
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
-
                   <!-- Modal Body -->
                   <div class="modal-body">
                     <form id="returnForm">
                       <input type="hidden" id="orderId">
                       <input type="hidden" id="productId">
                       <input type="hidden" id="variantIndex">
-
-                      <!-- Return Reason -->
                       <div class="form-group d-flex align-items-center">
                         <label for="returnReason" class="mx-2 me-3"><strong>Reason for Return</strong></label>
                         <input type="text" class="form-control" id="returnReason" name="reason" list="reason-options" placeholder="Enter or select a reason" pattern="[A-Za-z0-9\s]+" />
@@ -262,7 +312,6 @@
                       </div>
                     </form>
                   </div>
-
                   <!-- Modal Footer -->
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -275,6 +324,7 @@
           </div>
         </section>
       </div>
+
     </div>
   </div>
 </section>

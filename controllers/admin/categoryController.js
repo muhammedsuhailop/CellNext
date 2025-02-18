@@ -1,5 +1,6 @@
 const Category = require('../../models/categorySchema');
 const ProductV2 = require('../../models/productsSchemaV2');
+const User = require('../../models/userSchema');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
 

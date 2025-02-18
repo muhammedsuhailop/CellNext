@@ -156,7 +156,7 @@ const getAllCoupons = async (req, res) => {
             totalPages: totalPages,
             currentPage: page,
             searchQuery: search,
-            searchAction: '/admin/coupons',
+            searchAction: '/admin/coupons/view-coupons',
             messages: {
                 success: successMessage.length > 0 ? successMessage[0] : null,
                 error: errorMessage.length > 0 ? errorMessage[0] : null,

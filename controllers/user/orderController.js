@@ -415,7 +415,7 @@ const loadOrderPage = async (req, res) => {
 
     const orderIds = user.orderHistory;
     const page = parseInt(req.query.page) || 1;
-    const limit = 4;
+    const limit = 9;
     const skip = (page - 1) * limit;
 
     const totalOrders = await Orders.countDocuments({ _id: { $in: orderIds } });
