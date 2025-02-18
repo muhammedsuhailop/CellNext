@@ -255,8 +255,8 @@ window.addEventListener('load', function () {
             return;
         }
 
-        if (selectedPaymentMethod.id === 'cod' && parseFloat(totalAmount.replace(/[^\d.]/g, "")) < 1000) {
-            Swal.fire('Error', 'Cash on Delivery (COD) is not available for orders below ₹1000.', 'error');
+        if (selectedPaymentMethod.id === 'cod' && parseFloat(totalAmount.replace(/[^\d.]/g, "")) > 1000) {
+            Swal.fire('Error', 'Cash on Delivery (COD) is not available for orders above ₹1000.', 'error');
             return
         }
 

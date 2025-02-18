@@ -1,6 +1,7 @@
 const Category = require('../../models/categorySchema');
 const ProductV2 = require('../../models/productsSchemaV2');
 const Coupon = require('../../models/couponSchema');
+const User = require('../../models/userSchema');
 const formatDate = require('../../helpers/formatDate');
 
 const loadAddCoupon = async (req, res) => {
@@ -9,8 +10,10 @@ const loadAddCoupon = async (req, res) => {
         const errorMessage = req.flash('error');
         const products = await ProductV2.find({}).select('_id productName');
         const categories = await Category.find({}).select('_id name');
+        const admin = await User.findById(req.session._id);
 
         res.render('coupon-add', {
+            admin,
             products,
             categories,
             messages: {
@@ -145,8 +148,10 @@ const getAllCoupons = async (req, res) => {
             };
         });
 
+        const admin = await User.findById(req.session._id);
 
         res.render('coupons', {
+            admin,
             data: formattedCoupons,
             totalPages: totalPages,
             currentPage: page,

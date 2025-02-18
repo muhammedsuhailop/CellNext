@@ -39,6 +39,7 @@ const login = async (req, res) => {
         }
 
         req.session.admin = true
+        req.session._id = admin._id;
         res.redirect('/admin/');
     } catch (error) {
         console.error('Admin login error', error);

@@ -13,11 +13,13 @@ const getAddProduct = async (req, res) => {
     try {
         const category = await Category.find({ isListed: true });
         const brand = await Brand.find({ isBlocked: false });
+        const admin = await User.findById(req.session._id);
 
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
 
         res.render('product-add', {
+            admin,
             category: category,
             brand: brand,
             messages: {
@@ -184,6 +186,7 @@ const getAllProducts = async (req, res) => {
         const search = req.query.search || "";
         const page = req.query.page || 1;
         const limit = 8;
+        const admin = await User.findById(req.session._id);
 
         const products = await ProductV2.find({
             $or: [
@@ -197,7 +200,6 @@ const getAllProducts = async (req, res) => {
             .sort({ createdAt: -1 })
             .exec();
 
-        // Flatten variants into separate "product-like" entries
         const ProductData = products.flatMap((product) => {
             return product.variants.map((variant, index) => ({
                 _id: product._id,
@@ -236,6 +238,7 @@ const getAllProducts = async (req, res) => {
         const errorMessage = req.flash('error');
 
         res.render('products', {
+            admin,
             decodeURIata: ProductData,
             totalPages: totalPages,
             currentPage: page,
@@ -378,6 +381,7 @@ const unblockProduct = async (req, res) => {
 const getEditProduct = async (req, res) => {
     try {
         const id = req.query.id;
+        const admin = await User.findById(req.session._id);
         const product = await ProductV2.findOne({ _id: id });
         const category = await Category.find({});
         const brand = await Brand.find({});
@@ -388,6 +392,7 @@ const getEditProduct = async (req, res) => {
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
         res.render('product-edit', {
+            admin,
             product: product,
             category: category,
             categoryMap: categoryMap,
@@ -627,7 +632,7 @@ const getAllVariants = async (req, res) => {
         const search = req.query.search || "";
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
-
+        const admin = await User.findById(req.session._id);
 
         const query = {
             $or: [
@@ -663,6 +668,7 @@ const getAllVariants = async (req, res) => {
         const errorMessage = req.flash('error');
 
         res.render('variants', {
+            admin,
             productData: ProductData,
             messages: {
                 success: successMessage.length > 0 ? successMessage[0] : null,

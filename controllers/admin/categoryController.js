@@ -22,8 +22,10 @@ const categoryInfo = async (req, res) => {
 
         const totalPages = Math.ceil(count / limit);
         if (page > totalPages) page = totalPages;
+        const admin = await User.findById(req.session._id);
 
         res.render('category', {
+            admin,
             data: categoryData,
             totalPages: totalPages,
             currentPage: page,
@@ -86,7 +88,8 @@ const getEditCategory = async (req, res) => {
     try {
         const id = req.query.id;
         const category = await Category.findOne({ _id: id });
-        res.render('edit-category', { category });
+        const admin = await User.findById(req.session._id);
+        res.render('edit-category', { category, admin });
     } catch (error) {
         console.error('Error while loading edit category:', error);
         res.redirect('/admin/error-page');

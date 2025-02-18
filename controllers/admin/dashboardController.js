@@ -97,6 +97,7 @@ const generatePeriods = (filterType, startDate, endDate) => {
 
 const loadDashboard = async (req, res) => {
     try {
+        const userId = req.session._id;
         const filter = req.query.filterType;
         const { startDate: customStart, endDate: customEnd } = req.query;
         let dateFilter = {};
@@ -345,7 +346,7 @@ const loadDashboard = async (req, res) => {
 
         const totalRevenue = fullRevenueData.reduce((acc, cur) => acc + cur.revenue, 0);
 
-        console.log('orderStatusData0', orderStatusData)
+        const admin = await User.findById(req.session._id);
 
         res.render("dashboard", {
             bestSellingProducts,
@@ -354,7 +355,8 @@ const loadDashboard = async (req, res) => {
             totalRevenue,
             orderStatusData,
             revenueData: fullRevenueData,
-            filterType: filter
+            filterType: filter,
+            admin
         });
     } catch (error) {
         console.error("Error fetching best selling reports:", error);

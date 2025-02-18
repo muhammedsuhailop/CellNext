@@ -44,7 +44,6 @@ router.get('/editProduct', adminAuth, productsController.getEditProduct);
 router.post('/editProduct/:id', adminAuth, productsController.editProduct);
 router.get('/variants', adminAuth, productsController.getAllVariants);
 router.patch('/updateVariant', adminAuth, productsController.updateProductVariant);
-// router.post('/removeProductImage/:productId/:index', adminAuth, productsController.removeProductImage);
 router.put('/editProductVariant/:id/variant/:variantIndex', adminAuth, upload, productsController.editVariant);
 router.delete('/removeProductImage/:productId/:variantIndex/:index', adminAuth, productsController.remeoveVariantImage);
 //Brand Management 
@@ -70,7 +69,7 @@ router.delete('/coupons/delete-coupon', adminAuth, couponController.deleteCoupon
 router.get('/sales-report', adminAuth, reportControler.loadSalesReport);
 router.get('/sales-report/download-pdf', adminAuth, reportControler.downloadPDF);
 router.get('/sales-report/download-excel', adminAuth, reportControler.downloadExcel);
-router.get('/dashboard', dashboardController.loadDashboard);
+router.get('/dashboard', adminAuth, dashboardController.loadDashboard);
 
 //Error-Page
 router.get('/error-page', adminController.loadError);

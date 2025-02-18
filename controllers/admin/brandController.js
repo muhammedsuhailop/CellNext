@@ -1,6 +1,5 @@
 const Brand = require('../../models/brandSchema');
-const brand = require('../../models/brandSchema');
-const Product = require('../../models/productSchema');
+const User = require('../../models/userSchema');
 const fs = require('fs');
 const path = require('path');
 const uuidv4 = require('uuid').v4;
@@ -27,8 +26,10 @@ const loadBrandPage = async (req, res) => {
 
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
+        const admin = await User.findById(req.session._id);
 
         res.render('brands', {
+            admin,
             data: brandData,
             totalPages: totalPages,
             currentPage: page,
@@ -49,8 +50,10 @@ const loadAddBrandPage = async (req, res) => {
     try {
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
+        const admin = await User.findById(req.session._id);
 
         res.render('brand-add', {
+            admin,
             messages: {
                 success: successMessage.length > 0 ? successMessage[0] : null,
                 error: errorMessage.length > 0 ? errorMessage[0] : null,

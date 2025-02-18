@@ -73,8 +73,8 @@ const placeOrder = async (req, res) => {
     let coupon = cart.coupon
     let validCoupon = false;
 
-    if (paymentMethod === 'cod' && finalAmount < 1000) {
-      return res.status(400).json({ success: false, message: `Cash on Delivery (COD) is not available for orders below ₹1000.` });
+    if (paymentMethod === 'cod' && finalAmount > 1000) {
+      return res.status(400).json({ success: false, message: `Cash on Delivery (COD) is not available for orders above ₹1000.` });
     }
 
     if (cart.coupon) {

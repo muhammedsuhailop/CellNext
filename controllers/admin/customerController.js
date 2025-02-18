@@ -30,9 +30,10 @@ const customerInfo = async (req, res) => {
 
         const totalPages = Math.ceil(count / limit);
         if (page > totalPages) page = totalPages;
-
+        const admin = await User.findById(req.session._id);
 
         res.render('customers', {
+            admin,
             data: userData,
             totalPages: totalPages,
             currentPage: page,

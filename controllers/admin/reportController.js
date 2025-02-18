@@ -50,6 +50,7 @@ const loadSalesReport = async (req, res) => {
     try {
         let { filterType, startDate, endDate, page = 1, limit = 10, searchQuery = '' } = req.query;
         let dateFilter = {};
+        const admin = await User.findById(req.session._id);
 
         const pageNumber = Math.max(1, parseInt(page) || 1);
         const pageSize = Math.max(1, parseInt(limit) || 10);
@@ -75,6 +76,7 @@ const loadSalesReport = async (req, res) => {
         const errorMessage = req.flash('error');
 
         res.render("sales-report", {
+            admin,
             salesData: paginatedResults,
             currentPage: pageNumber,
             totalPages,

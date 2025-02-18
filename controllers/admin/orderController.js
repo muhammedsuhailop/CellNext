@@ -51,7 +51,9 @@ const getOrders = async (req, res) => {
         if (!orders || orders.length === 0) {
             const successMessage = req.flash('success');
             const errorMessage = req.flash('error');
+            const admin = await User.findById(req.session._id);
             return res.status(404).render('admin-orders', {
+                admin,
                 orders: [],
                 totalPages: 0,
                 currentPage: page,
@@ -116,8 +118,10 @@ const getOrders = async (req, res) => {
 
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
+        const admin = await User.findById(req.session._id);
 
         res.render('admin-orders', {
+            admin,
             orders: orderDetails,
             totalPages: totalPages,
             currentPage: page,
@@ -231,6 +235,7 @@ const updateStatus = async (req, res) => {
 const getOrderDetails = async (req, res) => {
     try {
         const orderId = req.params.orderId;
+        const admin = await User.findById(req.session._id);
 
         const order = await Orders.findById(orderId)
             .populate('userId', 'name email')
@@ -241,6 +246,7 @@ const getOrderDetails = async (req, res) => {
             return res.status(404).render('admin/order-details', {
                 order: null,
                 message: 'Order not found.',
+                admin,
             });
         }
 
@@ -297,6 +303,7 @@ const getOrderDetails = async (req, res) => {
 
         res.render('order-view', {
             order: orderDetails,
+            admin,
             messages: {
                 success: successMessage.length > 0 ? successMessage[0] : null,
                 error: errorMessage.length > 0 ? errorMessage[0] : null,
