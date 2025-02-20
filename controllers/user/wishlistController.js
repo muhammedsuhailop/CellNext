@@ -54,8 +54,6 @@ const loadWishlist = async (req, res) => {
 
         const cartItemCount = req.session.cartItemCount || 0;
 
-        console.log('wishlistItems', wishlistItems)
-
         res.render('wishlist', {
             wishlistItems: wishlistItems.filter(item => item !== null),
             user: userData,

@@ -3,7 +3,6 @@ const User = require('../../models/userSchema');
 const fs = require('fs');
 const path = require('path');
 const uuidv4 = require('uuid').v4;
-const { upload, setUploadType } = require('../../middlewares/multer');
 const { cloudinary } = require('../../config/cloudinary');
 
 
@@ -11,7 +10,7 @@ const loadBrandPage = async (req, res) => {
     try {
         let search = req.query.search || '';
         let page = parseInt(req.query.page) || 1;
-        const limit = 4;
+        const limit = 10;
         if (page < 1) page = 1;
 
         const searchCondition = search ? { brandName: { $regex: search, $options: 'i' } } : {};

@@ -101,7 +101,6 @@ const loadSalesReport = async (req, res) => {
 const downloadPDF = async (req, res) => {
     try {
         const { filterType, startDate, endDate } = req.query;
-        console.log('filterType, startDate, endDate', filterType, startDate, endDate);
 
         let dateFilter = {};
 
@@ -214,7 +213,6 @@ const downloadPDF = async (req, res) => {
 const downloadExcel = async (req, res) => {
     try {
         const { filterType, startDate, endDate } = req.query;
-        console.log('Excel Report - filterType, startDate, endDate', filterType, startDate, endDate);
 
         let dateFilter = {};
         if (filterType && filterType !== "custom") {

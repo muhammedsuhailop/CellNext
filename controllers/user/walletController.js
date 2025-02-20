@@ -17,12 +17,10 @@ const loadWalletPage = async (req, res) => {
             .exec();
 
         if (!wallet) {
-            console.log("No wallet found, creating new wallet...");
             wallet = new Wallet({ userId: userId, transactions: [] });
             await wallet.save();
             userData.wallet = wallet._id;
             await userData.save();
-            console.log("Wallet created successfully.");
         }
 
         const page = parseInt(req.query.page) || 1;

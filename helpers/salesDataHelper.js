@@ -1,15 +1,5 @@
 const Orders = require('../models/orderSchema');
 
-/**
- * Returns aggregated sales data.
- * 
- * Options:
- *   - filterType: e.g. "today", "week", "month", "year", or "custom"
- *   - startDate: (for custom filter) a date string or Date object
- *   - endDate: (for custom filter) a date string or Date object
- *   - skip: number of documents to skip (for pagination)
- *   - limit: number of documents to limit (for pagination)
- */
 const getDateRange = (filterType) => {
     let startDate = new Date();
     let endDate = new Date();

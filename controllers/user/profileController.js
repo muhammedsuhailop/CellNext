@@ -154,7 +154,6 @@ const loadMyAccounts = async (req, res) => {
     try {
         const user = req.session.user;
         const userData = await User.findById(user);
-        console.log('On load my accounts User:', user);
         const addressData = await Address.findOne({ userId: userData._id });
         const cartItemCount = req.session.cartItemCount || 0;
 
@@ -225,8 +224,6 @@ const addAddress = async (req, res) => {
         const { firstName, lastName, name, city, state, houseName,
             landmark, addressType, country, pinCode, phone, alternatePhone } = req.body;
 
-        console.log("req", req.body);
-
         const userAddress = await Address.findOne({ userId: userData._id });
         const normalizedAddressType = addressType.toLowerCase();
 
@@ -265,7 +262,6 @@ const addAddress = async (req, res) => {
 
 const editAddress = async (req, res) => {
     try {
-        console.log('On update address');
         const { addressId, name, addressType, houseName, landmark, city, state, country, pinCode, phone, alternatePhone } = req.body;
 
         if (!addressId || !name || !addressType || !houseName || !city || !state || !country || !pinCode || !phone || !landmark) {
@@ -300,8 +296,6 @@ const editAddress = async (req, res) => {
             },
             { new: true }
         );
-
-        console.log('Updated Address:', updatedAddress);
 
         if (updatedAddress) {
             return res.json({ success: true, message: 'Address updated successfully', data: updatedAddress });

@@ -8,7 +8,6 @@ const path = require('path');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
-const { upload, setUploadType } = require('../../middlewares/multer');
 const { cloudinary } = require('../../config/cloudinary');
 
 const getAddProduct = async (req, res) => {

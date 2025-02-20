@@ -54,14 +54,11 @@ const loadHomePage = async (req, res) => {
 
             let wallet = await Wallet.findOne({ userId: userData._id });
             if (!wallet) {
-                console.log("No wallet found, creating new wallet...");
                 wallet = new Wallet({ userId: userData._id, transactions: [] });
                 await wallet.save();
                 userData.wallet = wallet._id;
                 await userData.save();
-                console.log("Wallet created successfully.");
             }
-            console.log('User data', userData.name);
             const successMessage = req.flash('success');
             const errorMessage = req.flash('error');
             res.render('home', {
@@ -76,7 +73,6 @@ const loadHomePage = async (req, res) => {
                 cartItemCount
             })
         } else {
-            console.log('No loggedin user');
             const successMessage = req.flash('success');
             const errorMessage = req.flash('error');
             errorMessage.push("You're not logged in");
@@ -159,16 +155,13 @@ async function sendVerificationEmail(email, otp) {
 
 const signup = async (req, res) => {
     const { name, email, phone, password, confirmPassword, referralCode } = req.body;
-    console.log({ name, email, phone, password, confirmPassword, referralCode });
 
     try {
         if (password !== confirmPassword) {
-            console.log('Passwords do not match');
             return res.status(400).json({ message: 'Passwords do not match' });
         }
 
         const existingUser = await User.findOne({ email });
-        console.log('Existing User:', existingUser);
 
         if (existingUser) {
             console.log('Rendering signup with error code E110');
@@ -232,7 +225,6 @@ const securePassword = async (password) => {
 const verifyOtp = async (req, res) => {
     try {
         const { otp } = req.body;
-        console.log('OTP entered:', otp);
 
         if (otp === req.session.userOtp) {
             const user = req.session.userData;
@@ -296,7 +288,6 @@ const verifyOtp = async (req, res) => {
                     newUserWallet.balance = newUserBalanceAfter;
                     await newUserWallet.save();
 
-                    console.log('Referral bonuses applied.');
                 } else {
                     console.log('Invalid referral code.');
                 }
@@ -364,7 +355,6 @@ const login = async (req, res) => {
         req.session.user = findUser._id;
         req.session.cartItemCount = cartItemCount;
         req.flash('success', 'You have successfully logged in!');
-        console.log('req.session.user', req.session.user)
         res.redirect('/');
     } catch (error) {
         console.error('login error', error);
@@ -375,7 +365,6 @@ const login = async (req, res) => {
 const googleLogin = async (req, res) => {
     if (req.user) {
         req.session.user = req.user._id;
-        console.log('req.session.user', req.session.user);
     }
     res.redirect('/')
 }
@@ -503,7 +492,6 @@ const filterProduct = async (req, res) => {
         const priceLt = req.query.lt !== undefined ? req.query.lt : req.session.filters.price.lt;
 
         req.session.filters = { category: categoryName, brand: brandName, price: { gt: priceGt, lt: priceLt } };
-        console.log('Applied Filters:', req.session.filters);
 
         const blockedBrandNames = await Brand.find({ isBlocked: true }).select('brandName');
         const blockedBrandList = blockedBrandNames.map(b => b.brandName);
@@ -519,11 +507,9 @@ const filterProduct = async (req, res) => {
         let allVariants = [];
 
         if (searchResults && searchResults.length > 0) {
-            console.log("Filtering from session search results, count:", searchResults.length);
             const filteredByCatAndBrand = searchResults.filter(product => {
                 let categoryMatch = !findCategory || String(product.category) === String(findCategory._id);
                 let brandMatch = !findBrand || product.brand === findBrand.brandName;
-                console.log(`Product: ${product.productName}, categoryMatch: ${categoryMatch}, brandMatch: ${brandMatch}`);
                 return categoryMatch && brandMatch;
             });
             allVariants = filteredByCatAndBrand.filter(product =>
@@ -531,7 +517,6 @@ const filterProduct = async (req, res) => {
                 (!priceLt || product.variantSalePrice < priceLt)
             );
         } else {
-            console.log("Fetching products from DB...");
             let query = { isBlocked: false, brand: { $nin: blockedBrandList } };
             if (findCategory) query.category = findCategory._id;
             if (findBrand) query.brand = findBrand.brandName;
@@ -676,7 +661,6 @@ const filterByPrice = async (req, res) => {
             price: { gt: priceGt, lt: priceLt }
         };
 
-        console.log('Applied Filters:', req.session.filters);
 
         const blockedBrandNames = await Brand.find({ isBlocked: true }).select('brandName');
         const blockedBrandList = blockedBrandNames.map(b => b.brandName);
@@ -688,20 +672,17 @@ const filterByPrice = async (req, res) => {
         let searchResults = req.session.searchResult || [];
 
         if (searchResults && searchResults.length > 0) {
-            console.log("Filtering from session search results, count:", searchResults.length);
             allVariants = searchResults.filter(product => {
                 let categoryMatch = !findCategory || String(product.category) === String(findCategory._id);
                 let brandMatch = !findBrand || product.brand === findBrand.brandName;
                 let priceMatch = (!priceGt || product.variantSalePrice > priceGt) &&
                     (!priceLt || product.variantSalePrice < priceLt);
-                console.log(`Product: ${product.productName}, categoryMatch: ${categoryMatch}, brandMatch: ${brandMatch}`);
                 return categoryMatch && brandMatch && priceMatch;
             });
         } else {
             let query = { isBlocked: false, brand: { $nin: blockedBrandList } };
             if (findCategory) query.category = findCategory._id;
             if (findBrand) query.brand = findBrand.brandName;
-            console.log("Fetching products from DB with query:", query);
             const products = await ProductV2.find(query).lean();
 
             allVariants = products.flatMap(product =>

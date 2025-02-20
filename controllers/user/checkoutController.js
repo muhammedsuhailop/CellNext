@@ -26,8 +26,6 @@ const getCheckout = async (req, res) => {
             couponName = coupon.name;
         }
 
-        console.log('cart:', cart);
-
         const products = await ProductV2.find({
             '_id': { $in: cart.items.map(item => item.productId) }
         });
@@ -54,9 +52,6 @@ const getCheckout = async (req, res) => {
                 console.error(`Variant not found for ID: ${item.variantId}`);
                 return null;
             }
-
-            console.log('Product:', product);
-            console.log('Variant:', variant);
 
             return {
                 ...item,

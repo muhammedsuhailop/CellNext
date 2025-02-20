@@ -244,7 +244,7 @@ const placeOrder = async (req, res) => {
       await cart.save();
       req.session.cartItemCount = 0;
 
-      return res.json({ success: true, message: 'Order placed successfully using Wallet.', orderId: newOrder._id });
+      return res.json({ success: true, message: 'Order placed successfully using Wallet.', orderId: newOrder.orderId });
     }
 
     if (paymentMethod === 'razorpay') {
@@ -255,8 +255,6 @@ const placeOrder = async (req, res) => {
           receipt: `order_${newOrder._id}`,
           payment_capture: 1
         });
-
-        console.log('==razorpayOrder==', razorpayOrder);
 
         newOrder.payment.transactionId = razorpayOrder.id;
         await newOrder.save();
@@ -541,9 +539,6 @@ const cancelItemOrder = async (req, res) => {
     if (order.userId.toString() !== userId.toString()) {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
-
-    console.log(productId, variantIndex);
-    console.log(order.orderItems);
 
     const item = order.orderItems.find(i => i.productId.toString() === productId.toString() && i.variantId === Number(variantIndex));
     if (!item) return res.status(404).json({ message: "Item not found in order" });

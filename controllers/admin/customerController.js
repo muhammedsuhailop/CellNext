@@ -6,7 +6,7 @@ const customerInfo = async (req, res) => {
     try {
         let search = req.query.search || '';
         let page = parseInt(req.query.page) || 1;
-        const limit = 6;
+        const limit = 8;
         if (page < 1) page = 1;
         const userData = await User.find({
             isAdmin: false,
@@ -18,7 +18,6 @@ const customerInfo = async (req, res) => {
             .limit(limit * 1)
             .skip((page - 1) * limit)
             .exec();
-        console.log('Page :', page)
 
         const count = await User.countDocuments({
             isAdmin: false,

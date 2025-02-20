@@ -176,7 +176,6 @@ const addToCart = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Please login to add products to cart' });
         }
 
-        console.log('In Add to cart...');
         const { productId, variantId, quantity } = req.body;
         const userId = req.session.user;
 
@@ -247,8 +246,6 @@ const addToCart = async (req, res) => {
         cart.total = cart.subTotal + cart.deliveryCharge;
 
         const updatedCart = await cart.save();
-
-        console.log('after modiying cart:', updatedCart)
 
         const cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
         req.session.cartItemCount = cartItemCount;
@@ -328,14 +325,10 @@ const applyCoupon = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Your cart is empty' });
         }
 
-        console.log('cart', cart);
-
         const coupon = await Coupon.findOne({ name: couponCode, isActive: true });
         if (!coupon) {
             return res.status(404).json({ success: false, message: 'Invalid or expired coupon' });
         }
-
-        console.log('coupon', coupon);
 
         const now = new Date();
         if (now < coupon.startOn || now > coupon.expireOn) {

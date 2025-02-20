@@ -68,7 +68,6 @@ const loadError = async (req, res) => {
 
 const loadDashboard = async (req, res) => {
     if (req.session.admin) {
-        console.log(req.session.admin)
         try {
             res.redirect('/admin/dashboard');
         } catch (error) {

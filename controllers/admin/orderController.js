@@ -296,8 +296,6 @@ const getOrderDetails = async (req, res) => {
             additionalNote: order.additionalNote || 'Nil'
         };
 
-        console.log('orderDetails====', orderDetails)
-
         const successMessage = req.flash('success');
         const errorMessage = req.flash('error');
 
@@ -309,7 +307,6 @@ const getOrderDetails = async (req, res) => {
                 error: errorMessage.length > 0 ? errorMessage[0] : null,
             },
         })
-
 
     } catch (error) {
         console.error('Error listing product:', error);

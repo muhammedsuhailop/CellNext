@@ -66,7 +66,7 @@
                               bg-primary text-white
                             <% } else if (order.status === 'Delivered') { %>
                               bg-success text-white
-                            <% } else if (order.status === 'Returned' || order.status === 'Partial Return') { %>
+                            <% } else if (order.status === 'Returned' || order.status === 'Partial Return' || order.status=== 'Partial Cancellation') { %>
                               bg-warning text-white
                             <% } else if (order.status === 'Cancelled' || order.status === 'Cancel Request') { %>
                               bg-danger text-white

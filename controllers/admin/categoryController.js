@@ -103,7 +103,6 @@ const editCategory = async (req, res) => {
         const { name, description } = req.body;
         const existingCategory = await Category.findOne({ name });
         if (existingCategory && existingCategory._id.toString() !== id) {
-            console.log('Category already exists');
             return res.status(400).json({
                 errors: { name: 'This category name already exists.' },
             });

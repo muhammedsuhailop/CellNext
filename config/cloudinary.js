@@ -12,15 +12,17 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
     let folderName = 'prod-imgs';
+    let transformation = [{ width: 500, height: 500, crop: 'fill' }];
 
     if (req.uploadType === 'brand') {
       folderName = 'brand-logos';
+      transformation = [{ width: 300, height: 300, crop: 'limit' }];
     }
 
     return {
       folder: folderName,
       allowed_formats: ['jpg', 'jpeg', 'png'],
-      transformation: [{ width: 500, height: 500, crop: 'limit' }],
+      transformation,
     };
   },
 });
