@@ -8,6 +8,8 @@ const path = require('path');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
+const { upload, setUploadType } = require('../../middlewares/multer');
+const { cloudinary } = require('../../config/cloudinary');
 
 const getAddProduct = async (req, res) => {
     try {
@@ -50,29 +52,9 @@ const addProduct = async (req, res) => {
 
         const images = [];
         const files = req.files?.images || [];
-
         for (const file of files) {
-            const originalPath = file.path;
-            const uniqueId = uuidv4();
-            const croppedImagePath = path.join(
-                croppedImageDir,
-                `crd-img-${uniqueId}-${file.originalname}`
-            );
-
-            try {
-                const imageMetadata = await sharp(originalPath).metadata();
-                if (!imageMetadata) {
-                    console.error('Invalid or corrupt image file:', originalPath);
-                    continue;
-                }
-                await sharp(originalPath)
-                    .resize(500, 500)
-                    .toFile(croppedImagePath);
-                images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
-            } catch (err) {
-                console.error('Error processing file with sharp:', err);
-                continue;
-            }
+            // file.path is the secure URL provided by Cloudinary.
+            images.push(file.path);
         }
 
         const categoryId = await Category.findOne({ _id: product.category });
@@ -116,7 +98,6 @@ const addProductVariant = async (req, res) => {
     try {
         const { id: productId } = req.params;
         const variantData = req.body;
-        const files = req.files.variantImages || [];
 
         const product = await ProductV2.findById(productId);
         if (!product) {
@@ -138,25 +119,9 @@ const addProductVariant = async (req, res) => {
         }
 
         const images = [];
-
+        const files = req.files.variantImages || [];
         for (const file of files) {
-            const originalPath = file.path;
-            const uniqueId = uuidv4();
-            const croppedImagePath = path.join(
-                croppedImageDir,
-                `crd-variant-img-${uniqueId}-${file.originalname}`
-            );
-
-            try {
-                await sharp(originalPath)
-                    .resize(500, 500)
-                    .toFile(croppedImagePath);
-
-                images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
-            } catch (err) {
-                console.error('Error processing file with sharp:', err);
-                continue;
-            }
+            images.push(file.path);
         }
 
         const newVariant = {
@@ -413,7 +378,6 @@ const editProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         const product = req.body;
-        console.log('req body: ', req.body);
 
         const existingProduct = await ProductV2.findById(productId);
         if (!existingProduct) {
@@ -459,7 +423,6 @@ const editProduct = async (req, res) => {
 const editVariant = async (req, res) => {
     try {
         const productId = req.params.id;
-        console.log('Uploaded files:', req.files);
         const variantIndex = req.params.variantIndex;
         const updatedVariant = req.body;
 
@@ -476,119 +439,43 @@ const editVariant = async (req, res) => {
         if (!variant) {
             return res.status(404).json({ success: false, message: 'Variant not found' });
         }
-        const isColorOrStorageChanged = variant.color !== updatedVariant.color || variant.storage !== updatedVariant.storage;
 
+        const isColorOrStorageChanged = variant.color !== updatedVariant.color || variant.storage !== updatedVariant.storage;
         if (isColorOrStorageChanged) {
             const isDuplicate = existingProduct.variants.some((existingVariant, index) => {
-                if (index !== variantIndex) {
-                    return existingVariant.color === updatedVariant.color &&
-                        existingVariant.storage === updatedVariant.storage;
-                }
-                return false;
+                return index !== parseInt(variantIndex) &&
+                    existingVariant.color === updatedVariant.color &&
+                    existingVariant.size === updatedVariant.size;
             });
 
             if (isDuplicate) {
                 return res.status(400).json({ success: false, message: 'A variant with the same color and storage already exists.' });
             }
         }
-        const images = existingProduct.variants[variantIndex].images || [];
-        console.log('Images = ', images)
-        const croppedImageDir = path.join(__dirname, '../../public/uploads/prod-imgs');
 
-        if (!fs.existsSync(croppedImageDir)) {
-            fs.mkdirSync(croppedImageDir, { recursive: true });
-        }
+        const existingImages = variant.images || [];
+        const newImages = req.files?.variantImages ? req.files.variantImages.map(file => file.path) : [];
 
-        console.log('Uploaded files:', req.files);
-        if (req.files.variantImages) {
-            for (const file of req.files.variantImages) {
-                const originalPath = file.path;
-                const uniqueId = uuidv4();
-                const croppedImagePath = path.join(
-                    croppedImageDir,
-                    `crd-${uniqueId}-${file.originalname}`
-                );
-
-                console.log(`Processing file: ${file.originalname}`);
-                console.log(`Original file path: ${originalPath}`);
-                console.log(`Cropped file path: ${croppedImagePath}`);
-
-                if (!fs.existsSync(originalPath)) {
-                    console.error(`File does not exist: ${originalPath}`);
-                    continue;
-                }
-
-                try {
-                    const imageMetadata = await sharp(originalPath).metadata();
-                    if (!imageMetadata) {
-                        console.error('Invalid or corrupt image file:', originalPath);
-                        continue;
-                    }
-                    await sharp(originalPath)
-                        .resize(500, 500)
-                        .jpeg({ quality: 100, chromaSubsampling: '4:4:4' })
-                        .toFile(croppedImagePath);
-                    console.log('Cropping completed.');
-                    images.push(croppedImagePath.replace(/\\/g, '/').split('public')[1]);
-                } catch (err) {
-                    console.error('Error processing file with sharp:', err);
-                    continue;
-                }
-            }
-        }
+        const updatedImages = [...existingImages, ...newImages];
 
         variant.color = updatedVariant.color.toUpperCase();
         variant.size = updatedVariant.size.toUpperCase();
-        variant.regularPrice = updatedVariant.regularPrice;
-        variant.salePrice = updatedVariant.salePrice;
-        variant.stock = updatedVariant.quantity;
-        variant.images = images;
+        variant.regularPrice = parseFloat(updatedVariant.regularPrice);
+        variant.salePrice = parseFloat(updatedVariant.salePrice);
+        variant.stock = parseInt(updatedVariant.quantity, 10);
+        variant.images = updatedImages;
         variant.updatedAt = new Date();
 
         await existingProduct.save();
 
-        return res.status(200).json({ success: true, message: 'Variant updated successfully!', variant: variant });
-
+        return res.status(200).json({ success: true, message: 'Variant updated successfully!', variant });
     } catch (error) {
         console.error('Error updating variant:', error);
         return res.status(500).json({ success: false, message: 'An error occurred while updating the variant.' });
     }
 };
 
-const removeProductImage = async (req, res) => {
-    try {
-        const { productId, index } = req.params;
-
-        const product = await ProductV2.findById(productId);
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-
-        if (product.productImage[index]) {
-            const imagePath = path.join(__dirname, '../../public', product.productImage[index]);
-            fs.unlink(imagePath, (err) => {
-                if (err) {
-                    console.error('Error removing image file:', err);
-                    return res.status(500).json({ error: 'Internal server error' });
-                }
-                product.productImage.splice(index, 1);
-                product.save()
-                    .then(() => res.status(200).json({ success: 'Image removed successfully' }))
-                    .catch((error) => {
-                        console.error('Error saving product:', error);
-                        res.status(500).json({ error: 'Internal server error' });
-                    });
-            });
-        } else {
-            return res.status(400).json({ error: 'Image not found in product' });
-        }
-    } catch (error) {
-        console.error('Error removing image:', error);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-};
-
-const remeoveVariantImage = async (req, res) => {
+const removeVariantImage = async (req, res) => {
     try {
         const { productId, variantIndex, index } = req.params;
 
@@ -603,19 +490,21 @@ const remeoveVariantImage = async (req, res) => {
         }
 
         if (variant.images && variant.images[index]) {
-            const imagePath = path.join(__dirname, '../../public', variant.images[index]);
-            fs.unlink(imagePath, (err) => {
-                if (err) {
-                    console.error('Error removing image file:', err);
-                    return res.status(500).json({ error: 'Internal server error' });
+            const imageUrl = variant.images[index];
+
+            const publicId = imageUrl.split('/').pop().split('.')[0];
+
+            cloudinary.uploader.destroy(`prod-imgs/${publicId}`, async (error, result) => {
+                if (error) {
+                    console.error('Error removing image from Cloudinary:', error);
+                    return res.status(500).json({ error: 'Failed to remove image from Cloudinary' });
                 }
+
                 variant.images.splice(index, 1);
-                product.save()
-                    .then(() => res.status(200).json({ success: 'Variant image removed successfully' }))
-                    .catch((error) => {
-                        console.error('Error saving product:', error);
-                        res.status(500).json({ error: 'Internal server error' });
-                    });
+
+                await product.save();
+
+                return res.status(200).json({ success: 'Variant image removed successfully' });
             });
         } else {
             return res.status(400).json({ error: 'Image not found in variant' });
@@ -624,7 +513,7 @@ const remeoveVariantImage = async (req, res) => {
         console.error('Error removing image:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
-}
+};
 
 
 const getAllVariants = async (req, res) => {
@@ -719,9 +608,8 @@ module.exports = {
     unblockProduct,
     getEditProduct,
     editProduct,
-    removeProductImage,
     editVariant,
-    remeoveVariantImage,
+    removeVariantImage,
     addProductVariant,
     getAllVariants,
     updateProductVariant,

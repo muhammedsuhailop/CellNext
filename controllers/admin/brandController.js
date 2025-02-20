@@ -3,6 +3,9 @@ const User = require('../../models/userSchema');
 const fs = require('fs');
 const path = require('path');
 const uuidv4 = require('uuid').v4;
+const { upload, setUploadType } = require('../../middlewares/multer');
+const { cloudinary } = require('../../config/cloudinary');
+
 
 const loadBrandPage = async (req, res) => {
     try {
@@ -68,12 +71,12 @@ const loadAddBrandPage = async (req, res) => {
 const addBrand = async (req, res) => {
     try {
         const { name } = req.body;
-        const images = req.files;
+        const files = req.files;
 
         if (!name || !/^[a-zA-Z][a-zA-Z0-9 _-]*[a-zA-Z0-9]$/.test(name)) {
             return res.status(400).json({ error: 'Brand name should only contain alphabets, spaces, and (-_) and start with an alphabet.' });
         }
-        if (!images || images.length === 0) {
+        if (!files || files.length === 0) {
             return res.status(400).json({ error: 'Please upload at least one image.' });
         }
 
@@ -82,29 +85,7 @@ const addBrand = async (req, res) => {
             return res.status(400).json({ error: 'Brand already exists.' });
         }
 
-        const imageDir = path.join(__dirname, '../../public/uploads/brands');
-
-        if (!fs.existsSync(imageDir)) {
-            fs.mkdirSync(imageDir, { recursive: true });
-        }
-
-        const imageUrls = [];
-        for (const file of images) {
-            const originalPath = file.path;
-            const uniqueId = uuidv4();
-            const imagePath = path.join(imageDir, `${uniqueId}-${file.originalname}`);
-
-            console.log(`Processing file: ${file.originalname}`);
-            console.log(`Original file path: ${originalPath}`);
-            console.log(`Saving image to: ${imagePath}`);
-
-            try {
-                fs.renameSync(originalPath, imagePath);
-                imageUrls.push(`${imagePath.split('public')[1].replace(/\\/g, '/')}`);
-            } catch (err) {
-                console.error('Error saving file:', err);
-            }
-        }
+        const imageUrls = files.images[0].path;
 
         const newBrand = new Brand({
             brandName: name,

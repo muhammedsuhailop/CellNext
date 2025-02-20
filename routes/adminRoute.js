@@ -9,8 +9,8 @@ const orderController = require('../controllers/admin/orderController');
 const couponController = require('../controllers/admin/couponController');
 const reportControler = require('../controllers/admin/reportController');
 const dashboardController = require('../controllers/admin/dashboardController');
-const upload = require('../helpers/multer');
-const { userAuth, adminAuth } = require('../middlewares/auth')
+const { setUploadType, upload } = require('../helpers/multer');
+const { adminAuth } = require('../middlewares/auth')
 
 
 router.get('/login', adminController.loadLogin);
@@ -45,11 +45,11 @@ router.post('/editProduct/:id', adminAuth, productsController.editProduct);
 router.get('/variants', adminAuth, productsController.getAllVariants);
 router.patch('/updateVariant', adminAuth, productsController.updateProductVariant);
 router.put('/editProductVariant/:id/variant/:variantIndex', adminAuth, upload, productsController.editVariant);
-router.delete('/removeProductImage/:productId/:variantIndex/:index', adminAuth, productsController.remeoveVariantImage);
+router.delete('/removeProductImage/:productId/:variantIndex/:index', adminAuth, productsController.removeVariantImage);
 //Brand Management 
 router.get('/brands', adminAuth, brandController.loadBrandPage);
 router.get('/addBrand', adminAuth, brandController.loadAddBrandPage);
-router.post('/addBrand', adminAuth, upload, brandController.addBrand);
+router.post('/addBrand', adminAuth, setUploadType('brand'), upload, brandController.addBrand);
 router.patch('/brand/block', adminAuth, brandController.blockBrand);
 router.patch('/brand/unblock', adminAuth, brandController.unblockBrand);
 
