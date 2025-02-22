@@ -59,7 +59,6 @@ const loadHomePage = async (req, res) => {
                 userData.wallet = wallet._id;
                 await userData.save();
             }
-            console.log('user.cart', user.cart)
             if (userData.cart && userData.cart.length > 0) {
                 const cart = await Cart.findOne({ _id: userData.cart[0] }).lean();
                 if (cart && cart.items && cart.items.length > 0) {
