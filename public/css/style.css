@@ -1295,7 +1295,7 @@ ol {
 .shop__sidebar__accordion .card-body {
 	padding: 0;
 	padding-top: 10px;
-	padding-bottom: 20px;
+	padding-bottom: 15px;
 	border-bottom: 1px solid #e5e5e5;
 }
 
@@ -1314,7 +1314,7 @@ ol {
 .shop__sidebar__categories ul,
 .shop__sidebar__price ul,
 .shop__sidebar__brand ul {
-	height: 225px;
+	height: auto;
 }
 
 .shop__sidebar__categories ul li,
@@ -3984,6 +3984,12 @@ ol {
 	.hero__social {
 		margin-top: 180px;
 	}
+
+	.sidebar {
+		height: auto;
+		background-color: #f8f9fa;
+		border-right: 1px solid #dee2e6;
+	}
 }
 
 /* Small Device = 320px */
@@ -4053,6 +4059,18 @@ ol {
 
 	.categories__text:before {
 		height: 250px;
+	}
+
+	.sidebar {
+		height: auto;
+		background-color: #f8f9fa;
+		border-right: 1px solid #dee2e6;
+		margin-left: 1.7rem;
+		margin-right: 1.7rem;
+	}
+
+	.spad {
+		padding-top: 20px;
 	}
 }
 
@@ -4427,12 +4445,6 @@ ol {
 }
 
 
-.sidebar {
-	min-height: 100vh;
-	background-color: #f8f9fa;
-	border-right: 1px solid #dee2e6;
-}
-
 .sidebar .nav-link {
 	color: #495057;
 	padding: 10px 15px;
@@ -4558,6 +4570,12 @@ ol {
 @media (min-width: 768px) {
 	.address__form {
 		width: 50vw;
+	}
+
+	.sidebar {
+		height: 100vh;
+		background-color: #f8f9fa;
+		border-right: 1px solid #dee2e6;
 	}
 }
 
