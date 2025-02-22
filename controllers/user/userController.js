@@ -47,7 +47,7 @@ const loadHomePage = async (req, res) => {
             }
         ];
 
-        const cartItemCount = req.session.cartItemCount || 0;
+        let cartItemCount = req.session.cartItemCount || 0;
 
         if (user) {
             const userData = await User.findOne({ _id: user });
@@ -59,6 +59,17 @@ const loadHomePage = async (req, res) => {
                 userData.wallet = wallet._id;
                 await userData.save();
             }
+            console.log('user.cart', user.cart)
+            if (userData.cart && userData.cart.length > 0) {
+                const cart = await Cart.findOne({ _id: userData.cart[0] }).lean();
+                if (cart && cart.items && cart.items.length > 0) {
+                    cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+                }
+            }
+
+            req.session.cartItemCount = cartItemCount;
+            cartItemCount = req.session.cartItemCount;
+
             const successMessage = req.flash('success');
             const errorMessage = req.flash('error');
             res.render('home', {

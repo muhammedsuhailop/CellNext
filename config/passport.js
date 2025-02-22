@@ -3,10 +3,15 @@ const googleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userSchema');
 const env = require('dotenv').config();
 
+const callbackURL =
+    process.env.NODE_ENV === "production"
+        ? process.env.GOOGLE_CALLBACK_PROD
+        : process.env.GOOGLE_CALLBACK_LOCAL;
+
 passport.use(new googleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http://cellnext.shop/auth/google/callback'
+    callbackURL: callbackURL,
 },
     async (accessToken, refreshToken, profile, done) => {
         try {
