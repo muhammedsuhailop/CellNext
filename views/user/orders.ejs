@@ -127,8 +127,8 @@
                               </p>
                             </div>
                             <div>
-                              <% if (order.status === 'Delivered') { %>
-                              <a href="/order/invoice/<%=order._id %>" class="btn btn-sm btn-secondary mx-2">
+                              <% if (order.items.some(item => item.itemStatus === 'Delivered')) { %>
+                              <a href="/order/invoice/<%= order._id %>" class="btn btn-sm btn-secondary mx-2">
                                 <i class='bx bx-download'></i> Invoice
                               </a>
                               <% } %>
