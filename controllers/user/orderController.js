@@ -620,7 +620,7 @@ const generateInvoicePDF = async (req, res) => {
       return res.status(404).send('Order not found.');
     }
 
-    if (order.status !== 'Delivered') {
+    if (!order.orderItems.some(item => item.itemStatus === 'Delivered')) {
       return res.status(400).send('Invoice is available only for delivered orders.');
     }
 
@@ -678,24 +678,27 @@ const generateInvoicePDF = async (req, res) => {
 
     let rowY = tableTop + 25;
     order.orderItems.forEach(item => {
-      const productDetails = productMap[item.productId.toString()];
-      const variantDetails = productDetails ? productDetails[item.variantId] : null;
+      if (item.itemStatus !== 'Cancelled' && item.itemStatus !== 'Returned') {
+        const productDetails = productMap[item.productId.toString()];
+        const variantDetails = productDetails ? productDetails[item.variantId] : null;
 
-      const productName = variantDetails ? variantDetails.productName : 'Unknown Product';
-      const variantColor = variantDetails ? variantDetails.color : 'N/A';
-      const variantSize = variantDetails && variantDetails.size ? ` | ${variantDetails.size}` : '';
-      const deliveredOn = item.deliveredOn ? new Date(item.deliveredOn).toLocaleDateString('en-IN') : 'N/A';
-      let finalItemPrice = item.salePrice * item.quantity;
+        const productName = variantDetails ? variantDetails.productName : 'Unknown Product';
+        const variantColor = variantDetails ? variantDetails.color : 'N/A';
+        const variantSize = variantDetails && variantDetails.size ? ` | ${variantDetails.size}` : '';
+        const deliveredOn = item.deliveredOn ? new Date(item.deliveredOn).toLocaleDateString('en-IN') : 'N/A';
+        let finalItemPrice = item.salePrice * item.quantity;
 
-      doc.fontSize(10);
-      doc.text(`${productName} ${variantColor} ${variantSize}`, startX, rowY, { width: columnWidths[0], align: 'left' });
-      doc.text(String(item.quantity), startX + columnWidths[0] + columnWidths[1], rowY, { width: columnWidths[2], align: 'center' });
-      doc.text(`₹${finalItemPrice.toLocaleString('en-IN')}`, startX + columnWidths[0] + columnWidths[1], rowY, { width: columnWidths[3], align: 'right' });
-      // doc.text(deliveredOn, startX + columnWidths[0] + columnWidths[1] + columnWidths[3], rowY, { width: columnWidths[4], align: 'center' });
-      // doc.text(item.itemStatus, startX + columnWidths[0] + columnWidths[1] + columnWidths[3] + columnWidths[4], rowY, { width: columnWidths[5], align: 'center' });
+        doc.fontSize(10);
+        doc.text(`${productName} ${variantColor} ${variantSize}`, startX, rowY, { width: columnWidths[0], align: 'left' });
+        doc.text(String(item.quantity), startX + columnWidths[0] + columnWidths[1], rowY, { width: columnWidths[2], align: 'center' });
+        doc.text(`₹${finalItemPrice.toLocaleString('en-IN')}`, startX + columnWidths[0] + columnWidths[1], rowY, { width: columnWidths[3], align: 'right' });
+        // doc.text(deliveredOn, startX + columnWidths[0] + columnWidths[1] + columnWidths[3], rowY, { width: columnWidths[4], align: 'center' });
+        // doc.text(item.itemStatus, startX + columnWidths[0] + columnWidths[1] + columnWidths[3] + columnWidths[4], rowY, { width: columnWidths[5], align: 'center' });
 
-      rowY += rowSpacing;
-    });
+        rowY += rowSpacing;
+      }
+    }
+    );
 
     doc.moveDown(2);
 
@@ -741,7 +744,6 @@ const retryPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Payment retries are allowed only within 24 hours of order initiation.' });
     }
 
-    // Check stock availability before retrying payment
     for (const item of order.orderItems) {
       const product = await ProductV2.findById(item.productId);
       if (!product) {
@@ -757,15 +759,13 @@ const retryPayment = async (req, res) => {
       }
     }
 
-    // Create a new Razorpay order
     const razorpayOrder = await razorpay.orders.create({
-      amount: order.finalAmount * 100, // Convert to paise
+      amount: order.finalAmount * 100,
       currency: 'INR',
       receipt: `retry_${order._id}`,
       payment_capture: 1
     });
 
-    // Update order with new transaction details
     order.payment.transactionId = razorpayOrder.id;
     order.payment.status = 'Pending';
     order.status = 'Pending';

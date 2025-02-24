@@ -348,6 +348,18 @@ const loadDashboard = async (req, res) => {
 
         const admin = await User.findById(req.session._id);
 
+        if (orderStatusData.length === 0) {
+
+            orderStatusData.push({
+                delivered: 0,
+                cancelled: 0,
+                returned: 0,
+                cancelRequest: 0,
+                returnRequest: 0,
+                inProcess: 0
+            });
+        }
+
         res.render("dashboard", {
             bestSellingProducts,
             bestSellingCategories,
