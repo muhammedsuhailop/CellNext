@@ -115,7 +115,6 @@ const editCategory = async (req, res) => {
         );
 
         if (updatedCategory) {
-            console.log('Category updated successfully');
             return res.status(200).json({ message: 'Category updated successfully.' });
         } else {
             console.log('Category not found');
