@@ -204,7 +204,7 @@ const placeOrder = async (req, res) => {
       await cart.save();
       req.session.cartItemCount = 0;
 
-      return res.json({ success: true, message: 'Order placed successfully with Cash on Delivery.', orderId: newOrder._id });
+      return res.json({ success: true, message: 'Order placed successfully with Cash on Delivery.', orderId: newOrder.orderId });
     }
 
     if (paymentMethod === 'wallet') {
