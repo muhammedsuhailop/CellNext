@@ -36,17 +36,16 @@
                 <table class="table">
                   <thead>
                     <tr>
-                      <th>Logo</th>
+                      <th class="text-center">Logo</th>
                       <th>Brand Name</th>
                       <th>Status</th>
                       <th>Block/UnBlock</th>
-                      <th>Delete</th>
                     </tr>
                   </thead>
                   <tbody class="table-border-bottom-0">
                     <% data.forEach((brand) => { %>
                     <tr>
-                      <td>
+                      <td class="text-center">
                         <img src="<%= brand.brandImage %>" alt="<%= brand.brandName %>" style="width: 50px; height: 50px; object-fit: contain; border-radius: 5px;" />
                       </td>
 
@@ -74,12 +73,6 @@
                         <% } %>
                       </td>
 
-                      <!-- Delete Button -->
-                      <td>
-                        <button class="btn btn-sm btn-danger disabled" style="width: 65px;">
-                          <a href="/admin/brand/delete?id=<%= brand._id %>" class="text-white">Delete</a>
-                        </button>
-                      </td>
                     </tr>
                     <% }) %>
                   </tbody>
