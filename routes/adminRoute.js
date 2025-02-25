@@ -73,6 +73,9 @@ router.get('/dashboard', adminAuth, dashboardController.loadDashboard);
 
 //Error-Page
 router.get('/error-page', adminController.loadError);
+router.use((req, res) => {
+    adminController.loadError(req, res);
+})
 
 
 module.exports = router;
