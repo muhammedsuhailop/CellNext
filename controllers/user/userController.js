@@ -133,32 +133,32 @@ const loadVerifOtpPage = async (req, res) => {
 
 function generateOtp() {
     return Math.floor(1000 + Math.random() * 9000).toString();
-}
+} 
 
 async function sendVerificationEmail(email, otp) {
     try {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
-            port: 587,
-            secure: false,
-            requireTLS: true,
             auth: {
+                type: 'OAuth2',
                 user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD
+                clientId: process.env.GOOGLE_CLIENT_ID,
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+                refreshToken: process.env.GOOGLE_REFRESH_TOKEN
             }
-        })
+        });
 
         const info = await transporter.sendMail({
-            from: process.env.NODEMAILER_EMAIL,
+            from: `YourAppName <${process.env.NODEMAILER_EMAIL}>`,
             to: email,
             subject: 'Verify your account',
             text: `Your OTP is ${otp}`,
-            html: `<b>Your OTP: ${otp}`
-        })
+            html: `<b>Your OTP: ${otp}</b>`
+        });
 
-        return info.accepted.length > 0
+        return info.accepted.length > 0;
     } catch (error) {
-        console.error('Error sending email', error);
+        console.error('Error sending email via Gmail API:', error);
         return false;
     }
 };
