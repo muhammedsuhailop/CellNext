@@ -20,32 +20,99 @@ function generateShortReferralCode(length = 6) {
     return uuidv4().replace(/-/g, '').substring(0, length).toUpperCase();
 }
 
-async function sendVerificationEmail(email, otp) {
-    try {
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                type: 'OAuth2',
-                user: process.env.NODEMAILER_EMAIL,
-                clientId: process.env.GOOGLE_CLIENT_ID,
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                refreshToken: process.env.GOOGLE_REFRESH_TOKEN
-            }
-        });
+const sendVerificationEmail = async (email, otp) => {
+  console.log("\n================ EMAIL SERVICE ================");
+  console.log(`[EMAIL] Starting password reset email`);
+  console.log(`[EMAIL] Recipient       : ${email}`);
+  console.log(`[EMAIL] Time            : ${new Date().toISOString()}`);
 
-        const info = await transporter.sendMail({
-            from: `CellNext <${process.env.NODEMAILER_EMAIL}>`,
-            to: email,
-            subject: 'Password Reset CellNext',
-            text: `Your OTP for password Reset is ${otp}`,
-            html: `<b>Your OTP for password Reset: ${otp}</b>` 
-        });
+  try {
+    console.log("[EMAIL] Checking environment variables...");
 
-        return info.accepted.length > 0;
-    } catch (error) {
-        console.error('Error sending password reset email via Gmail API:', error);
-        return false;
-    }
+    console.log(
+      `[EMAIL] NODEMAILER_EMAIL       : ${process.env.NODEMAILER_EMAIL ? "✔ Found" : "✘ Missing"}`,
+    );
+    console.log(
+      `[EMAIL] GOOGLE_CLIENT_ID      : ${process.env.GOOGLE_CLIENT_ID ? "✔ Found" : "✘ Missing"}`,
+    );
+    console.log(
+      `[EMAIL] GOOGLE_CLIENT_SECRET  : ${process.env.GOOGLE_CLIENT_SECRET ? "✔ Found" : "✘ Missing"}`,
+    );
+    console.log(
+      `[EMAIL] GOOGLE_REFRESH_TOKEN  : ${process.env.GOOGLE_REFRESH_TOKEN ? "✔ Found" : "✘ Missing"}`,
+    );
+
+    console.log("[EMAIL] Creating transporter...");
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+
+      // Nodemailer logs
+      logger: true,
+      debug: true,
+
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+
+      auth: {
+        type: "OAuth2",
+        user: process.env.NODEMAILER_EMAIL,
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+      },
+    });
+
+    console.log("[EMAIL] Transporter created successfully.");
+
+    console.log("[EMAIL] Verifying SMTP connection...");
+
+    const verifyStart = Date.now();
+    await transporter.verify();
+
+    console.log(
+      `[EMAIL] SMTP verification successful (${Date.now() - verifyStart} ms)`,
+    );
+
+    console.log("[EMAIL] Sending email...");
+
+    const sendStart = Date.now();
+
+    const info = await transporter.sendMail({
+      from: `CellNext <${process.env.NODEMAILER_EMAIL}>`,
+      to: email,
+      subject: "Password Reset CellNext",
+      text: `Your OTP for password Reset is ${otp}`,
+      html: `<b>Your OTP for password Reset: ${otp}</b>`,
+    });
+
+    console.log(
+      `[EMAIL] Email sent successfully (${Date.now() - sendStart} ms)`,
+    );
+    console.log("[EMAIL] Message ID :", info.messageId);
+    console.log("[EMAIL] Accepted  :", info.accepted);
+    console.log("[EMAIL] Rejected  :", info.rejected);
+    console.log("[EMAIL] Response  :", info.response);
+
+    console.log("================ EMAIL SUCCESS ================\n");
+
+    return info.accepted.length > 0;
+  } catch (error) {
+    console.error("\n================ EMAIL FAILED =================");
+    console.error("[EMAIL] Failed at :", new Date().toISOString());
+    console.error("[EMAIL] Name      :", error.name);
+    console.error("[EMAIL] Message   :", error.message);
+    console.error("[EMAIL] Code      :", error.code);
+    console.error("[EMAIL] Command   :", error.command);
+    console.error("[EMAIL] Response  :", error.response);
+    console.error("[EMAIL] Response Code :", error.responseCode);
+    console.error("[EMAIL] Stack     :");
+    console.error(error.stack);
+    console.error("===============================================\n");
+
+    return false;
+  }
 };
 
 const securePassword = async (password) => {
