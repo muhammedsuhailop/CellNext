@@ -1,11 +1,11 @@
 const User = require('../../models/userSchema');
 const Address = require('../../models/addressSchema');
-const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const env = require('dotenv').config();
 const session = require('express-session');
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
+const { sendVerificationEmail } = require("../../services/emailService");
 
 function generateOtp() {
     const digits = '1234567890';
@@ -19,101 +19,6 @@ function generateOtp() {
 function generateShortReferralCode(length = 6) {
     return uuidv4().replace(/-/g, '').substring(0, length).toUpperCase();
 }
-
-const sendVerificationEmail = async (email, otp) => {
-  console.log("\n================ EMAIL SERVICE ================");
-  console.log(`[EMAIL] Starting password reset email`);
-  console.log(`[EMAIL] Recipient       : ${email}`);
-  console.log(`[EMAIL] Time            : ${new Date().toISOString()}`);
-
-  try {
-    console.log("[EMAIL] Checking environment variables...");
-
-    console.log(
-      `[EMAIL] NODEMAILER_EMAIL       : ${process.env.NODEMAILER_EMAIL ? "✔ Found" : "✘ Missing"}`,
-    );
-    console.log(
-      `[EMAIL] GOOGLE_CLIENT_ID      : ${process.env.GOOGLE_CLIENT_ID ? "✔ Found" : "✘ Missing"}`,
-    );
-    console.log(
-      `[EMAIL] GOOGLE_CLIENT_SECRET  : ${process.env.GOOGLE_CLIENT_SECRET ? "✔ Found" : "✘ Missing"}`,
-    );
-    console.log(
-      `[EMAIL] GOOGLE_REFRESH_TOKEN  : ${process.env.GOOGLE_REFRESH_TOKEN ? "✔ Found" : "✘ Missing"}`,
-    );
-
-    console.log("[EMAIL] Creating transporter...");
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-
-      // Nodemailer logs
-      logger: true,
-      debug: true,
-
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
-
-      auth: {
-        type: "OAuth2",
-        user: process.env.NODEMAILER_EMAIL,
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-      },
-    });
-
-    console.log("[EMAIL] Transporter created successfully.");
-
-    console.log("[EMAIL] Verifying SMTP connection...");
-
-    const verifyStart = Date.now();
-    await transporter.verify();
-
-    console.log(
-      `[EMAIL] SMTP verification successful (${Date.now() - verifyStart} ms)`,
-    );
-
-    console.log("[EMAIL] Sending email...");
-
-    const sendStart = Date.now();
-
-    const info = await transporter.sendMail({
-      from: `CellNext <${process.env.NODEMAILER_EMAIL}>`,
-      to: email,
-      subject: "Password Reset CellNext",
-      text: `Your OTP for password Reset is ${otp}`,
-      html: `<b>Your OTP for password Reset: ${otp}</b>`,
-    });
-
-    console.log(
-      `[EMAIL] Email sent successfully (${Date.now() - sendStart} ms)`,
-    );
-    console.log("[EMAIL] Message ID :", info.messageId);
-    console.log("[EMAIL] Accepted  :", info.accepted);
-    console.log("[EMAIL] Rejected  :", info.rejected);
-    console.log("[EMAIL] Response  :", info.response);
-
-    console.log("================ EMAIL SUCCESS ================\n");
-
-    return info.accepted.length > 0;
-  } catch (error) {
-    console.error("\n================ EMAIL FAILED =================");
-    console.error("[EMAIL] Failed at :", new Date().toISOString());
-    console.error("[EMAIL] Name      :", error.name);
-    console.error("[EMAIL] Message   :", error.message);
-    console.error("[EMAIL] Code      :", error.code);
-    console.error("[EMAIL] Command   :", error.command);
-    console.error("[EMAIL] Response  :", error.response);
-    console.error("[EMAIL] Response Code :", error.responseCode);
-    console.error("[EMAIL] Stack     :");
-    console.error(error.stack);
-    console.error("===============================================\n");
-
-    return false;
-  }
-};
 
 const securePassword = async (password) => {
     try {
@@ -140,7 +45,12 @@ const forgotEmailValid = async (req, res) => {
         const findUser = await User.findOne({ email: email });
         if (findUser) {
             const otp = generateOtp();
-            const emailSent = await sendVerificationEmail(email, otp);
+            const emailSent = await sendVerificationEmail(
+              email,
+              otp,
+              "Password Reset CellNext",
+              "Password Reset",
+            );
             if (emailSent) {
                 req.session.userOtp = otp;
                 req.session.email = email;
@@ -186,7 +96,12 @@ const resendOtp = async (req, res) => {
         const otp = generateOtp();
         req.session.userOtp = otp;
         const email = req.session.email;
-        const emailSent = await sendVerificationEmail(email, otp);
+        const emailSent = await sendVerificationEmail(
+          email,
+          otp,
+          "Password Reset CellNext",
+          "Password Reset",
+        );
         if (emailSent) {
             console.log('Resend OTP : ', otp);
             res.status(200).json({ success: true, messege: 'Resend OTP successful' });

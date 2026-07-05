@@ -4,11 +4,11 @@ const ProductV2 = require('../../models/productsSchemaV2');
 const Brand = require('../../models/brandSchema');
 const Cart = require('../../models/cartSchema');
 const Wallet = require('../../models/walletSchema');
-const nodemailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 const { getPopularProducts } = require('../../helpers/salesDataHelper');
+const { sendVerificationEmail } = require("../../services/emailService");
 
 function generateShortReferralCode(length = 6) {
     return uuidv4().replace(/-/g, '').substring(0, length).toUpperCase();
@@ -135,34 +135,6 @@ function generateOtp() {
     return Math.floor(1000 + Math.random() * 9000).toString();
 } 
 
-async function sendVerificationEmail(email, otp) {
-    try {
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                type: 'OAuth2',
-                user: process.env.NODEMAILER_EMAIL,
-                clientId: process.env.GOOGLE_CLIENT_ID,
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                refreshToken: process.env.GOOGLE_REFRESH_TOKEN
-            }
-        });
-
-        const info = await transporter.sendMail({
-            from: `YourAppName <${process.env.NODEMAILER_EMAIL}>`,
-            to: email,
-            subject: 'Verify your account',
-            text: `Your OTP is ${otp}`,
-            html: `<b>Your OTP: ${otp}</b>`
-        });
-
-        return info.accepted.length > 0;
-    } catch (error) {
-        console.error('Error sending email via Gmail API:', error);
-        return false;
-    }
-};
-
 const signup = async (req, res) => {
     const { name, email, phone, password, confirmPassword, referralCode } = req.body;
 
@@ -179,7 +151,12 @@ const signup = async (req, res) => {
         }
 
         const genOtp = generateOtp();
-        const emailSent = await sendVerificationEmail(email, genOtp);
+        const emailSent = await sendVerificationEmail(
+          email,
+          genOtp,
+          "Verify your account",
+          "Account Verification",
+        );
         if (!emailSent) {
             console.log('Email error while sending OTP');
             return res.status(500).json({ message: 'Email-error' });
@@ -209,7 +186,12 @@ const resendOtp = async (req, res) => {
         const otp = generateOtp();
         req.session.userOtp = otp;
 
-        const emailSent = await sendVerificationEmail(email, otp);
+        const emailSent = await sendVerificationEmail(
+          email,
+          otp,
+          "Verify your account",
+          "Account Verification",
+        );
         if (emailSent) {
             console.log('Resend OTP:', otp);
             return res.status(200).json({ success: true, message: 'OTP Resent successfully' });
