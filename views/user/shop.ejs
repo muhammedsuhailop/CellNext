@@ -1,238 +1,249 @@
 <%- include('../../views/partials/user/header') %>
 
-<!-- Breadcrumb Section Begin -->
-<section class="breadcrumb-option">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12">
-        <div class="breadcrumb__text">
-          <h4>Shop</h4>
-          <div class="breadcrumb__links">
-            <a href="/">Home</a>
-            <span>Shop</span>
+  <!-- Breadcrumb Section Begin -->
+  <section class="breadcrumb-option">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="breadcrumb__text">
+            <h4>Shop</h4>
+            <div class="breadcrumb__links">
+              <a href="/">Home</a>
+              <span>Shop</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
-<!-- Breadcrumb Section End -->
+  </section>
+  <!-- Breadcrumb Section End -->
 
-<!-- Shop Section Begin -->
-<section class="shop spad">
-  <div class="container">
-    <div class="row">
-      <%- include('../../views/partials/user/shop-sidebar') %>
+  <!-- Shop Section Begin -->
+  <section class="shop spad">
+    <div class="container">
+      <div class="row">
+        <%- include('../../views/partials/user/shop-sidebar') %>
 
-      <div class="col-lg-9">
-        <div class="shop__product__option">
-          <div class="row">
-            <div class="col-lg-6 col-md-6 col-sm-6">
-              <div class="shop__product__option__left">
-                <p>
-                  Showing
-                  <%= totalProducts === 0 
-                      ? 0 
-                      : (currentPage - 1) * 9 + 1 %>–
-                  <%= Math.min(currentPage * 9, totalProducts) %> of
-                  <%= totalProducts %> results
-                </p>
-              </div>
-            </div>
-
-            <div class="col-lg-6 col-md-6 col-sm-6">
-              <div class="shop__product__option__right">
-                <p>Sort by:</p>
-                <select id="sortDropdown" class="no-nice-select" onchange="sortProducts()">
-                  <option value="default">Default</option>
-                  <option value="priceLowToHigh">Price: Low to High</option>
-                  <option value="priceHighToLow">Price: High to Low</option>
-                  <option value="rating">Based on Rating</option>
-                  <option value="new">New to Old</option>
-                  <option value="old">Old to New</option>
-                  <option value="aToZ">A - Z</option>
-                  <option value="zToA">Z - A</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row" id="productContainer">
-          <% if (products.length === 0) { %>
-          <div class="col-12">
-            <p class="text-center text-warning">No results found</p>
-          </div>
-          <% } else { %>
-          <% for (let i = 0; i < products.length; i++) { %>
-          <div class="col-lg-4 col-md-6 col-sm-6">
-            <div class="product__item <%= products[i].productOffer < products[i].variantRegularPrice ? '' : '' %>">
-              <!-- Product Image -->
-              <div onclick="redirectToProduct('<%=products[i]._id%>','<%= products[i].variantNumber %>')" class="product__item__pic" style="background-image: url('<%= products[i].variantImages[0] %>');">
-                <span class="label">
-                  <%= products[i].productOffer > 5 ? 'Sale' : '' %>
-                </span>
-              </div>
-
-              <!-- Product Details -->
-              <div class="product__item__text">
-                <h6><%= products[i].productName %> <span class="text-muted"> |</span> <%= products[i].variantColor %>
-                  <% if (products[i].variantSize !== 'NA') { %>
-                  <span class="text-muted"> |</span> <%= products[i].variantSize %>
-                  <% } %>
-                </h6>
-                <% if (products[i].variantStock <= 0) { %>
-                <a class="text-danger font-weight-bold">Out of Stock</a>
-                <% } else { %>
-                <a href="#" class="add-cart" id="add-to-cart-link">+ Add To Cart</a>
-                <% } %>
-
-                <!-- Rating -->
-                <div class="rating">
-                  <% for (let j = 0; j < (products[i].rating || 0); j++) { %>
-                  <i class="fa fa-star"></i>
-                  <% } %>
-                  <% for (let j = (products[i].rating || 0); j < 5; j++) { %>
-                  <i class="fa fa-star-o"></i>
-                  <% } %>
+          <div class="col-lg-9">
+            <div class="shop__product__option">
+              <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                  <div class="shop__product__option__left">
+                    <p>
+                      Showing
+                      <%= totalProducts===0 ? 0 : (currentPage - 1) * 9 + 1 %>–
+                        <%= Math.min(currentPage * 9, totalProducts) %> of
+                          <%= totalProducts %> results
+                    </p>
+                  </div>
                 </div>
 
-                <!-- Price -->
-                <h5>
-                  ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })
-                        .format(products[i].variantSalePrice).replace('₹', '').trim() %>
-                </h5>
-                <h6>
-                  <span class="text-muted" style="text-decoration: line-through; font-size: 0.9em;">
-                    ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })
-                          .format(products[i].variantRegularPrice).replace('₹', '').trim() %>
-                  </span>
-                </h6>
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                  <div class="shop__product__option__right">
+                    <p>Sort by:</p>
+                    <select id="sortDropdown" class="no-nice-select" onchange="sortProducts()">
+                      <option value="default">Default</option>
+                      <option value="priceLowToHigh">Price: Low to High</option>
+                      <option value="priceHighToLow">Price: High to Low</option>
+                      <option value="rating">Based on Rating</option>
+                      <option value="new">New to Old</option>
+                      <option value="old">Old to New</option>
+                      <option value="aToZ">A - Z</option>
+                      <option value="zToA">Z - A</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
 
+            <div class="row" id="productContainer">
+              <% if (products.length===0) { %>
+                <div class="col-12">
+                  <p class="text-center text-warning">No results found</p>
+                </div>
+                <% } else { %>
+                  <% for (let i=0; i < products.length; i++) { %>
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                      <div
+                        class="product__item <%= products[i].productOffer < products[i].variantRegularPrice ? '' : '' %>">
+                        <!-- Product Image -->
+                        <div onclick="redirectToProduct('<%=products[i]._id%>','<%= products[i].variantNumber %>')"
+                          class="product__item__pic"
+                          style="background-image: url('<%= products[i].variantImages[0] %>');">
+                          <span class="label">
+                            <%= products[i].productOffer> 5 ? 'Sale' : '' %>
+                          </span>
+                        </div>
+
+                        <!-- Product Details -->
+                        <div class="product__item__text">
+                          <h6>
+                            <%= products[i].productName %> <span class="text-muted"> |</span>
+                              <%= products[i].variantColor %>
+                                <% if (products[i].variantSize !=='NA' ) { %>
+                                  <span class="text-muted"> |</span>
+                                  <%= products[i].variantSize %>
+                                    <% } %>
+                          </h6>
+                          <% if (products[i].variantStock <=0) { %>
+                            <a class="text-danger font-weight-bold">Out of Stock</a>
+                            <% } else { %>
+                              <a href="#" class="add-cart" id="add-to-cart-link">+ Add To Cart</a>
+                              <% } %>
+
+                                <!-- Rating -->
+                                <div class="rating">
+                                  <% for (let j=0; j < (products[i].rating || 0); j++) { %>
+                                    <i class="fa fa-star"></i>
+                                    <% } %>
+                                      <% for (let j=(products[i].rating || 0); j < 5; j++) { %>
+                                        <i class="fa fa-star-o"></i>
+                                        <% } %>
+                                </div>
+
+                                <!-- Price -->
+                                <h5>
+                                  ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency' , currency: 'INR' })
+                                    .format(products[i].variantSalePrice).replace('₹', '' ).trim() %>
+                                </h5>
+                                <h6>
+                                  <span class="text-muted" style="text-decoration: line-through; font-size: 0.9em;">
+                                    ₹ <%= new Intl.NumberFormat('en-IN', { style: 'currency' , currency: 'INR' })
+                                      .format(products[i].variantRegularPrice).replace('₹', '' ).trim() %>
+                                  </span>
+                                </h6>
+
+                        </div>
+                      </div>
+                    </div>
+                    <% } %>
+                      <% } %>
+            </div>
+
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="product__pagination">
+                  <% if (currentPage> 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>">&lt;</a>
+                    <% } %>
+
+                      <% if (currentPage> 3) { %>
+                        <a href="?page=1">1</a>
+                        <% if (currentPage> 4) { %>
+                          <span>...</span>
+                          <% } %>
+                            <% } %>
+
+                              <% for (let i=Math.max(1, currentPage - 2); i <=Math.min(totalPages, currentPage + 2);
+                                i++) { %>
+                                <% if (i===currentPage) { %>
+                                  <a class="active" href="#">
+                                    <%= i %>
+                                  </a>
+                                  <% } else { %>
+                                    <a href="?page=<%= i %>">
+                                      <%= i %>
+                                    </a>
+                                    <% } %>
+                                      <% } %>
+
+                                        <% if (currentPage < totalPages - 2) { %>
+                                          <% if (currentPage < totalPages - 3) { %>
+                                            <span>...</span>
+                                            <% } %>
+                                              <a href="?page=<%= totalPages %>">
+                                                <%= totalPages %>
+                                              </a>
+                                              <% } %>
+
+                                                <% if (currentPage < totalPages) { %>
+                                                  <a href="?page=<%= currentPage + 1 %>"> &gt;</a>
+                                                  <% } %>
+                </div>
               </div>
             </div>
           </div>
-          <% } %>
-          <% } %>
-        </div>
-
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="product__pagination">
-              <% if (currentPage > 1) { %>
-              <a href="?page=<%= currentPage - 1 %>">&lt;</a>
-              <% } %>
-
-              <% if (currentPage > 3) { %>
-              <a href="?page=1">1</a>
-              <% if (currentPage > 4) { %>
-              <span>...</span>
-              <% } %>
-              <% } %>
-
-              <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
-              <% if (i === currentPage) { %>
-              <a class="active" href="#"><%= i %></a>
-              <% } else { %>
-              <a href="?page=<%= i %>"><%= i %></a>
-              <% } %>
-              <% } %>
-
-              <% if (currentPage < totalPages - 2) { %>
-              <% if (currentPage < totalPages - 3) { %>
-              <span>...</span>
-              <% } %>
-              <a href="?page=<%= totalPages %>"><%= totalPages %></a>
-              <% } %>
-
-              <% if (currentPage < totalPages) { %>
-              <a href="?page=<%= currentPage + 1 %>"> &gt;</a>
-              <% } %>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Shop Section End -->
+  <!-- Shop Section End -->
 
-<!-- Footer Section -->
-<%- include('../../views/partials/user/footer') %>
+  <!-- Footer Section -->
+  <%- include('../../views/partials/user/footer') %>
 
-<!-- Search Begin -->
-<div class="search-model">
-  <div class="h-100 d-flex align-items-center justify-content-center">
-    <div class="search-close-switch">+</div>
-    <form class="search-model-form">
-      <input type="text" id="search-input" placeholder="Search here.....">
-    </form>
-  </div>
-</div>
-<!-- Search End -->
+    <!-- Search Begin -->
+    <div class="search-model">
+      <div class="h-100 d-flex align-items-center justify-content-center">
+        <div class="search-close-switch">+</div>
+        <form class="search-model-form">
+          <input type="text" id="search-input" placeholder="Search here.....">
+        </form>
+      </div>
+    </div>
+    <!-- Search End -->
 
-<!-- Js Plugins -->
-<script src="js/jquery-3.3.1.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/jquery.nice-select.min.js"></script>
-<script src="js/jquery.nicescroll.min.js"></script>
-<script src="js/jquery.magnific-popup.min.js"></script>
-<script src="js/jquery.countdown.min.js"></script>
-<script src="js/jquery.slicknav.js"></script>
-<script src="js/mixitup.min.js"></script>
-<script src="js/owl.carousel.min.js"></script>
-<script src="js/main.js"></script>
-<script>
-  function redirectToProduct(productId, variant) {
-    window.location.href = `/productDetails?id=${productId}&variant=${variant}`;
-  }
-</script>
+    <!-- Js Plugins -->
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.nice-select.min.js"></script>
+    <script src="js/jquery.nicescroll.min.js"></script>
+    <script src="js/jquery.magnific-popup.min.js"></script>
+    <script src="js/jquery.countdown.min.js"></script>
+    <script src="js/jquery.slicknav.js"></script>
+    <script src="js/mixitup.min.js"></script>
+    <script src="js/owl.carousel.min.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+      function redirectToProduct(productId, variant) {
+        window.location.href = `/productDetails?id=${productId}&variant=${variant}`;
+      }
+    </script>
 
-<script>
-  let products = <%- JSON.stringify(products) %>;
+    <script>
+      let products = <% - JSON.stringify(products) %>;
 
-  let originalProducts = [...products];
+      let originalProducts = [...products];
 
-  function sortProducts() {
-    const sortType = document.getElementById('sortDropdown').value;
-    let sortedProducts = [...originalProducts];
+      function sortProducts() {
+        const sortType = document.getElementById('sortDropdown').value;
+        let sortedProducts = [...originalProducts];
 
-    switch (sortType) {
-      case "priceLowToHigh":
-        sortedProducts.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
-        break;
-      case "priceHighToLow":
-        sortedProducts.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
-        break;
-      case "aToZ":
-        sortedProducts.sort((a, b) => a.productName.localeCompare(b.productName));
-        break;
-      case "zToA":
-        sortedProducts.sort((a, b) => b.productName.localeCompare(a.productName));
-        break;
-      case "rating":
-        sortedProducts.sort((a, b) => a.rating.localeCompare(b.rating));
-        break;
-      case "new":
-        sortedProducts.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-        break;
-      case "old":
-        sortedProducts.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-        break;
-      default:
-        sortedProducts = [...originalProducts];
-    }
+        switch (sortType) {
+          case "priceLowToHigh":
+            sortedProducts.sort((a, b) => a.variantSalePrice - b.variantSalePrice);
+            break;
+          case "priceHighToLow":
+            sortedProducts.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
+            break;
+          case "aToZ":
+            sortedProducts.sort((a, b) => a.productName.localeCompare(b.productName));
+            break;
+          case "zToA":
+            sortedProducts.sort((a, b) => b.productName.localeCompare(a.productName));
+            break;
+          case "rating":
+            sortedProducts.sort((a, b) => a.rating.localeCompare(b.rating));
+            break;
+          case "new":
+            sortedProducts.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+            break;
+          case "old":
+            sortedProducts.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+            break;
+          default:
+            sortedProducts = [...originalProducts];
+        }
 
-    renderProducts(sortedProducts);
-  }
+        renderProducts(sortedProducts);
+      }
 
-  function renderProducts(products) {
-    const productContainer = document.getElementById("productContainer");
-    productContainer.innerHTML = "";
+      function renderProducts(products) {
+        const productContainer = document.getElementById("productContainer");
+        productContainer.innerHTML = "";
 
-    products.forEach(product => {
-      productContainer.innerHTML += `
+        products.forEach(product => {
+          productContainer.innerHTML += `
           <div class="col-lg-4 col-md-6 col-sm-6">
             <div class="product__item ${product.productOffer < product.variantRegularPrice ? '' : ''}">
               <div onclick="redirectToProduct('${product._id}', '${product.variantNumber}')" 
@@ -248,9 +259,9 @@
                 <h6>${product.productName} <span class="text-muted"> |</span> ${product.variantColor}
                   ${product.variantSize !== 'NA' ? `<span class="text-muted"> |</span> ${product.variantSize}` : ''}
                 </h6>
-                ${product.variantStock <= 0 
-                  ? '<a class="text-danger font-weight-bold">Out of Stock</a>' 
-                  : '<a href="#" class="add-cart">+ Add To Cart</a>'}
+                ${product.variantStock <= 0
+              ? '<a class="text-danger font-weight-bold">Out of Stock</a>'
+              : '<a href="#" class="add-cart">+ Add To Cart</a>'}
 
                 <div class="rating">
                   ${'<i class="fa fa-star"></i>'.repeat(product.rating || 0)}
@@ -258,142 +269,188 @@
                 </div>
 
                 <h5>₹ ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })
-                        .format(product.variantSalePrice).replace('₹', '').trim()}</h5>
+              .format(product.variantSalePrice).replace('₹', '').trim()}</h5>
                 <h6>
                   <span class="text-muted" style="text-decoration: line-through; font-size: 0.9em;">
                     ₹ ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })
-                          .format(product.variantRegularPrice).replace('₹', '').trim()}
+              .format(product.variantRegularPrice).replace('₹', '').trim()}
                   </span>
                 </h6>
               </div>
             </div>
           </div>
         `;
-    });
-  }
-
-  $(document).ready(function() {
-    $('select').not('.no-nice-select').niceSelect();
-  });
-
-  $(document).ready(function() {
-    $('select').not('.no-nice-select').niceSelect();
-
-    $('#sortDropdown').next('.nice-select').remove();
-    $('#sortDropdown').show();
-  });
-</script>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll(".add-cart").forEach((button) => {
-      button.addEventListener("click", function(event) {
-        event.preventDefault();
-
-        const productContainer = this.closest(".product__item");
-
-        if (!productContainer) {
-          console.error("Product container not found");
-          return;
-        }
-
-        const productId = productContainer
-          .querySelector(".product__item__pic")
-          .getAttribute("onclick")
-          .match(/'([^']+)'/)[1];
-
-        const variantId = productContainer
-          .querySelector(".product__item__pic")
-          .getAttribute("onclick")
-          .match(/'([^']+)',\s*'([^']+)'/)[2];
-
-
-        console.log("Product ID:", productId);
-        console.log("Variant ID:", variantId);
-
-        if (!productId || !variantId) {
-          alert("Failed to retrieve product details.");
-          return;
-        }
-
-        const cartData = {
-          productId: productId,
-          variantId: parseInt(variantId, 10),
-          quantity: 1,
-        };
-
-        fetch("/cart/add", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + localStorage.getItem("authToken"),
-            },
-            body: JSON.stringify(cartData),
-          })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              Swal.fire({
-                icon: "success",
-                title: "Item added to cart!",
-                text: data.message || "You can view your cart or continue shopping.",
-                showCancelButton: true,
-                confirmButtonText: "Go to Cart",
-                cancelButtonText: "Continue Shopping",
-                reverseButtons: true,
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  window.location.href = "/cart";
-                } else {
-                  updateCartDisplay(data.cart);
-                }
-              });
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: "Failed to add item to cart",
-                text: data.message || "Please try again later.",
-                confirmButtonText: "Try Again",
-              });
-            }
-          })
-          .catch((error) => {
-            console.error("Error adding to cart:", error);
-            Swal.fire({
-              icon: "error",
-              title: "There was an error",
-              text: error.message ||
-                "There was an error processing your request. Please try again later.",
-              confirmButtonText: "OK",
-            });
-          });
-      });
-    });
-  });
-
-  function updateCartDisplay(cart) {
-    console.log('Updated cart:', cart);
-
-    let cartItemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-
-    const badge = document.getElementById("cart-count-badge");
-
-    if (cartItemCount > 0) {
-      badge.textContent = cartItemCount;
-      badge.classList.remove("bg-secondary", "bg-success", "bg-warning");
-      if (cartItemCount < 5) {
-        badge.classList.add("bg-secondary");
-      } else if (cartItemCount < 10) {
-        badge.classList.add("bg-success");
-      } else {
-        badge.classList.add("bg-warning");
+        });
       }
-    } else {
-      badge.style.display = "none";
-    }
-  }
-</script>
 
-</body>
+      $(document).ready(function () {
+        $('select').not('.no-nice-select').niceSelect();
+      });
 
-</html>
+      $(document).ready(function () {
+        $('select').not('.no-nice-select').niceSelect();
+
+        $('#sortDropdown').next('.nice-select').remove();
+        $('#sortDropdown').show();
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".add-cart").forEach((button) => {
+          button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            const productContainer = this.closest(".product__item");
+
+            if (!productContainer) {
+              console.error("Product container not found");
+              return;
+            }
+
+            const productId = productContainer
+              .querySelector(".product__item__pic")
+              .getAttribute("onclick")
+              .match(/'([^']+)'/)[1];
+
+            const variantId = productContainer
+              .querySelector(".product__item__pic")
+              .getAttribute("onclick")
+              .match(/'([^']+)',\s*'([^']+)'/)[2];
+
+
+            console.log("Product ID:", productId);
+            console.log("Variant ID:", variantId);
+
+            if (!productId || !variantId) {
+              alert("Failed to retrieve product details.");
+              return;
+            }
+
+            const cartData = {
+              productId: productId,
+              variantId: parseInt(variantId, 10),
+              quantity: 1,
+            };
+
+            fetch("/cart/add", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + localStorage.getItem("authToken"),
+              },
+              body: JSON.stringify(cartData),
+            })
+              .then(async (response) => {
+
+                const data = await response.json();
+
+                return {
+                  status: response.status,
+                  data,
+                };
+              })
+              .then(({ status, data }) => {
+
+                if (status === 401) {
+
+                  Swal.fire({
+                    icon: "warning",
+                    title: "Login Required",
+                    text: "Please login to add this item to your cart.",
+                    showCancelButton: true,
+                    confirmButtonText: "Login",
+                    cancelButtonText: "Cancel",
+                  }).then((result) => {
+
+                    if (result.isConfirmed) {
+
+                      sessionStorage.setItem(
+                        "redirectAfterLogin",
+                        window.location.pathname + window.location.search
+                      );
+
+                      window.location.href = "/login";
+                    }
+
+                  });
+
+                  return;
+                }
+
+                if (data.success) {
+
+                  Swal.fire({
+                    icon: "success",
+                    title: "Item added to cart!",
+                    text: data.message || "You can view your cart or continue shopping.",
+                    showCancelButton: true,
+                    confirmButtonText: "Go to Cart",
+                    cancelButtonText: "Continue Shopping",
+                    reverseButtons: true,
+                  }).then((result) => {
+
+                    if (result.isConfirmed) {
+                      window.location.href = "/cart";
+                    } else {
+                      updateCartDisplay(data.cart);
+                    }
+
+                  });
+
+                } else {
+
+                  Swal.fire({
+                    icon: "error",
+                    title: "Failed to add item to cart",
+                    text: data.message || "Please try again later.",
+                    confirmButtonText: "Try Again",
+                  });
+
+                }
+
+              })
+              .catch((error) => {
+
+                console.error(error);
+
+                Swal.fire({
+                  icon: "error",
+                  title: "There was an error",
+                  text:
+                    error.message ||
+                    "There was an error processing your request. Please try again later.",
+                  confirmButtonText: "OK",
+                });
+
+              });
+          });
+        });
+      });
+
+      function updateCartDisplay(cart) {
+        console.log('Updated cart:', cart);
+
+        let cartItemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+        const badge = document.getElementById("cart-count-badge");
+
+        if (cartItemCount > 0) {
+          badge.textContent = cartItemCount;
+          badge.classList.remove("bg-secondary", "bg-success", "bg-warning");
+          if (cartItemCount < 5) {
+            badge.classList.add("bg-secondary");
+          } else if (cartItemCount < 10) {
+            badge.classList.add("bg-success");
+          } else {
+            badge.classList.add("bg-warning");
+          }
+        } else {
+          badge.style.display = "none";
+        }
+      }
+    </script>
+
+    </body>
+
+    </html>
