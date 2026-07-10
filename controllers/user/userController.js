@@ -1,17 +1,17 @@
-const User = require('../../models/userSchema');
-const Category = require('../../models/categorySchema');
-const ProductV2 = require('../../models/productsSchemaV2');
-const Brand = require('../../models/brandSchema');
-const Cart = require('../../models/cartSchema');
-const Wallet = require('../../models/walletSchema');
-const env = require('dotenv').config();
-const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
-const { getPopularProducts } = require('../../helpers/salesDataHelper');
+const User = require("../../models/userSchema");
+const Category = require("../../models/categorySchema");
+const ProductV2 = require("../../models/productsSchemaV2");
+const Brand = require("../../models/brandSchema");
+const Cart = require("../../models/cartSchema");
+const Wallet = require("../../models/walletSchema");
+const env = require("dotenv").config();
+const bcrypt = require("bcrypt");
+const { v4: uuidv4 } = require("uuid");
+const { getPopularProducts } = require("../../helpers/salesDataHelper");
 const { sendVerificationEmail } = require("../../services/emailService");
 
 function generateShortReferralCode(length = 6) {
-    return uuidv4().replace(/-/g, '').substring(0, length).toUpperCase();
+    return uuidv4().replace(/-/g, "").substring(0, length).toUpperCase();
 }
 
 const loadHomePage = async (req, res) => {
@@ -20,12 +20,12 @@ const loadHomePage = async (req, res) => {
         const categories = await Category.find({ isListed: true });
         const productData = await ProductV2.find({
             isBlocked: false,
-            category: { $in: categories.map(category => category._id) },
+            category: { $in: categories.map((category) => category._id) },
             variants: {
                 $elemMatch: {
-                    stock: { $gt: 0 }
-                }
-            }
+                    stock: { $gt: 0 },
+                },
+            },
         });
 
         productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -35,16 +35,18 @@ const loadHomePage = async (req, res) => {
                 backgroundImage: "img/hero/oppo banner1.PNG",
                 collection: "New Year Collection",
                 title: "Exclusive New Year Collections ",
-                description: "Crafting the future of mobile phones, where luxury meets innovation. Designed with precision and ethically produced to deliver unmatched quality, each device is a testament to excellence in craftsmanship.",
-                link: "/shop"
+                description:
+                    "Crafting the future of mobile phones, where luxury meets innovation. Designed with precision and ethically produced to deliver unmatched quality, each device is a testament to excellence in craftsmanship.",
+                link: "/shop",
             },
             {
                 backgroundImage: "img/hero/banner--5.PNG",
                 collection: "Apple Zone",
                 title: "iPhone: Where cutting-edge technology meets timeless elegance.",
-                description: "Designed to elevate your experience with unmatched performance and seamless style.",
-                link: '/filter?brand=Apple'
-            }
+                description:
+                    "Designed to elevate your experience with unmatched performance and seamless style.",
+                link: "/filter?brand=Apple",
+            },
         ];
 
         let cartItemCount = req.session.cartItemCount || 0;
@@ -62,16 +64,19 @@ const loadHomePage = async (req, res) => {
             if (userData.cart && userData.cart.length > 0) {
                 const cart = await Cart.findOne({ _id: userData.cart[0] }).lean();
                 if (cart && cart.items && cart.items.length > 0) {
-                    cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+                    cartItemCount = cart.items.reduce(
+                        (total, item) => total + item.quantity,
+                        0,
+                    );
                 }
             }
 
             req.session.cartItemCount = cartItemCount;
             cartItemCount = req.session.cartItemCount;
 
-            const successMessage = req.flash('success');
-            const errorMessage = req.flash('error');
-            res.render('home', {
+            const successMessage = req.flash("success");
+            const errorMessage = req.flash("error");
+            res.render("home", {
                 user: userData,
                 products: productData,
                 categories: categories,
@@ -80,13 +85,12 @@ const loadHomePage = async (req, res) => {
                     success: successMessage.length > 0 ? successMessage[0] : null,
                     error: errorMessage.length > 0 ? errorMessage[0] : null,
                 },
-                cartItemCount
-            })
+                cartItemCount,
+            });
         } else {
-            const successMessage = req.flash('success');
-            const errorMessage = req.flash('error');
-            errorMessage.push("You're not logged in");
-            return res.render('home', {
+            const successMessage = req.flash("success");
+            const errorMessage = req.flash("error");
+            return res.render("home", {
                 products: productData,
                 categories: categories,
                 heroData: heroData,
@@ -94,85 +98,85 @@ const loadHomePage = async (req, res) => {
                     success: successMessage.length > 0 ? successMessage[0] : null,
                     error: errorMessage.length > 0 ? errorMessage[0] : null,
                 },
-                cartItemCount
+                cartItemCount,
             });
         }
-
     } catch (error) {
-        console.log('Error loading Home page', error);
-        res.status(500).send('Server Error');
+        console.log("Error loading Home page", error);
+        res.status(500).send("Server Error");
     }
-}
+};
 
 const pageNotFound = async (req, res) => {
     try {
-        res.render('page-404');
+        res.render("page-404");
     } catch (error) {
-        res.redirect('./pageNotFound');
+        res.redirect("./pageNotFound");
     }
-}
+};
 
 const loadSignupPage = async (req, res) => {
     try {
-        res.render('signup', { message: '' });
+        res.render("signup", { message: "" });
     } catch (error) {
-        console.log('Error loading Signup page');
-        res.status(500).send('Server Error');
+        console.log("Error loading Signup page");
+        res.status(500).send("Server Error");
     }
-}
+};
 
 const loadVerifOtpPage = async (req, res) => {
     try {
-        res.render('verify-otp', { message: '' });
+        res.render("verify-otp", { message: "" });
     } catch (error) {
-        console.log('Error loading Signup page');
-        res.status(500).send('Server Error');
+        console.log("Error loading Signup page");
+        res.status(500).send("Server Error");
     }
-}
-
+};
 
 function generateOtp() {
     return Math.floor(1000 + Math.random() * 9000).toString();
-} 
+}
 
 const signup = async (req, res) => {
-    const { name, email, phone, password, confirmPassword, referralCode } = req.body;
+    const { name, email, phone, password, confirmPassword, referralCode } =
+        req.body;
 
     try {
         if (password !== confirmPassword) {
-            return res.status(400).json({ message: 'Passwords do not match' });
+            return res.status(400).json({ message: "Passwords do not match" });
         }
 
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
-            console.log('Rendering signup with error code E110');
-            return res.status(400).json({ errorCode: 'E110', message: 'Email is already registered' });
+            console.log("Rendering signup with error code E110");
+            return res
+                .status(400)
+                .json({ errorCode: "E110", message: "Email is already registered" });
         }
 
         const genOtp = generateOtp();
         const emailSent = await sendVerificationEmail(
-          email,
-          genOtp,
-          "Verify your account",
-          "Account Verification",
+            email,
+            genOtp,
+            "Verify your account",
+            "Account Verification",
         );
         if (!emailSent) {
-            console.log('Email error while sending OTP');
-            return res.status(500).json({ message: 'Email-error' });
+            console.log("Email error while sending OTP");
+            return res.status(500).json({ message: "Email-error" });
         }
 
         req.session.userOtp = genOtp;
         req.session.referralCode = referralCode || null;
-        console.log('referralCode on signup ', req.session.referralCode);
+        console.log("referralCode on signup ", req.session.referralCode);
         req.session.userData = { name, email, phone, password };
-        console.log('Generated OTP:', req.session.userOtp);
+        console.log("Generated OTP:", req.session.userOtp);
 
-
-        res.status(200).json({ message: 'OTP sent successfully' });
+        res.status(200).json({ message: "OTP sent successfully" });
     } catch (error) {
-        console.error('Error during user signup', error.message);
-        res.status(500).json({ message: 'Server Error: ' + error.message });
+        console.error("Error during user signup", error.message);
+        res.status(500).json({ message: "Server Error: " + error.message });
     }
 };
 
@@ -180,39 +184,47 @@ const resendOtp = async (req, res) => {
     try {
         const { email } = req.session.userData;
         if (!email) {
-            return res.status(400).json({ success: false, message: 'Email not found' });
+            return res
+                .status(400)
+                .json({ success: false, message: "Email not found" });
         }
 
         const otp = generateOtp();
         req.session.userOtp = otp;
 
         const emailSent = await sendVerificationEmail(
-          email,
-          otp,
-          "Verify your account",
-          "Account Verification",
+            email,
+            otp,
+            "Verify your account",
+            "Account Verification",
         );
         if (emailSent) {
-            console.log('Resend OTP:', otp);
-            return res.status(200).json({ success: true, message: 'OTP Resent successfully' });
+            console.log("Resend OTP:", otp);
+            return res
+                .status(200)
+                .json({ success: true, message: "OTP Resent successfully" });
         } else {
-            return res.status(400).json({ success: false, message: 'Failed to resend OTP. Please try again.' });
+            return res.status(400).json({
+                success: false,
+                message: "Failed to resend OTP. Please try again.",
+            });
         }
     } catch (error) {
-        console.error('Error during resend OTP', error.message);
-        res.status(500).json({ success: false, message: 'Server Error: ' + error.message });
+        console.error("Error during resend OTP", error.message);
+        res
+            .status(500)
+            .json({ success: false, message: "Server Error: " + error.message });
     }
 };
-
 
 const securePassword = async (password) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         return hashedPassword;
     } catch (error) {
-        console.log('Error password hashing', error);
+        console.log("Error password hashing", error);
     }
-}
+};
 
 const verifyOtp = async (req, res) => {
     try {
@@ -250,11 +262,11 @@ const verifyOtp = async (req, res) => {
 
                     const referrerTransaction = {
                         transactionId: uuidv4(),
-                        type: 'credit',
+                        type: "credit",
                         amount: 300,
                         description: `Referral bonus from ${user.name} signup`,
                         orderId: null,
-                        transactionCategory: 'referral',
+                        transactionCategory: "referral",
                         balanceAfterTransaction: referrerBalanceAfter,
                     };
 
@@ -262,26 +274,27 @@ const verifyOtp = async (req, res) => {
                     referrerWallet.balance = referrerBalanceAfter;
                     await referrerWallet.save();
 
-                    const newUserWallet = await Wallet.findOne({ userId: saveUserData._id });
+                    const newUserWallet = await Wallet.findOne({
+                        userId: saveUserData._id,
+                    });
                     const newUserBalanceBefore = newUserWallet.balance;
                     const newUserBalanceAfter = newUserBalanceBefore + 150;
 
                     const newUserTransaction = {
                         transactionId: uuidv4(),
-                        type: 'credit',
+                        type: "credit",
                         amount: 150,
-                        description: 'Referral bonus for using referral code',
+                        description: "Referral bonus for using referral code",
                         orderId: null,
-                        transactionCategory: 'referral',
+                        transactionCategory: "referral",
                         balanceAfterTransaction: newUserBalanceAfter,
                     };
 
                     newUserWallet.transactions.push(newUserTransaction);
                     newUserWallet.balance = newUserBalanceAfter;
                     await newUserWallet.save();
-
                 } else {
-                    console.log('Invalid referral code.');
+                    console.log("Invalid referral code.");
                 }
             }
 
@@ -289,30 +302,34 @@ const verifyOtp = async (req, res) => {
             saveUserData.referralCode = newReferralCode;
             await saveUserData.save();
 
-            res.json({ success: true, redirectUrl: '/' });
+            res.json({ success: true, redirectUrl: "/" });
         } else {
-            res.status(400).json({ success: false, message: 'Invalid OTP. Please try again.' });
+            res
+                .status(400)
+                .json({ success: false, message: "Invalid OTP. Please try again." });
         }
     } catch (error) {
-        console.log('Error verifying OTP:', error);
-        res.status(500).json({ success: false, message: 'Internal server error. Please try again later.' });
+        console.log("Error verifying OTP:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error. Please try again later.",
+        });
     }
 };
 
 const loadLoginPage = async (req, res) => {
     try {
-        const message = req.flash('message')[0];
+        const message = req.flash("message")[0];
         if (!req.session.user) {
-            return res.render('login', { message: message });
+            return res.render("login", { message: message });
         } else {
-            res.redirect('/');
+            res.redirect("/");
         }
-
     } catch (error) {
-        console.log('Error loading Login page');
-        res.redirect('/pageNotFound');
+        console.log("Error loading Login page");
+        res.redirect("/pageNotFound");
     }
-}
+};
 
 const login = async (req, res) => {
     try {
@@ -321,58 +338,63 @@ const login = async (req, res) => {
         const findUser = await User.findOne({ isAdmin: 0, email: email });
 
         if (!findUser) {
-            req.flash('message', 'User not found');
-            return res.redirect('/login');
+            req.flash("message", "User not found");
+            return res.redirect("/login");
         }
         if (findUser.isBlocked) {
-            req.flash('message', 'This account is blocked');
-            return res.redirect('/login');
+            req.flash("message", "This account is blocked");
+            return res.redirect("/login");
         }
 
         const passwordMatch = await bcrypt.compare(password, findUser.password);
 
         if (!passwordMatch) {
-            req.flash('message', 'Incorrect Password');
-            return res.redirect('/login');
+            req.flash("message", "Incorrect Password");
+            return res.redirect("/login");
         }
 
         let cartItemCount = 0;
         if (findUser.cart && findUser.cart.length > 0) {
             const cart = await Cart.findOne({ _id: findUser.cart[0] }).lean();
             if (cart && cart.items && cart.items.length > 0) {
-                cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+                cartItemCount = cart.items.reduce(
+                    (total, item) => total + item.quantity,
+                    0,
+                );
             }
         }
 
         req.session.user = findUser._id;
         req.session.cartItemCount = cartItemCount;
-        req.flash('success', 'You have successfully logged in!');
-        res.redirect('/');
+        req.flash("success", "You have successfully logged in!");
+        res.redirect("/");
     } catch (error) {
-        console.error('login error', error);
-        return res.render('login', { message: 'login failed. Please try again later' });
+        console.error("login error", error);
+        return res.render("login", {
+            message: "login failed. Please try again later",
+        });
     }
-}
+};
 
 const googleLogin = async (req, res) => {
     if (req.user) {
         req.session.user = req.user._id;
     }
-    res.redirect('/')
-}
+    res.redirect("/");
+};
 
 const logout = async (req, res) => {
     try {
         req.session.destroy((err) => {
             if (err) {
-                console.error('Error destroying session:', err);
-                return res.redirect('pageNotFound');
+                console.error("Error destroying session:", err);
+                return res.redirect("pageNotFound");
             }
-            return res.redirect('/');
+            return res.redirect("/");
         });
     } catch (error) {
-        console.error('Logout error:', error);
-        res.redirect('pageNotFound');
+        console.error("Logout error:", error);
+        res.redirect("pageNotFound");
     }
 };
 
@@ -396,16 +418,15 @@ const loadShopePage = async (req, res) => {
         req.session.sortBy = null;
         req.session.search = null;
 
-        const blockedBrandNames = await Brand.find({ isBlocked: true })
+        const blockedBrandNames = await Brand.find({ isBlocked: true });
         const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
         const products = await ProductV2.find({
             isBlocked: false,
             category: { $in: categoryIds },
-            brand: { $nin: blockedBrandList }
-        })
-            .sort({ createdAt: -1 });
+            brand: { $nin: blockedBrandList },
+        }).sort({ createdAt: -1 });
 
-        const productVariants = products.flatMap(product =>
+        const productVariants = products.flatMap((product) =>
             product.variants.map((variant, variantIndex) => ({
                 _id: product._id,
                 productName: product.productName,
@@ -424,22 +445,23 @@ const loadShopePage = async (req, res) => {
                 updatedAt: product.updatedAt,
                 totalVariants: product.variants.length,
                 variantNumber: variantIndex++,
-            }))
+            })),
         );
 
         const paginatedVariants = productVariants.slice(skip, skip + limit);
 
-
         const totalPages = Math.ceil(productVariants.length / limit);
 
         const brands = await Brand.find({ isBlocked: false });
-        const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+        const categoriesWithIds = categories.map((category) => ({
+            _id: category._id,
+            name: category.name,
+        }));
         const cartItemCount = req.session.cartItemCount || 0;
 
         selectedFilters = req.session.filters;
 
-
-        res.render('shop', {
+        res.render("shop", {
             user: userData,
             products: paginatedVariants,
             brand: brands,
@@ -453,10 +475,10 @@ const loadShopePage = async (req, res) => {
             search: req.session.search || null,
         });
     } catch (error) {
-        console.error('Shope page error:', error);
-        res.redirect('pageNotFound');
+        console.error("Shope page error:", error);
+        res.redirect("pageNotFound");
     }
-}
+};
 
 const filterProduct = async (req, res) => {
     try {
@@ -477,36 +499,51 @@ const filterProduct = async (req, res) => {
             req.session.filters.brand = null;
         }
 
-
         const categoryName = req.query.category || req.session.filters.category;
         const brandName = req.query.brand || req.session.filters.brand;
-        const priceGt = req.query.gt !== undefined ? req.query.gt : req.session.filters.price.gt;
-        const priceLt = req.query.lt !== undefined ? req.query.lt : req.session.filters.price.lt;
+        const priceGt =
+            req.query.gt !== undefined ? req.query.gt : req.session.filters.price.gt;
+        const priceLt =
+            req.query.lt !== undefined ? req.query.lt : req.session.filters.price.lt;
 
-        req.session.filters = { category: categoryName, brand: brandName, price: { gt: priceGt, lt: priceLt } };
+        req.session.filters = {
+            category: categoryName,
+            brand: brandName,
+            price: { gt: priceGt, lt: priceLt },
+        };
 
-        const blockedBrandNames = await Brand.find({ isBlocked: true }).select('brandName');
-        const blockedBrandList = blockedBrandNames.map(b => b.brandName);
+        const blockedBrandNames = await Brand.find({ isBlocked: true }).select(
+            "brandName",
+        );
+        const blockedBrandList = blockedBrandNames.map((b) => b.brandName);
 
-        const findCategory = categoryName ? await Category.findOne({ name: categoryName }) : null;
+        const findCategory = categoryName
+            ? await Category.findOne({ name: categoryName })
+            : null;
         const findBrand = brandName ? await Brand.findOne({ brandName }) : null;
 
         const brands = await Brand.find({}).lean();
         const categories = await Category.find({ isListed: true }).lean();
-        const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+        const categoriesWithIds = categories.map((category) => ({
+            _id: category._id,
+            name: category.name,
+        }));
 
         let searchResults = req.session.searchResult || [];
         let allVariants = [];
 
         if (searchResults && searchResults.length > 0) {
-            const filteredByCatAndBrand = searchResults.filter(product => {
-                let categoryMatch = !findCategory || String(product.category) === String(findCategory._id);
+            const filteredByCatAndBrand = searchResults.filter((product) => {
+                let categoryMatch =
+                    !findCategory ||
+                    String(product.category) === String(findCategory._id);
                 let brandMatch = !findBrand || product.brand === findBrand.brandName;
                 return categoryMatch && brandMatch;
             });
-            allVariants = filteredByCatAndBrand.filter(product =>
-                (!priceGt || product.variantSalePrice > priceGt) &&
-                (!priceLt || product.variantSalePrice < priceLt)
+            allVariants = filteredByCatAndBrand.filter(
+                (product) =>
+                    (!priceGt || product.variantSalePrice > priceGt) &&
+                    (!priceLt || product.variantSalePrice < priceLt),
             );
         } else {
             let query = { isBlocked: false, brand: { $nin: blockedBrandList } };
@@ -515,14 +552,15 @@ const filterProduct = async (req, res) => {
             const findProducts = await ProductV2.find(query).lean();
 
             if (findProducts.length === 0) {
-                console.log('No products found for the given filters.');
+                console.log("No products found for the given filters.");
             }
 
-            allVariants = findProducts.flatMap(product =>
+            allVariants = findProducts.flatMap((product) =>
                 (product.variants || [])
-                    .filter(variant =>
-                        (!priceGt || variant.salePrice > priceGt) &&
-                        (!priceLt || variant.salePrice < priceLt)
+                    .filter(
+                        (variant) =>
+                            (!priceGt || variant.salePrice > priceGt) &&
+                            (!priceLt || variant.salePrice < priceLt),
                     )
                     .map((variant, variantIndex) => ({
                         _id: product._id,
@@ -541,7 +579,7 @@ const filterProduct = async (req, res) => {
                         createdAt: product.createdAt,
                         updatedAt: product.updatedAt,
                         variantNumber: variantIndex++,
-                    }))
+                    })),
             );
         }
 
@@ -551,7 +589,7 @@ const filterProduct = async (req, res) => {
         if (sortBy === "popularity") {
             const salesMap = await getPopularProducts();
 
-            allVariants.forEach(product => {
+            allVariants.forEach((product) => {
                 product.totalSold = salesMap.get(product._id.toString()) || 0;
             });
 
@@ -565,16 +603,19 @@ const filterProduct = async (req, res) => {
                     allVariants.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
                     break;
                 case "newest":
-                    allVariants.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    allVariants.sort(
+                        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+                    );
                     break;
                 case "oldest":
-                    allVariants.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    allVariants.sort(
+                        (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+                    );
                     break;
                 default:
                     break;
             }
         }
-
 
         req.session.filteredProducts = allVariants;
 
@@ -583,7 +624,10 @@ const filterProduct = async (req, res) => {
         const totalProducts = allVariants.length;
         const startIndex = (currentPage - 1) * itemsPerPage;
         const totalPages = Math.ceil(totalProducts / itemsPerPage);
-        const currentVariants = allVariants.slice(startIndex, startIndex + itemsPerPage);
+        const currentVariants = allVariants.slice(
+            startIndex,
+            startIndex + itemsPerPage,
+        );
 
         let userData = null;
         if (user) {
@@ -602,7 +646,7 @@ const filterProduct = async (req, res) => {
         const cartItemCount = req.session.cartItemCount || 0;
         const selectedFilters = req.session.filters;
 
-        res.render('shop', {
+        res.render("shop", {
             user: userData,
             products: currentVariants,
             category: categories,
@@ -618,10 +662,9 @@ const filterProduct = async (req, res) => {
             sortBy: req.session.sortBy || null,
             search: req.session.search || null,
         });
-
     } catch (error) {
-        console.error('Shop filter error:', error);
-        res.redirect('pageNotFound');
+        console.error("Shop filter error:", error);
+        res.redirect("pageNotFound");
     }
 };
 
@@ -644,30 +687,38 @@ const filterByPrice = async (req, res) => {
 
         const categoryName = req.query.category || req.session.filters.category;
         const brandName = req.query.brand || req.session.filters.brand;
-        const priceGt = req.query.gt !== undefined ? req.query.gt : req.session.filters.price.gt;
-        const priceLt = req.query.lt !== undefined ? req.query.lt : req.session.filters.price.lt;
+        const priceGt =
+            req.query.gt !== undefined ? req.query.gt : req.session.filters.price.gt;
+        const priceLt =
+            req.query.lt !== undefined ? req.query.lt : req.session.filters.price.lt;
 
         req.session.filters = {
             category: categoryName,
             brand: brandName,
-            price: { gt: priceGt, lt: priceLt }
+            price: { gt: priceGt, lt: priceLt },
         };
 
+        const blockedBrandNames = await Brand.find({ isBlocked: true }).select(
+            "brandName",
+        );
+        const blockedBrandList = blockedBrandNames.map((b) => b.brandName);
 
-        const blockedBrandNames = await Brand.find({ isBlocked: true }).select('brandName');
-        const blockedBrandList = blockedBrandNames.map(b => b.brandName);
-
-        const findCategory = categoryName ? await Category.findOne({ name: categoryName }) : null;
+        const findCategory = categoryName
+            ? await Category.findOne({ name: categoryName })
+            : null;
         const findBrand = brandName ? await Brand.findOne({ brandName }) : null;
 
         let allVariants = [];
         let searchResults = req.session.searchResult || [];
 
         if (searchResults && searchResults.length > 0) {
-            allVariants = searchResults.filter(product => {
-                let categoryMatch = !findCategory || String(product.category) === String(findCategory._id);
+            allVariants = searchResults.filter((product) => {
+                let categoryMatch =
+                    !findCategory ||
+                    String(product.category) === String(findCategory._id);
                 let brandMatch = !findBrand || product.brand === findBrand.brandName;
-                let priceMatch = (!priceGt || product.variantSalePrice > priceGt) &&
+                let priceMatch =
+                    (!priceGt || product.variantSalePrice > priceGt) &&
                     (!priceLt || product.variantSalePrice < priceLt);
                 return categoryMatch && brandMatch && priceMatch;
             });
@@ -677,11 +728,12 @@ const filterByPrice = async (req, res) => {
             if (findBrand) query.brand = findBrand.brandName;
             const products = await ProductV2.find(query).lean();
 
-            allVariants = products.flatMap(product =>
+            allVariants = products.flatMap((product) =>
                 (product.variants || [])
-                    .filter(variant =>
-                        (!priceGt || variant.salePrice > priceGt) &&
-                        (!priceLt || variant.salePrice < priceLt)
+                    .filter(
+                        (variant) =>
+                            (!priceGt || variant.salePrice > priceGt) &&
+                            (!priceLt || variant.salePrice < priceLt),
                     )
                     .map((variant, variantIndex) => ({
                         _id: product._id,
@@ -700,14 +752,14 @@ const filterByPrice = async (req, res) => {
                         createdAt: product.createdAt,
                         updatedAt: product.updatedAt,
                         variantNumber: variantIndex++,
-                    }))
+                    })),
             );
             const sortBy = req.session.sortBy || "newest";
 
             if (sortBy === "popularity") {
                 const salesMap = await getPopularProducts();
 
-                products.forEach(product => {
+                products.forEach((product) => {
                     product.totalSold = salesMap.get(product._id.toString()) || 0;
                 });
 
@@ -721,10 +773,14 @@ const filterByPrice = async (req, res) => {
                         products.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
                         break;
                     case "newest":
-                        products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                        products.sort(
+                            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+                        );
                         break;
                     case "oldest":
-                        products.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                        products.sort(
+                            (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+                        );
                         break;
                     default:
                         break;
@@ -739,16 +795,22 @@ const filterByPrice = async (req, res) => {
         const totalProducts = allVariants.length;
         const startIndex = (currentPage - 1) * itemsPerPage;
         const totalPages = Math.ceil(totalProducts / itemsPerPage);
-        const currentVariants = allVariants.slice(startIndex, startIndex + itemsPerPage);
+        const currentVariants = allVariants.slice(
+            startIndex,
+            startIndex + itemsPerPage,
+        );
 
         const allBrands = await Brand.find({}).lean();
         const allCategories = await Category.find({ isListed: true }).lean();
-        const categoriesWithIds = allCategories.map(category => ({ _id: category._id, name: category.name }));
+        const categoriesWithIds = allCategories.map((category) => ({
+            _id: category._id,
+            name: category.name,
+        }));
 
         const cartItemCount = req.session.cartItemCount || 0;
         const selectedFilters = req.session.filters;
 
-        res.render('shop', {
+        res.render("shop", {
             user: userData,
             products: currentVariants,
             category: allCategories,
@@ -762,10 +824,9 @@ const filterByPrice = async (req, res) => {
             sortBy: req.session.sortBy || null,
             search: req.session.search || null,
         });
-
     } catch (error) {
-        console.error('Shop filter error:', error);
-        res.redirect('pageNotFound');
+        console.error("Shop filter error:", error);
+        res.redirect("pageNotFound");
     }
 };
 
@@ -775,13 +836,12 @@ const processSearch = async (req, res) => {
 
         req.session.searchQuery = search;
 
-        res.redirect('/search');
+        res.redirect("/search");
     } catch (error) {
         console.error("Error processing search:", error);
-        res.redirect('pageNotFound');
+        res.redirect("pageNotFound");
     }
 };
-
 
 const searchProducts = async (req, res) => {
     try {
@@ -794,17 +854,22 @@ const searchProducts = async (req, res) => {
         req.session.filters = {
             category: null,
             brand: null,
-            price: { gt: null, lt: null }
+            price: { gt: null, lt: null },
         };
         req.session.filteredProducts = null;
 
         const brands = await Brand.find({}).lean();
         const categories = await Category.find({ isListed: true }).lean();
-        const categoryIds = categories.map(category => category._id.toString());
-        const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+        const categoryIds = categories.map((category) => category._id.toString());
+        const categoriesWithIds = categories.map((category) => ({
+            _id: category._id,
+            name: category.name,
+        }));
 
-        const blockedBrandNames = await Brand.find({ isBlocked: true }).select('brandName');
-        const blockedBrandList = blockedBrandNames.map(brand => brand.brandName);
+        const blockedBrandNames = await Brand.find({ isBlocked: true }).select(
+            "brandName",
+        );
+        const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
 
         let query = {
             productName: { $regex: new RegExp(search, "i") },
@@ -815,7 +880,7 @@ const searchProducts = async (req, res) => {
 
         const products = await ProductV2.find(query).lean();
 
-        let searchResult = products.flatMap(product =>
+        let searchResult = products.flatMap((product) =>
             product.variants.map((variant, variantIndex) => ({
                 _id: product._id,
                 productName: product.productName,
@@ -833,7 +898,7 @@ const searchProducts = async (req, res) => {
                 updatedAt: product.updatedAt,
                 sortBy: req.session.sortBy || null,
                 variantNumber: variantIndex++,
-            }))
+            })),
         );
 
         req.session.searchResult = searchResult;
@@ -843,7 +908,7 @@ const searchProducts = async (req, res) => {
         if (sortBy === "popularity") {
             const salesMap = await getPopularProducts();
 
-            products.forEach(product => {
+            products.forEach((product) => {
                 product.totalSold = salesMap.get(product._id.toString()) || 0;
             });
 
@@ -857,10 +922,14 @@ const searchProducts = async (req, res) => {
                     products.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
                     break;
                 case "newest":
-                    products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    products.sort(
+                        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+                    );
                     break;
                 case "oldest":
-                    products.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    products.sort(
+                        (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+                    );
                     break;
                 default:
                     break;
@@ -872,11 +941,14 @@ const searchProducts = async (req, res) => {
         const totalProducts = searchResult.length;
         const startIndex = (currentPage - 1) * itemsPerPage;
         const totalPages = Math.ceil(totalProducts / itemsPerPage);
-        const currentProduct = searchResult.slice(startIndex, startIndex + itemsPerPage);
+        const currentProduct = searchResult.slice(
+            startIndex,
+            startIndex + itemsPerPage,
+        );
 
         const cartItemCount = req.session.cartItemCount || 0;
 
-        res.render('shop', {
+        res.render("shop", {
             user: userData,
             products: currentProduct,
             category: categories,
@@ -891,8 +963,8 @@ const searchProducts = async (req, res) => {
             search: req.session.search || null,
         });
     } catch (error) {
-        console.error('Search error:', error);
-        res.redirect('pageNotFound');
+        console.error("Search error:", error);
+        res.redirect("pageNotFound");
     }
 };
 
@@ -911,9 +983,11 @@ const sortShopProducts = async (req, res) => {
 
         if (!products || products.length === 0) {
             const blockedBrandNames = await Brand.find({ isBlocked: true });
-            const blockedBrandList = blockedBrandNames.map((brand) => brand.brandName);
+            const blockedBrandList = blockedBrandNames.map(
+                (brand) => brand.brandName,
+            );
             const categories = await Category.find({ isListed: true });
-            const categoryIds = categories.map(category => category._id.toString());
+            const categoryIds = categories.map((category) => category._id.toString());
 
             const allProducts = await ProductV2.find({
                 isBlocked: false,
@@ -921,7 +995,7 @@ const sortShopProducts = async (req, res) => {
                 brand: { $nin: blockedBrandList },
             }).lean();
 
-            products = allProducts.flatMap(product =>
+            products = allProducts.flatMap((product) =>
                 product.variants.map((variant, variantIndex) => ({
                     _id: product._id,
                     productName: product.productName,
@@ -939,14 +1013,14 @@ const sortShopProducts = async (req, res) => {
                     createdAt: product.createdAt,
                     updatedAt: product.updatedAt,
                     variantNumber: variantIndex++,
-                }))
+                })),
             );
         }
 
         if (currentSortBy === "popularity") {
             const salesMap = await getPopularProducts();
 
-            products.forEach(product => {
+            products.forEach((product) => {
                 product.totalSold = salesMap.get(product._id.toString()) || 0;
             });
 
@@ -960,10 +1034,14 @@ const sortShopProducts = async (req, res) => {
                     products.sort((a, b) => b.variantSalePrice - a.variantSalePrice);
                     break;
                 case "newest":
-                    products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    products.sort(
+                        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+                    );
                     break;
                 case "oldest":
-                    products.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    products.sort(
+                        (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+                    );
                     break;
                 default:
                     break;
@@ -977,7 +1055,10 @@ const sortShopProducts = async (req, res) => {
 
         const brands = await Brand.find({ isBlocked: false });
         const categories = await Category.find({ isListed: true });
-        const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+        const categoriesWithIds = categories.map((category) => ({
+            _id: category._id,
+            name: category.name,
+        }));
         const cartItemCount = req.session.cartItemCount || 0;
 
         res.render("shop", {
@@ -993,15 +1074,11 @@ const sortShopProducts = async (req, res) => {
             sortBy: currentSortBy,
             search: req.session.search || null,
         });
-
     } catch (error) {
         console.error("Sorting error:", error);
         res.redirect("pageNotFound");
     }
 };
-
-
-
 
 module.exports = {
     loadHomePage,
@@ -1021,5 +1098,4 @@ module.exports = {
     searchProducts,
     processSearch,
     sortShopProducts,
-
-}
+};

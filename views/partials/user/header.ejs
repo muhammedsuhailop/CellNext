@@ -10,7 +10,8 @@
   <title>CellNext</title>
 
   <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
+    rel="stylesheet">
 
   <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
 
@@ -43,23 +44,25 @@
     <div class="offcanvas__option">
       <div class="offcanvas-top-tile">
         <% if (locals.user) { %>
-        <div class="dropdown">
-          <span><%= user.name %> <i class="arrow_carrot-down"></i></span>
-          <ul>
-            <li><a href="/my-account">My Account</a></li>
-            <li><a href="/my-orders">Orders</a></li>
-            <li><a href="/logout">Logout</a></li>
-          </ul>
-        </div>
-        <% } else { %>
-        <div class="dropdown">
-          <span>Login <i class="arrow_carrot-down"></i></span>
-          <ul>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/signup">Signup</a></li>
-          </ul>
-        </div>
-        <% } %>
+          <div class="dropdown">
+            <span>
+              <%= user.name %> <i class="arrow_carrot-down"></i>
+            </span>
+            <ul>
+              <li><a href="/my-account">My Account</a></li>
+              <li><a href="/my-orders">Orders</a></li>
+              <li><a href="/logout">Logout</a></li>
+            </ul>
+          </div>
+          <% } else { %>
+            <div class="dropdown">
+              <span>Login <i class="arrow_carrot-down"></i></span>
+              <ul>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/signup">Signup</a></li>
+              </ul>
+            </div>
+            <% } %>
       </div>
     </div>
     <div class="offcanvas__nav__option">
@@ -89,23 +92,25 @@
             <div class="header__top__right">
               <div class="header__dropdown">
                 <% if (locals.user) { %>
-                <div class="dropdown">
-                  <span><%= user.name %> <i class="arrow_carrot-down"></i></span>
-                  <ul>
-                    <li><a href="/my-account">My Account</a></li>
-                    <li><a href="/my-orders">Orders</a></li>
-                    <li><a href="/logout">Logout</a></li>
-                  </ul>
-                </div>
-                <% } else { %>
-                <div class="dropdown">
-                  <span>Login <i class="arrow_carrot-down"></i></span>
-                  <ul>
-                    <li><a href="/login">Login</a></li>
-                    <li><a href="/signup">Signup</a></li>
-                  </ul>
-                </div>
-                <% } %>
+                  <div class="dropdown">
+                    <span>
+                      <%= user.name %> <i class="arrow_carrot-down"></i>
+                    </span>
+                    <ul>
+                      <li><a href="/my-account">My Account</a></li>
+                      <li><a href="/my-orders">Orders</a></li>
+                      <li><a href="/logout">Logout</a></li>
+                    </ul>
+                  </div>
+                  <% } else { %>
+                    <div class="dropdown">
+                      <span>Login <i class="arrow_carrot-down"></i></span>
+                      <ul>
+                        <li><a href="/login">Login</a></li>
+                        <li><a href="/signup">Signup</a></li>
+                      </ul>
+                    </div>
+                    <% } %>
               </div>
             </div>
           </div>
@@ -123,29 +128,34 @@
           <nav class="header__menu mobile-menu">
             <ul>
               <li class="<%= currentPath === '/' ? 'active' : '' %>"><a href="/">Home</a></li>
-              <li class="<%= ['/shop', '/filter', '/filterPrice', '/search'].some(path => currentPath.startsWith(path)) ? 'active' : '' %>">
+              <li
+                class="<%= ['/shop', '/filter', '/filterPrice', '/search'].some(path => currentPath.startsWith(path)) ? 'active' : '' %>">
                 <a href="/shop">Shop</a>
               </li>
               <% if (locals.user) { %>
-              <li class="<%= ['/my-account', '/edit-profile', '/my-orders', '/wallet'].includes(currentPath) ? 'active' : '' %>">
-                <a href="/my-account">My Account</a>
-                <ul class="dropdown">
-                  <li class="<%= currentPath === '/my-account' ? 'active' : '' %>"><a href="/my-account">My Account</a></li>
-                  <li class="<%= currentPath === '/edit-profile' ? 'active' : '' %>"><a href="/edit-profile">Edit Profile</a></li>
-                  <li class="<%= currentPath === '/my-orders' ? 'active' : '' %>"><a href="/my-orders">My Orders</a></li>
-                  <li class="<%= currentPath === '/wallet' ? 'active' : '' %>"><a href="/wallet"> My Wallet</a></li>
-                  <li><a href="/logout"> Log out</a></li>
-                </ul>
-              </li>
-              <% } else {%>
-              <li>
-                <a href="/my-account">Log In</a>
-                <ul class="dropdown">
-                  <li><a href="/login">Login</a></li>
-                  <li><a href="/signup">Signup</a></li>
-                </ul>
-              </li>
-              <% } %>
+                <li
+                  class="<%= ['/my-account', '/edit-profile', '/my-orders', '/wallet'].includes(currentPath) ? 'active' : '' %>">
+                  <a href="/my-account">My Account</a>
+                  <ul class="dropdown">
+                    <li class="<%= currentPath === '/my-account' ? 'active' : '' %>"><a href="/my-account">My
+                        Account</a></li>
+                    <li class="<%= currentPath === '/edit-profile' ? 'active' : '' %>"><a href="/edit-profile">Edit
+                        Profile</a></li>
+                    <li class="<%= currentPath === '/my-orders' ? 'active' : '' %>"><a href="/my-orders">My Orders</a>
+                    </li>
+                    <li class="<%= currentPath === '/wallet' ? 'active' : '' %>"><a href="/wallet"> My Wallet</a></li>
+                    <li><a href="/logout"> Log out</a></li>
+                  </ul>
+                </li>
+                <% } else {%>
+                  <li>
+                    <a href="/my-account">Log In</a>
+                    <ul class="dropdown">
+                      <li><a href="/login">Login</a></li>
+                      <li><a href="/signup">Signup</a></li>
+                    </ul>
+                  </li>
+                  <% } %>
             </ul>
           </nav>
         </div>
@@ -153,20 +163,24 @@
           <div class="col-lg-3 col-md-3 d-flex justify-content-center align-items-center">
             <div class="header__nav__option d-flex align-items-center " style="gap: 10px;">
               <i class="bx bx-search bx-sm text-black" id="searchIcon" style="cursor: pointer;"></i>
-              <form action="/search" method="POST" id="searchForm" class="d-flex align-items-center" style="visibility: hidden; opacity: 0; width: 0; transition: width 0.3s, opacity 0.3s;">
+              <form action="/search" method="POST" id="searchForm" class="d-flex align-items-center"
+                style="visibility: hidden; opacity: 0; width: 0; transition: width 0.3s, opacity 0.3s;">
                 <input type="text" class="form-control" placeholder="Search..." name="query" style="width: 150px;">
               </form>
-              <a href="/wishlist" class="d-flex justify-content-center align-items-center <%= currentPath === '/wishlist' ? 'active' : '' %>">
+              <a href="/wishlist"
+                class="d-flex justify-content-center align-items-center <%= currentPath === '/wishlist' ? 'active' : '' %>">
                 <i class="text-black bx-sm <%= currentPath === '/wishlist' ? 'bx bxs-heart' : 'bx bx-heart ' %>"></i>
               </a>
-              <a href="/cart" class="d-flex justify-content-center align-items-center position-relative <%= currentPath === '/cart' ? 'active' : '' %>">
+              <a href="/cart"
+                class="d-flex justify-content-center align-items-center position-relative <%= currentPath === '/cart' ? 'active' : '' %>">
                 <i class="bx bx-cart bx-sm text-black"></i>
-                <% if (cartItemCount >= 0) { %>
-                <span id="cart-count-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-white
-                        <%= cartItemCount < 5 ? 'bg-secondary' : cartItemCount < 10 ? 'bg-success' : 'bg-warning' %>" style="font-size: 10px;">
-                  <%= cartItemCount %>
-                </span>
-                <% } %>
+                <% if (cartItemCount>= 0) { %>
+                  <span id="cart-count-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-white
+                        <%= cartItemCount < 5 ? 'bg-secondary' : cartItemCount < 10 ? 'bg-success' : 'bg-warning' %>"
+                    style="font-size: 10px;">
+                    <%= cartItemCount %>
+                  </span>
+                  <% } %>
               </a>
 
             </div>
@@ -194,5 +208,23 @@
       searchForm.style.opacity = '0';
       searchForm.style.width = '0';
       searchIcon.style.display = 'inline';
+    });
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+      const redirectUrl = sessionStorage.getItem("redirectAfterLogin");
+
+      if (!redirectUrl) return;
+
+      if (window.location.pathname === "/") {
+
+        sessionStorage.removeItem("redirectAfterLogin");
+
+        window.location.replace(redirectUrl);
+
+      }
+
     });
   </script>

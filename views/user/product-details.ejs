@@ -348,10 +348,23 @@
         } else {
           Swal.fire({
             icon: 'error',
-            title: 'Failed add item to cart',
+            title: 'Please login to add to cart',
             text: data.message || 'Please try again later.',
-            confirmButtonText: 'Try Again'
-          });
+            confirmButtonText: 'Login',
+            showCancelButton: true,
+            cancelButtonText: 'Leave it now',
+          })
+          .then((result) => {
+            if (result.isConfirmed) {
+
+    sessionStorage.setItem(
+        "redirectAfterLogin",
+        window.location.pathname + window.location.search
+    );
+
+    window.location.href = "/login";
+}
+          });;
         }
       })
       .catch(error => {
