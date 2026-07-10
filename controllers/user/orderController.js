@@ -251,24 +251,41 @@ const placeOrder = async (req, res) => {
       try {
         const razorpayOrder = await razorpay.orders.create({
           amount: finalAmount * 100,
-          currency: 'INR',
+          currency: "INR",
           receipt: `order_${newOrder._id}`,
-          payment_capture: 1
+          payment_capture: 1,
         });
 
         newOrder.payment.transactionId = razorpayOrder.id;
         await newOrder.save();
-        await User.findByIdAndUpdate(userId, { $push: { orderHistory: newOrder._id } });
+        await User.findByIdAndUpdate(userId, {
+          $push: { orderHistory: newOrder._id },
+        });
 
         return res.json({
           success: true,
-          message: 'Razorpay order created successfully.',
+          message: "Razorpay order created successfully.",
           razorpayOrderId: razorpayOrder.id,
           orderId: newOrder._id,
           key: process.env.RAZORPAY_KEY,
         });
       } catch (error) {
-        return res.status(500).json({ success: false, message: 'Failed to create Razorpay order.' });
+        console.error("========== RAZORPAY ORDER ERROR ==========");
+        console.error(error);
+
+        if (error.error) {
+          console.error("Razorpay Error:", error.error);
+        }
+
+        console.error("=========================================");
+
+        return res.status(500).json({
+          success: false,
+          message:
+            error.error?.description ||
+            error.message ||
+            "Failed to create Razorpay order.",
+        });
       }
     }
 
