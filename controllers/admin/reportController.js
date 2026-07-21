@@ -136,7 +136,6 @@ const downloadPDF = async (req, res) => {
       };
     }
 
-    // const salesData = await fetchSalesData({ filterType, startDate, endDate });
     const { paginatedResults } = await fetchSalesData({
       filterType,
       startDate,
@@ -254,7 +253,7 @@ const downloadPDF = async (req, res) => {
     });
 
     const generatedOn = `Generated On :${new Date().toLocaleDateString()}`;
-    const footerText = `${generatedOn} |© 2025 CellNext. All rights reserved.`;
+    const footerText = `${generatedOn} |© 2026 CellNext. All rights reserved.`;
 
     const footerY = doc.page.height - doc.page.margins.bottom - 20;
 

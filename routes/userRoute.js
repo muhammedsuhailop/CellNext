@@ -10,14 +10,21 @@ const walletController = require("../controllers/user/walletController");
 const wishlistController = require("../controllers/user/wishlistController");
 const passport = require("passport");
 const { userAuth, adminAuth, userAuthAjax } = require("../middlewares/auth");
+const {
+  redirectIfAuthenticated,
+} = require("../middlewares/redirectIfAuthenticated");
 
 router.get("/pageNotFound", userController.pageNotFound);
 
 //signup
-router.get("/signup", userController.loadSignupPage);
+router.get("/signup", redirectIfAuthenticated, userController.loadSignupPage);
 router.post("/signup", userController.signup);
 router.post("/verify-otp", userController.verifyOtp);
-router.get("/verify-otp", userController.loadVerifOtpPage);
+router.get(
+  "/verify-otp",
+  redirectIfAuthenticated,
+  userController.loadVerifOtpPage,
+);
 router.post("/resend-otp", userController.resendOtp);
 router.get(
   "/auth/google",
@@ -30,7 +37,7 @@ router.get(
 );
 
 //login
-router.get("/login", userController.loadLoginPage);
+router.get("/login", redirectIfAuthenticated, userController.loadLoginPage);
 router.post("/login", userController.login);
 
 router.get("/logout", userController.logout);

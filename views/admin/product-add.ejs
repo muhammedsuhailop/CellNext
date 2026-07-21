@@ -285,6 +285,9 @@
         if (!description) {
           displayErrorMessage(form, 'description-error', 'Please enter a product description.');
           isValid = false;
+        } else if (description && description.length < 10) {
+            displayErrorMessage(form, 'description-error', 'Description should be at least 10 characters long.');
+            isValid = false;
         } else if (description.length >= 500) {
           displayErrorMessage(form, 'description-error', 'Description must be less than 500 characters.');
           isValid = false;
@@ -311,6 +314,11 @@
           isValid = false;
         }
 
+        if (!salePrice || !/^\d+(\.\d{1,2})?$/.test(salePrice) || parseFloat(salePrice) <= 0) {
+          displayErrorMessage(form, 'salePrice-error', 'Please enter a valid sale price.');
+          isValid = false;
+        }
+
         if (salePrice && parseFloat(price) < parseFloat(salePrice)) {
           displayErrorMessage(form, 'salePrice-error', 'Regular price must be greater than sale price.');
           isValid = false;
@@ -324,6 +332,22 @@
         let totalImagesSelected = 0;
         imageInputs.forEach((imageInput) => {
           totalImagesSelected += imageInput.files.length;
+        });
+
+        imageInputs.forEach((imageInput, index) => {
+          const file = imageInput.files[0];
+
+          if (file) {
+            if (!file.type.startsWith("image/")) {
+              displayErrorMessage(form, `image${index + 1}-error`, "Only image files are allowed.");
+              isValid = false;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+              displayErrorMessage(form, `image${index + 1}-error`, "Image size must not exceed 2 MB.");
+              isValid = false;
+            }
+          }
         });
 
         if (totalImagesSelected < 3) {

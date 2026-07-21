@@ -277,7 +277,7 @@ const addProductOffer = async (req, res) => {
 
     findProduct.variants = findProduct.variants.map((variant) => {
       let salePrice = variant.salePrice;
-      const regularPrice = variant.salePrice;
+      const regularPrice = variant.regularPrice;
 
       if (percentage > 0) {
         const productDiscount = Math.floor(salePrice * (percentage / 100));
@@ -332,9 +332,15 @@ const removeProductOffer = async (req, res) => {
         salePrice = Math.floor(salePrice / (1 - productOfferPercentage));
       }
 
+      console.log({
+        regularPrice: variant.regularPrice,
+        oldSalePrice: variant.salePrice,
+        newSalePrice: salePrice,
+      });
+
       return {
         ...variant,
-        salePrice,
+        salePrice: Math.min(salePrice, variant.regularPrice),
       };
     });
 
