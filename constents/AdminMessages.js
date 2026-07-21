@@ -1,4 +1,4 @@
-export const ADMIN_MESSAGES = Object.freeze({
+const ADMIN_MESSAGES = Object.freeze({
   SUCCESS: {
     CREATED: "Created successfully.",
     UPDATED: "Updated successfully.",
@@ -25,7 +25,7 @@ export const ADMIN_MESSAGES = Object.freeze({
     LISTING_CATEGORY: "An error occurred while listing the category.",
     UNLISTING_CATEGORY: "An error occurred while unlisting the category.",
     DUPLICATE_CATEGORY_NAME: "This category name already exists.",
-    CATEGORY_NOT_FOUND: "Category updated successfully.",
+    CATEGORY_NOT_FOUND: "Category not found.",
     FIELDS_MISSING: "All required fields must be provided.",
     CREATE_COUPON: "Failed to create coupon.",
     USER_BLOCK_FAILED: "Failed to block user",
@@ -37,3 +37,5 @@ export const ADMIN_MESSAGES = Object.freeze({
     NO_SALES_DATA_FOUND: "No sales data found for the selected filter.",
   },
 });
+
+module.exports = { ADMIN_MESSAGES };

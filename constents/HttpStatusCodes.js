@@ -1,4 +1,4 @@
-export const HttpStatusCode = Object.freeze({
+const HttpStatusCode = Object.freeze({
   // Success
   OK: 200,
   CREATED: 201,
@@ -18,3 +18,5 @@ export const HttpStatusCode = Object.freeze({
   BAD_GATEWAY: 502,
   SERVICE_UNAVAILABLE: 503,
 });
+
+module.exports = { HttpStatusCode };
