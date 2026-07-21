@@ -6,6 +6,7 @@ const session = require("express-session");
 const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
 const { sendVerificationEmail } = require("../../services/emailService");
+const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
 
 function generateOtp() {
   const digits = "1234567890";
@@ -90,7 +91,7 @@ const verifyForgetPassOtp = async (req, res) => {
     console.error(error.stack);
 
     res
-      .staus(500)
+      .staus(HttpStatusCode.INTERNAL_SERVER_ERROR)
       .json({ success: false, message: "An error occured, Try later" });
   }
 };
@@ -124,7 +125,9 @@ const resendOtp = async (req, res) => {
     );
     if (emailSent) {
       console.log("Resend OTP : ", otp);
-      res.status(200).json({ success: true, messege: "Resend OTP successful" });
+      res
+        .status(HttpStatusCode.OK)
+        .json({ success: true, messege: "Resend OTP successful" });
     }
   } catch (error) {
     console.error(`\n[${new Date().toISOString()}] ${__filename}`);
@@ -135,7 +138,9 @@ const resendOtp = async (req, res) => {
 
     console.error(error.stack);
 
-    res.staus(500).json({ success: false, message: "Internal Error" });
+    res
+      .staus(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: "Internal Error" });
   }
 };
 
@@ -146,7 +151,9 @@ const resetPassword = async (req, res) => {
     if (password1 === password2) {
       const passHash = await securePassword(password1);
       await User.updateOne({ email: email }, { $set: { password: passHash } });
-      res.status(200).json({ message: "Password updated successfully!" });
+      res
+        .status(HttpStatusCode.OK)
+        .json({ message: "Password updated successfully!" });
     } else {
       res.render("reset-password", { message: "Password do not match" });
     }
@@ -223,11 +230,13 @@ const editProfile = async (req, res) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      return res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({ message: "User not found." });
     }
 
     return res
-      .status(200)
+      .status(HttpStatusCode.OK)
       .json({ message: "User profile updated successfully.", user });
   } catch (error) {
     console.error(`\n[${new Date().toISOString()}] ${__filename}`);
@@ -434,7 +443,9 @@ const editAddress = async (req, res) => {
 
     console.error(error.stack);
 
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: "Server error" });
   }
 };
 
@@ -485,11 +496,13 @@ const generateReferralCode = async (req, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({ message: "User not found" });
     }
 
     if (user.referralCode) {
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         message: "You already have a referral code.",
         referralCode: user.referralCode,
       });
@@ -500,7 +513,7 @@ const generateReferralCode = async (req, res) => {
     user.referralCode = newReferralCode;
     await user.save();
 
-    return res.status(200).json({
+    return res.status(HttpStatusCode.OK).json({
       message: "Referral code generated successfully!",
       referralCode: newReferralCode,
     });
@@ -513,11 +526,9 @@ const generateReferralCode = async (req, res) => {
 
     console.error(error.stack);
 
-    return res
-      .status(500)
-      .json({
-        message: "An error occurred while generating the referral code.",
-      });
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred while generating the referral code.",
+    });
   }
 };
 

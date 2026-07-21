@@ -5,6 +5,8 @@ const Address = require("../../models/addressSchema");
 const Wallet = require("../../models/walletSchema");
 const Coupon = require("../../models/couponSchema");
 const { v4: uuidv4 } = require("uuid");
+const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
+const { ADMIN_MESSAGES } = require("../../constents/AdminMessages");
 
 async function checkCouponValidity(items, categories, products, minAmount) {
   let eligibleAmount = 0;
@@ -53,7 +55,7 @@ const getOrders = async (req, res) => {
       const successMessage = req.flash("success");
       const errorMessage = req.flash("error");
       const admin = await User.findById(req.session._id);
-      return res.status(404).render("admin-orders", {
+      return res.status(HttpStatusCode.NOT_FOUND).render("admin-orders", {
         admin,
         orders: [],
         totalPages: 0,
@@ -151,7 +153,9 @@ const updateStatus = async (req, res) => {
 
     const order = await Orders.findById(orderId).populate("userId");
     if (!order) {
-      return res.status(404).json({ error: "Order not found." });
+      return res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({ error: ADMIN_MESSAGES.ERROR.ORDER_NOT_FOUND });
     }
 
     const allowedTransitions = {
@@ -166,11 +170,9 @@ const updateStatus = async (req, res) => {
     };
 
     if (!allowedTransitions[order.status]?.includes(newStatus)) {
-      return res
-        .status(400)
-        .json({
-          error: `Cannot change status from ${order.status} to ${newStatus}.`,
-        });
+      return res.status(400).json({
+        error: `Cannot change status from ${order.status} to ${newStatus}.`,
+      });
     }
 
     if (newStatus === "Cancelled" || newStatus === "Returned") {
@@ -232,15 +234,15 @@ const updateStatus = async (req, res) => {
     order.status = newStatus;
     await order.save();
 
-    res
-      .status(200)
-      .json({
-        message: "Order status updated successfully!",
-        updatedOrder: order,
-      });
+    res.status(HttpStatusCode.OK).json({
+      message: "Order status updated successfully!",
+      updatedOrder: order,
+    });
   } catch (error) {
     console.error("Error updating order status:", error);
-    res.status(500).json({ error: "Server error. Please try again later." });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ error: ADMIN_MESSAGES.ERROR.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -254,11 +256,13 @@ const getOrderDetails = async (req, res) => {
       .exec();
 
     if (!order) {
-      return res.status(404).render("admin/order-details", {
-        order: null,
-        message: "Order not found.",
-        admin,
-      });
+      return res
+        .status(HttpStatusCode.NOT_FOUND)
+        .render("admin/order-details", {
+          order: null,
+          message: ADMIN_MESSAGES.ERROR.ORDER_NOT_FOUND,
+          admin,
+        });
     }
 
     const addressDoc = await Address.findOne({
@@ -373,12 +377,10 @@ const updateItemStatus = async (req, res) => {
     };
 
     if (!allowedTransitions[item.itemStatus]?.includes(newStatus)) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: `Cannot change status from ${item.itemStatus} to ${newStatus}.`,
-        });
+      return res.status(400).json({
+        success: false,
+        error: `Cannot change status from ${item.itemStatus} to ${newStatus}.`,
+      });
     }
 
     if (newStatus === "Cancelled" || newStatus === "Returned") {
@@ -600,16 +602,16 @@ const updateItemStatus = async (req, res) => {
 
     await order.save();
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Order item status updated successfully!",
-        updatedItem: item,
-      });
+    res.status(HttpStatusCode.OK).json({
+      success: true,
+      message: "Order item status updated successfully!",
+      updatedItem: item,
+    });
   } catch (error) {
     console.error("Error updating item status:", error);
-    res.status(500).json({ error: "Server error. Please try again later." });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ error: ADMIN_MESSAGES.ERROR.INTERNAL_SERVER_ERROR });
   }
 };
 
