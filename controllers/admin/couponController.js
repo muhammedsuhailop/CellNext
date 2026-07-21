@@ -3,8 +3,8 @@ const ProductV2 = require("../../models/productsSchemaV2");
 const Coupon = require("../../models/couponSchema");
 const User = require("../../models/userSchema");
 const formatDate = require("../../helpers/formatDate");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
-const { ADMIN_MESSAGES } = require("../../constents/AdminMessages");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
+const { ADMIN_MESSAGES } = require("../../constents/adminMessages");
 
 const loadAddCoupon = async (req, res) => {
   try {

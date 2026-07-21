@@ -9,7 +9,8 @@ const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
 const { getPopularProducts } = require("../../helpers/salesDataHelper");
 const { sendVerificationEmail } = require("../../services/emailService");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
+const { USER_MESSAGES } = require("../../constents/userMessages");
 
 function generateShortReferralCode(length = 6) {
   return uuidv4().replace(/-/g, "").substring(0, length).toUpperCase();
@@ -146,16 +147,17 @@ const signup = async (req, res) => {
     if (password !== confirmPassword) {
       return res
         .status(HttpStatusCode.BAD_REQUEST)
-        .json({ message: "Passwords do not match" });
+        .json({ message: USER_MESSAGES.AUTH.ERROR.PASSWORD_MISMATCH });
     }
 
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       console.log("Rendering signup with error code E110");
-      return res
-        .status(400)
-        .json({ errorCode: "E110", message: "Email is already registered" });
+      return res.status(400).json({
+        errorCode: "E110",
+        message: USER_MESSAGES.AUTH.ERROR.EMAIL_ALREADY_REGISTERED,
+      });
     }
 
     const genOtp = generateOtp();
@@ -169,7 +171,7 @@ const signup = async (req, res) => {
       console.log("Email error while sending OTP");
       return res
         .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-        .json({ message: "Email-error" });
+        .json({ message: USER_MESSAGES.AUTH.ERROR.EMAIL_SEND_FAILED });
     }
 
     req.session.userOtp = genOtp;
@@ -178,12 +180,14 @@ const signup = async (req, res) => {
     req.session.userData = { name, email, phone, password };
     console.log("Generated OTP:", req.session.userOtp);
 
-    res.status(HttpStatusCode.OK).json({ message: "OTP sent successfully" });
+    res
+      .status(HttpStatusCode.OK)
+      .json({ message: USER_MESSAGES.AUTH.SUCCESS.OTP_SENT });
   } catch (error) {
     console.error("Error during user signup", error.message);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ message: "Server Error: " + error.message });
+      .json({ message: USER_MESSAGES.AUTH.ERROR.SERVER_ERROR + error.message });
   }
 };
 
@@ -191,9 +195,10 @@ const resendOtp = async (req, res) => {
   try {
     const { email } = req.session.userData;
     if (!email) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email not found" });
+      return res.status(400).json({
+        success: false,
+        message: USER_MESSAGES.AUTH.ERROR.SERVER_ERROR,
+      });
     }
 
     const otp = generateOtp();
@@ -207,20 +212,21 @@ const resendOtp = async (req, res) => {
     );
     if (emailSent) {
       console.log("Resend OTP:", otp);
-      return res
-        .status(HttpStatusCode.OK)
-        .json({ success: true, message: "OTP Resent successfully" });
+      return res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: USER_MESSAGES.AUTH.SUCCESS.OTP_RESENT,
+      });
     } else {
       return res.status(HttpStatusCode.BAD_REQUEST).json({
         success: false,
-        message: "Failed to resend OTP. Please try again.",
+        message: USER_MESSAGES.AUTH.ERROR.OTP_SEND_FAILED,
       });
     }
   } catch (error) {
     console.error("Error during resend OTP", error.message);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: "Server Error: " + error.message });
+      .json({ success: false, message: USER_MESSAGES.AUTH.ERROR.SERVER_ERROR });
   }
 };
 
@@ -311,15 +317,16 @@ const verifyOtp = async (req, res) => {
 
       res.json({ success: true, redirectUrl: "/" });
     } else {
-      res
-        .status(400)
-        .json({ success: false, message: "Invalid OTP. Please try again." });
+      res.status(400).json({
+        success: false,
+        message: USER_MESSAGES.AUTH.ERROR.INVALID_OTP,
+      });
     }
   } catch (error) {
     console.log("Error verifying OTP:", error);
     res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Internal server error. Please try again later.",
+      message: USER_MESSAGES.AUTH.ERROR.INTERNAL_SERVER_ERROR,
     });
   }
 };
@@ -345,18 +352,18 @@ const login = async (req, res) => {
     const findUser = await User.findOne({ isAdmin: 0, email: email });
 
     if (!findUser) {
-      req.flash("message", "User not found");
+      req.flash("message", USER_MESSAGES.AUTH.ERROR.USER_NOT_FOUND);
       return res.redirect("/login");
     }
     if (findUser.isBlocked) {
-      req.flash("message", "This account is blocked");
+      req.flash("message", USER_MESSAGES.AUTH.ERROR.ACCOUNT_BLOCKED);
       return res.redirect("/login");
     }
 
     const passwordMatch = await bcrypt.compare(password, findUser.password);
 
     if (!passwordMatch) {
-      req.flash("message", "Incorrect Password");
+      req.flash("message", USER_MESSAGES.AUTH.ERROR.INVALID_PASSWORD);
       return res.redirect("/login");
     }
 
@@ -373,12 +380,12 @@ const login = async (req, res) => {
 
     req.session.user = findUser._id;
     req.session.cartItemCount = cartItemCount;
-    req.flash("success", "You have successfully logged in!");
+    req.flash("success", USER_MESSAGES.AUTH.SUCCESS.LOGIN_SUCCESS);
     res.redirect("/");
   } catch (error) {
     console.error("login error", error);
     return res.render("login", {
-      message: "login failed. Please try again later",
+      message: USER_MESSAGES.AUTH.ERROR.SERVER_ERROR,
     });
   }
 };

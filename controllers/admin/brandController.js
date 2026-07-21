@@ -4,8 +4,8 @@ const fs = require("fs");
 const path = require("path");
 const uuidv4 = require("uuid").v4;
 const { cloudinary } = require("../../config/cloudinary");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
-const { ADMIN_MESSAGES } = require("../../constents/AdminMessages");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
+const { ADMIN_MESSAGES } = require("../../constents/adminMessages");
 
 const loadBrandPage = async (req, res) => {
   try {

@@ -2,7 +2,7 @@ const ProductV2 = require("../../models/productsSchemaV2");
 const Cart = require("../../models/cartSchema");
 const User = require("../../models/userSchema");
 const Coupon = require("../../models/couponSchema");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
 
 const loadCartPage = async (req, res) => {
   try {
@@ -59,8 +59,7 @@ const loadCartPage = async (req, res) => {
 
       if (!variant || variant.stock <= 0) {
         item.quantity = 0;
-        outOfStockMessage =
-          "Some items in your cart are out of stock and have been set to zero.";
+        outOfStockMessage = USER_MESSAGES.CART.ERROR.EMPTY_CART;
       } else if (item.quantity === 0 && variant.stock > 0) {
         item.quantity = 1;
       }
@@ -196,7 +195,7 @@ const loadCartPage = async (req, res) => {
     console.error("Error loading cart:", error);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .send("Error fetching cart data");
+      .send(USER_MESSAGES.CART.ERROR.FETCH_CART_FAILED);
   }
 };
 
@@ -205,7 +204,7 @@ const addToCart = async (req, res) => {
     if (!req.session.user) {
       return res.status(HttpStatusCode.BAD_REQUEST).json({
         success: false,
-        message: "Please login to add products to cart",
+        message: USER_MESSAGES.CART.ERROR.LOGIN_REQUIRED,
       });
     }
 
@@ -214,22 +213,26 @@ const addToCart = async (req, res) => {
 
     const product = await ProductV2.findById(productId);
     if (!product) {
-      return res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json({ success: false, message: "Product not found" });
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        success: false,
+        message: USER_MESSAGES.CART.ERROR.PRODUCT_NOT_FOUND,
+      });
     }
 
     const variant = product.variants[variantId];
     if (!variant) {
       return res
         .status(HttpStatusCode.NOT_FOUND)
-        .json({ success: false, message: "Variant not found" });
+        .json({
+          success: false,
+          message: USER_MESSAGES.CART.ERROR.VARIANT_NOT_FOUND,
+        });
     }
 
     if (quantity > variant.stock) {
       return res.status(HttpStatusCode.BAD_REQUEST).json({
         success: false,
-        message: `Not enough stock available for this variant. Only ${variant.stock} item(s) left in stock.`,
+        message: `${USER_MESSAGES.CART.ERROR.STOCK_NOT_AVAILABLE} Only ${variant.stock} item(s) left in stock.`,
       });
     }
 
@@ -252,13 +255,13 @@ const addToCart = async (req, res) => {
         if (item.quantity + quantity > 5) {
           return res.status(HttpStatusCode.BAD_REQUEST).json({
             success: false,
-            message: `Maximum cart quantity: 5`,
+            message: USER_MESSAGES.CART.ERROR.MAX_CART_QUANTITY,
           });
         }
         if (item.quantity + quantity > variant.stock) {
           return res.status(HttpStatusCode.BAD_REQUEST).json({
             success: false,
-            message: `Item in cart! Insufficient stock`,
+            message: USER_MESSAGES.CART.ERROR.INSUFFICIENT_STOCK,
           });
         }
         item.quantity += quantity;
@@ -293,12 +296,16 @@ const addToCart = async (req, res) => {
     );
     req.session.cartItemCount = cartItemCount;
 
-    res.json({ success: true, message: "Successfully added to cart.", cart });
+    res.json({
+      success: true,
+      message: USER_MESSAGES.CART.SUCCESS.ADDED,
+      cart,
+    });
   } catch (err) {
     console.error("Error adding to cart:", err);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: "Server error" });
+      .json({ success: false, message: USER_MESSAGES.CART.ERROR.SERVER_ERROR });
   }
 };
 
@@ -320,7 +327,7 @@ const removeProductFromCart = async (req, res) => {
     if (!updatedCart) {
       return res
         .status(HttpStatusCode.NOT_FOUND)
-        .json({ message: "Cart not found" });
+        .json({ message: USER_MESSAGES.CART.ERROR.CART_NOT_FOUND });
     }
 
     const productIds = updatedCart.items.map((item) => item.productId);
@@ -356,12 +363,15 @@ const removeProductFromCart = async (req, res) => {
 
     return res
       .status(HttpStatusCode.OK)
-      .json({ message: "Item removed successfully", cart: updatedCart });
+      .json({
+        message: USER_MESSAGES.CART.SUCCESS.ITEM_REMOVED,
+        cart: updatedCart,
+      });
   } catch (error) {
     console.error("Error:", error);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to remove item" });
+      .json({ error: USER_MESSAGES.CART.ERROR.REMOVE_ITEM_FAILED });
   }
 };
 
@@ -370,7 +380,7 @@ const applyCoupon = async (req, res) => {
     if (!req.session.user) {
       return res.status(HttpStatusCode.UNAUTHORIZED).json({
         success: false,
-        message: "Please log in to apply a coupon",
+        message: USER_MESSAGES.CART.ERROR.LOGIN_REQUIRED_FOR_COUPON,
       });
     }
 
@@ -381,21 +391,24 @@ const applyCoupon = async (req, res) => {
     if (!cart || cart.items.length === 0) {
       return res
         .status(HttpStatusCode.BAD_REQUEST)
-        .json({ success: false, message: "Your cart is empty" });
+        .json({ success: false, message: USER_MESSAGES.CART.ERROR.CART_EMPTY });
     }
 
     const coupon = await Coupon.findOne({ name: couponCode, isActive: true });
     if (!coupon) {
       return res
         .status(HttpStatusCode.NOT_FOUND)
-        .json({ success: false, message: "Invalid or expired coupon" });
+        .json({
+          success: false,
+          message: USER_MESSAGES.CART.ERROR.INVALID_COUPON,
+        });
     }
 
     const now = new Date();
     if (now < coupon.startOn || now > coupon.expireOn) {
       return res.status(HttpStatusCode.BAD_REQUEST).json({
         success: false,
-        message: "Coupon has expired or is not yet active",
+        message: USER_MESSAGES.CART.ERROR.COUPON_EXPIRED,
       });
     }
 
@@ -405,15 +418,17 @@ const applyCoupon = async (req, res) => {
     ) {
       return res
         .status(HttpStatusCode.BAD_REQUEST)
-        .json({ success: false, message: "Coupon usage limit exceeded" });
+        .json({
+          success: false,
+          message: USER_MESSAGES.CART.ERROR.COUPON_USAGE_LIMIT_EXCEEDED,
+        });
     }
 
     const userUsage = coupon.usedCount.get(userId.toString()) || 0;
     if (userUsage >= coupon.usageLimitPerUser) {
       return res.status(HttpStatusCode.BAD_REQUEST).json({
         success: false,
-        message:
-          "You have already used this coupon the maximum number of times",
+        message: USER_MESSAGES.CART.ERROR.COUPON_USER_LIMIT_EXCEEDED,
       });
     }
 
@@ -462,7 +477,7 @@ const applyCoupon = async (req, res) => {
     if (eligibleAmount < coupon.minimumOrderAmount) {
       return res.status(HttpStatusCode.BAD_REQUEST).json({
         success: false,
-        message: `Your cart does not meet the minimum order amount of ₹${coupon.minimumOrderAmount}`,
+        message: `${USER_MESSAGES.CART.ERROR.COUPON_MINIMUM_ORDER} ₹${coupon.minimumOrderAmount}`,
       });
     }
 
@@ -490,7 +505,7 @@ const applyCoupon = async (req, res) => {
 
     return res.json({
       success: true,
-      message: "Coupon applied successfully",
+      message: USER_MESSAGES.CART.SUCCESS.COUPON_APPLIED,
       subTotal: cart.subTotal,
       discount: discountAmount,
       total: cart.total,
@@ -500,7 +515,7 @@ const applyCoupon = async (req, res) => {
     console.error("Error applying coupon:", err);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: "Server error" });
+      .json({ success: false, message: USER_MESSAGES.CART.ERROR.SERVER_ERROR });
   }
 };
 
@@ -512,7 +527,10 @@ const removeCoupon = async (req, res) => {
     if (!cart || !cart.coupon) {
       return res
         .status(HttpStatusCode.BAD_REQUEST)
-        .json({ success: false, message: "No coupon applied" });
+        .json({
+          success: false,
+          message: USER_MESSAGES.CART.ERROR.NO_COUPON_APPLIED,
+        });
     }
 
     const coupon = await Coupon.findById(cart.coupon);
@@ -528,12 +546,18 @@ const removeCoupon = async (req, res) => {
     await coupon.save();
     await cart.save();
 
-    res.json({ success: true, message: "Coupon removed successfully" });
+    res.json({
+      success: true,
+      message: USER_MESSAGES.CART.SUCCESS.COUPON_REMOVED,
+    });
   } catch (error) {
     console.error("Error removing coupon:", error);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: "Failed to remove coupon" });
+      .json({
+        success: false,
+        message: USER_MESSAGES.CART.ERROR.REMOVE_COUPON_FAILED,
+      });
   }
 };
 
@@ -553,7 +577,10 @@ const getCoupons = async (req, res) => {
     console.error("Error fetching coupons:", error);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ status: false, message: "Internal Server Error" });
+      .json({
+        status: false,
+        message: USER_MESSAGES.CART.ERROR.INTERNAL_SERVER_ERROR,
+      });
   }
 };
 

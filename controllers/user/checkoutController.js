@@ -3,7 +3,8 @@ const Cart = require("../../models/cartSchema");
 const User = require("../../models/userSchema");
 const Address = require("../../models/addressSchema");
 const Coupon = require("../../models/couponSchema");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
+const { USER_MESSAGES } = require("../../constents/userMessages");
 
 const getCheckout = async (req, res) => {
   try {
@@ -12,15 +13,12 @@ const getCheckout = async (req, res) => {
     const addressData = await Address.findOne({ userId: userData._id });
     const cart = await Cart.findOne({ userId: userId });
     if (!cart) {
-      return res.status(HttpStatusCode.NOT_FOUND).send("Cart not found");
+      return res.status(HttpStatusCode.NOT_FOUND).send(USER_MESSAGES.CHECKOUT.NOT_FOUND);
     }
 
     const validCart = cart.items.filter((item) => item.quantity > 0);
     if (validCart.length === 0) {
-      req.flash(
-        "message",
-        "Cannot proceed to checkout. Cart is empty or items are out of stock.",
-      );
+      req.flash("message", USER_MESSAGES.CHECKOUT.ERROR.EMPTY_CART);
       res.redirect("/cart");
     }
 
@@ -91,7 +89,7 @@ const getCheckout = async (req, res) => {
     console.error(error);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .send("Error fetching cart data");
+      .send(USER_MESSAGES.CHECKOUT.ERROR.FETCH_CART_FAILED);
   }
 };
 

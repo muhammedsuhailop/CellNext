@@ -6,7 +6,8 @@ const session = require("express-session");
 const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
 const { sendVerificationEmail } = require("../../services/emailService");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
+const { USER_MESSAGES } = require("../../constents/userMessages");
 
 function generateOtp() {
   const digits = "1234567890";
@@ -59,12 +60,12 @@ const forgotEmailValid = async (req, res) => {
       } else {
         res.json({
           success: false,
-          message: "Failed to send OTP. Please try later",
+          message: USER_MESSAGES.AUTH.ERROR.EMAIL_SEND_FAILED,
         });
       }
     } else {
       console.log("User not found:", email);
-      req.flash("error", "User not found");
+      req.flash("error", USER_MESSAGES.AUTH.ERROR.USER_NOT_FOUND);
       return res.redirect("/forgot-password");
     }
   } catch (error) {
@@ -79,7 +80,10 @@ const verifyForgetPassOtp = async (req, res) => {
     if (enteredOtp === req.session.userOtp) {
       res.json({ success: true, redirectUrl: "/reset-password" });
     } else {
-      res.json({ success: false, message: "Invalid OTP" });
+      res.json({
+        success: false,
+        message: USER_MESSAGES.AUTH.ERROR.INVALID_OTP,
+      });
     }
   } catch (error) {
     console.error(`\n[${new Date().toISOString()}] ${__filename}`);
@@ -92,7 +96,7 @@ const verifyForgetPassOtp = async (req, res) => {
 
     res
       .staus(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: "An error occured, Try later" });
+      .json({ success: false, message: USER_MESSAGES.AUTH.ERROR.SERVER_ERROR });
   }
 };
 
@@ -125,9 +129,10 @@ const resendOtp = async (req, res) => {
     );
     if (emailSent) {
       console.log("Resend OTP : ", otp);
-      res
-        .status(HttpStatusCode.OK)
-        .json({ success: true, messege: "Resend OTP successful" });
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: USER_MESSAGES.AUTH.SUCCESS.OTP_RESENT,
+      });
     }
   } catch (error) {
     console.error(`\n[${new Date().toISOString()}] ${__filename}`);
@@ -138,9 +143,10 @@ const resendOtp = async (req, res) => {
 
     console.error(error.stack);
 
-    res
-      .staus(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: "Internal Error" });
+    res.staus(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: USER_MESSAGES.AUTH.ERROR.INTERNAL_SERVER_ERROR,
+    });
   }
 };
 
@@ -153,9 +159,11 @@ const resetPassword = async (req, res) => {
       await User.updateOne({ email: email }, { $set: { password: passHash } });
       res
         .status(HttpStatusCode.OK)
-        .json({ message: "Password updated successfully!" });
+        .json({ message: USER_MESSAGES.AUTH.SUCCESS.PASSWORD_UPDATED });
     } else {
-      res.render("reset-password", { message: "Password do not match" });
+      res.render("reset-password", {
+        message: USER_MESSAGES.AUTH.ERROR.PASSWORD_MISMATCH,
+      });
     }
   } catch (error) {
     console.error(`\n[${new Date().toISOString()}] ${__filename}`);
@@ -221,7 +229,7 @@ const editProfile = async (req, res) => {
     if (!firstName || !phone) {
       return res
         .status(400)
-        .json({ message: "First name and phone number are required." });
+        .json({ message: USER_MESSAGES.PROFILE.ERROR.REQUIRED_FIELDS });
     }
 
     const user = await User.findByIdAndUpdate(
@@ -232,12 +240,12 @@ const editProfile = async (req, res) => {
     if (!user) {
       return res
         .status(HttpStatusCode.NOT_FOUND)
-        .json({ message: "User not found." });
+        .json({ message: USER_MESSAGES.PROFILE.ERROR.USER_NOT_FOUND });
     }
 
     return res
       .status(HttpStatusCode.OK)
-      .json({ message: "User profile updated successfully.", user });
+      .json({ message: USER_MESSAGES.PROFILE.SUCCESS.PROFILE_UPDATED, user });
   } catch (error) {
     console.error(`\n[${new Date().toISOString()}] ${__filename}`);
     console.error(`${error.name}: ${error.message}`);
@@ -300,7 +308,7 @@ const addAddress = async (req, res) => {
       if (existingAddress) {
         res.json({
           success: false,
-          message: "This address type already exists.",
+          message: USER_MESSAGES.ADDRESS.ERROR.ADDRESS_TYPE_ALREADY_EXISTS,
         });
       }
     }
@@ -342,7 +350,7 @@ const addAddress = async (req, res) => {
       await userAddress.save();
     }
 
-    res.json({ success: true, message: "Saved new address successfully" });
+    res.json({ success: true, message: USER_MESSAGES.ADDRESS.SUCCESS.CREATED });
   } catch (error) {
     console.error(`\n[${new Date().toISOString()}] ${__filename}`);
     console.error(`${error.name}: ${error.message}`);
@@ -384,9 +392,10 @@ const editAddress = async (req, res) => {
       !phone ||
       !landmark
     ) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
+      return res.status(400).json({
+        success: false,
+        message: USER_MESSAGES.ADDRESS.ERROR.REQUIRED_FIELDS,
+      });
     }
 
     const userAddress = await Address.findOne({ userId: req.session.user });
@@ -401,7 +410,7 @@ const editAddress = async (req, res) => {
     if (existingAddress) {
       return res.json({
         success: false,
-        message: "An address with this type already exists",
+        message: USER_MESSAGES.ADDRESS.ERROR.ADDRESS_TYPE_EXISTS,
       });
     }
     const updatedAddress = await Address.findOneAndUpdate(
@@ -426,13 +435,14 @@ const editAddress = async (req, res) => {
     if (updatedAddress) {
       return res.json({
         success: true,
-        message: "Address updated successfully",
+        message: USER_MESSAGES.ADDRESS.SUCCESS.UPDATED,
         data: updatedAddress,
       });
     } else {
-      return res
-        .status(404)
-        .json({ success: false, message: "Address update failed" });
+      return res.status(404).json({
+        success: false,
+        message: USER_MESSAGES.ADDRESS.ERROR.ADDRESS_UPDATE_FAILED,
+      });
     }
   } catch (error) {
     console.error(`\n[${new Date().toISOString()}] ${__filename}`);
@@ -445,7 +455,7 @@ const editAddress = async (req, res) => {
 
     return res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: "Server error" });
+      .json({ success: false, message: USER_MESSAGES.AUTH.ERROR.SERVER_ERROR });
   }
 };
 
@@ -456,9 +466,10 @@ const deleteAddress = async (req, res) => {
     const userAddress = await Address.findOne({ userId: req.session.user });
 
     if (!userAddress) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User address not found" });
+      return res.status(404).json({
+        success: false,
+        message: USER_MESSAGES.ADDRESS.ERROR.USER_ADDRESS_NOT_FOUND,
+      });
     }
 
     const addressIndex = userAddress.address.findIndex(
@@ -470,12 +481,13 @@ const deleteAddress = async (req, res) => {
       await userAddress.save();
       return res.json({
         success: true,
-        message: "Address deleted successfully",
+        message: USER_MESSAGES.ADDRESS.SUCCESS.DELETED,
       });
     } else {
-      return res
-        .status(404)
-        .json({ success: false, message: "Address not found" });
+      return res.status(404).json({
+        success: false,
+        message: USER_MESSAGES.ADDRESS.ERROR.ADDRESS_NOT_FOUND,
+      });
     }
   } catch (error) {
     console.error(`\n[${new Date().toISOString()}] ${__filename}`);
@@ -498,12 +510,12 @@ const generateReferralCode = async (req, res) => {
     if (!user) {
       return res
         .status(HttpStatusCode.NOT_FOUND)
-        .json({ message: "User not found" });
+        .json({ message: USER_MESSAGES.REFERRAL.ERROR.USER_NOT_FOUND });
     }
 
     if (user.referralCode) {
       return res.status(HttpStatusCode.OK).json({
-        message: "You already have a referral code.",
+        message: USER_MESSAGES.REFERRAL.SUCCESS.ALREADY_EXISTS,
         referralCode: user.referralCode,
       });
     }
@@ -514,7 +526,7 @@ const generateReferralCode = async (req, res) => {
     await user.save();
 
     return res.status(HttpStatusCode.OK).json({
-      message: "Referral code generated successfully!",
+      message: USER_MESSAGES.REFERRAL.SUCCESS.GENERATED,
       referralCode: newReferralCode,
     });
   } catch (error) {
@@ -527,7 +539,7 @@ const generateReferralCode = async (req, res) => {
     console.error(error.stack);
 
     return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      message: "An error occurred while generating the referral code.",
+      message: USER_MESSAGES.REFERRAL.ERROR.GENERATION_FAILED,
     });
   }
 };

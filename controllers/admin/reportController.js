@@ -12,8 +12,8 @@ const {
   fetchSalesData,
   fetchOverallSalesData,
 } = require("../../helpers/salesDataHelper");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
-const { ADMIN_MESSAGES } = require("../../constents/AdminMessages");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
+const { ADMIN_MESSAGES } = require("../../constents/adminMessages");
 
 const reportsDir = path.join(__dirname, "../../public/reports");
 const filePath = path.join(reportsDir, "sales_report.pdf");

@@ -1,5 +1,5 @@
-const { ADMIN_MESSAGES } = require("../../constents/AdminMessages");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
+const { ADMIN_MESSAGES } = require("../../constents/adminMessages");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
 const User = require("../../models/userSchema");
 const env = require("dotenv").config();
 const bcrypt = require("bcrypt");

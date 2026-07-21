@@ -1,7 +1,8 @@
 const User = require("../../models/userSchema");
 const ProductV2 = require("../../models/productsSchemaV2");
 const Wishlist = require("../../models/wishlistSchema");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
+const { USER_MESSAGES } = require("../../constents/userMessages");
 
 const loadWishlist = async (req, res) => {
   try {
@@ -67,7 +68,7 @@ const loadWishlist = async (req, res) => {
     console.error("Error loading wishlist:", error);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .send("Internal Server Error");
+      .send(USER_MESSAGES.WISHLIST.ERROR.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -97,7 +98,7 @@ const addToWishlist = async (req, res) => {
     if (itemExists) {
       return res.json({
         success: true,
-        message: "Item already exists in the wishlist.",
+        message: USER_MESSAGES.WISHLIST.SUCCESS.ITEM_ALREADY_EXISTS,
       });
     }
 
@@ -107,13 +108,16 @@ const addToWishlist = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Item added to wishlist successfully.",
+      message: USER_MESSAGES.WISHLIST.SUCCESS.ITEM_ADDED,
     });
   } catch (error) {
     console.error("Error adding item to wishlist:", error);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: "Internal server error." });
+      .json({
+        success: false,
+        message: USER_MESSAGES.WISHLIST.ERROR.INTERNAL_SERVER_ERROR,
+      });
   }
 };
 
@@ -131,21 +135,21 @@ removeProductFromWishlist = async (req, res) => {
     if (!updatedWishlist) {
       return res
         .status(HttpStatusCode.NOT_FOUND)
-        .json({ message: "Wishlist not found" });
+        .json({ message: USER_MESSAGES.WISHLIST.ERROR.WISHLIST_NOT_FOUND });
     }
 
     const wishlistItemCount = updatedWishlist.items.length;
     req.session.wishlistItemCount = wishlistItemCount;
 
     return res.status(HttpStatusCode.OK).json({
-      message: "Product removed from wishlist successfully",
+      message: USER_MESSAGES.WISHLIST.SUCCESS.ITEM_REMOVED,
       wishlist: updatedWishlist,
     });
   } catch (error) {
     console.error("Error:", error);
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to remove product from wishlist" });
+      .json({ error: USER_MESSAGES.WISHLIST.ERROR.REMOVE_ITEM_FAILED });
   }
 };
 

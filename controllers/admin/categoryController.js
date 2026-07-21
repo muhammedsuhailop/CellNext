@@ -1,5 +1,5 @@
-const { ADMIN_MESSAGES } = require("../../constents/AdminMessages");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
+const { ADMIN_MESSAGES } = require("../../constents/adminMessages");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
 const Category = require("../../models/categorySchema");
 const ProductV2 = require("../../models/productsSchemaV2");
 const User = require("../../models/userSchema");

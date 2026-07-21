@@ -9,8 +9,8 @@ const sharp = require("sharp");
 const { v4: uuidv4 } = require("uuid");
 const mongoose = require("mongoose");
 const { cloudinary } = require("../../config/cloudinary");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
-const { ADMIN_MESSAGES } = require("../../constents/AdminMessages");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
+const { ADMIN_MESSAGES } = require("../../constents/adminMessages");
 
 const getAddProduct = async (req, res) => {
   try {

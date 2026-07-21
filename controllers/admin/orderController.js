@@ -5,8 +5,8 @@ const Address = require("../../models/addressSchema");
 const Wallet = require("../../models/walletSchema");
 const Coupon = require("../../models/couponSchema");
 const { v4: uuidv4 } = require("uuid");
-const { HttpStatusCode } = require("../../constents/HttpStatusCodes");
-const { ADMIN_MESSAGES } = require("../../constents/AdminMessages");
+const { HttpStatusCode } = require("../../constents/httpStatusCodes");
+const { ADMIN_MESSAGES } = require("../../constents/adminMessages");
 
 async function checkCouponValidity(items, categories, products, minAmount) {
   let eligibleAmount = 0;
